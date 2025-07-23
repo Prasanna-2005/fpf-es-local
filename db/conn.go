@@ -10,6 +10,8 @@ import (
 
 var db *sqlx.DB
 
+// InitialseDB opens up the connection and pings the connection via sqlx.Connect.
+// Stores the connection in the unexported variable
 func InitialseDB() error {
 
 	cfg := config.Cfg

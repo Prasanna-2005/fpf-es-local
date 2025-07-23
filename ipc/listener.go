@@ -12,6 +12,7 @@ func Listen() {
 	daemon.listen()
 }
 
+// listen actively listens for incoming connections and will handle the established connection in seperate goroutine
 func (d *ipcDaemon) listen() {
 	logging.Info("Daemon Started Listening on " + config.Cfg.SockPath)
 	for {
@@ -28,6 +29,7 @@ func (d *ipcDaemon) listen() {
 	}
 }
 
+// handleConnection takes the established connection and reads the transferred bytes and handle it appropriately
 func handleConnection(conn net.Conn) {
 
 	// close the connection from the server side if the signalling is success

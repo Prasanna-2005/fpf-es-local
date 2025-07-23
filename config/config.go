@@ -4,6 +4,7 @@ import (
 	"os"
 )
 
+// config represents the overall configuration of the service
 type config struct {
 	SockPath   string
 	DBUser     string
@@ -17,6 +18,8 @@ var (
 	Cfg *config
 )
 
+// InitialiseConfig initialises the exported Cfg for other modules to use
+// It Acquires the runtime env variables and assign them
 func InitialiseConfig() {
 	Cfg = &config{
 		SockPath:   os.Getenv("SOCKET_PATH"),

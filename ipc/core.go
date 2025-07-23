@@ -8,6 +8,7 @@ import (
 	"quantrium-tech/form_pf_extractor_service/config"
 )
 
+// ipcDaemon represents the core daemon that listens and forwards the inbound messages
 type ipcDaemon struct {
 	listener net.Listener
 }
@@ -16,6 +17,8 @@ var (
 	daemon *ipcDaemon
 )
 
+// InitialiseDaemon opens a new uds socket and attach the listener to the daemon
+// if socket is already exists, it throws the error
 func InitialiseDaemon() error {
 
 	l, err := net.Listen("unix", config.Cfg.SockPath)
@@ -31,6 +34,7 @@ func InitialiseDaemon() error {
 
 }
 
+// TearDownSocket removes the socket from the system
 func TearDownSocket() error {
 	if err := os.Remove(config.Cfg.SockPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("removing the file: " + err.Error())

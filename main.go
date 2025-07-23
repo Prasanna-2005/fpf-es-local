@@ -35,6 +35,7 @@ func init() {
 
 }
 
+// handleSignal waits/blocks the routine till expected signal arrives and proceed with the cleanup.
 func handleSignal(c chan os.Signal) {
 	<-c
 	logging.Warn("Got a Kill/Interupt Signal")

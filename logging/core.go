@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// logger represents the composition of multiple std logger for different levels
 type logger struct {
 	infoLogger  *log.Logger
 	warnLogger  *log.Logger
@@ -19,6 +20,7 @@ var (
 	l *logger
 )
 
+// InitialiseLogger creates a new std logger for each level with predefined flags
 func InitialiseLogger() {
 	l = &logger{
 		infoLogger:  log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lmsgprefix),
@@ -27,6 +29,7 @@ func InitialiseLogger() {
 	}
 }
 
+// getCallerInfo retrieves the stack information for the required frame.
 func getCallerInfo(frame int) string {
 
 	pc, file, line, _ := runtime.Caller(frame)
