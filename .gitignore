@@ -53,3 +53,4 @@ local/
 bin/
 Makefile
 .env
+.scannerwork
