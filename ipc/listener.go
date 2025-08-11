@@ -1,7 +1,9 @@
 package ipc
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/logging"
@@ -44,7 +46,25 @@ func handleConnection(conn net.Conn) {
 	}
 
 	logging.Info(fmt.Sprintf("%d bytes of data read from the connection at: ", n) + conn.LocalAddr().String())
+	go handleMessage(buff[:n])
+}
 
-	// TODO: Should be removed once we have the schema and further signal processing
-	conn.Write(buff[:n])
+// handleMessage takes the incoming buffer and tries to forward it to the inbound channel if found to be valid
+func handleMessage(buff []byte) {
+
+	var message inboundMessage
+	err := json.Unmarshal(buff, message)
+	if err != nil {
+		logging.Error("Error in unmarshaling the inbound data: " + err.Error())
+		return
+	}
+
+	if message.FilingID == "" {
+		logging.Error("Recieved a empty filing ID or filing ID not present on the signal")
+		return
+	}
+
+	InboundChannel <- message
+
+	logging.Info("Inbound Message forwarded to the main channel")
 }
