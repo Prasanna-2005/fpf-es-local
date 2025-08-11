@@ -3,7 +3,6 @@ package ipc
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net"
 	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/logging"
