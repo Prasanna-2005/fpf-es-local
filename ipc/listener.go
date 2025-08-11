@@ -52,7 +52,7 @@ func handleConnection(conn net.Conn) {
 func handleMessage(buff []byte) {
 
 	var message inboundMessage
-	err := json.Unmarshal(buff, message)
+	err := json.Unmarshal(buff, &message)
 	if err != nil {
 		logging.Error("Error in unmarshaling the inbound data: " + err.Error())
 		return
