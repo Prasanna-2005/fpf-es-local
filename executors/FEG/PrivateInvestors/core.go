@@ -10,35 +10,35 @@ type PrivateFund struct {
 
 // WorkPaperData represents the core structure that holds all the data for a particular Fund-Series combination
 type WorkPaperData struct {
-	totalAssets                   int
-	unfundedCommitments           int
-	totalPartnerCaptial           int
-	totalLiabilities              int
-	investments                   int
-	investmentsUnrealisedGainLoss int
-	cashSweep                     int
-	cashGeneralAccount            int
+	totalAssets                   float64
+	unfundedCommitments           float64
+	totalPartnerCaptial           float64
+	totalLiabilities              float64
+	investments                   float64
+	investmentsUnrealisedGainLoss float64
+	cashSweep                     float64
+	cashGeneralAccount            float64
 	liquidityData                 LiquidityData
 	fundPerformanceData           FundPerformanceData
 }
 
 // LiquidityData represents the structure that holds all the data retrieved from the investorLiquidity File
 type LiquidityData struct {
-	top5OwnedPercentage        int
-	nonProfitOwnedPercentage   int
-	pensionPlanOwnedPercentage int
-	otherPlanOwnedPercentage   int
-	usPersonOwnedPercentage    int
+	top5OwnedPercentage        float64
+	nonProfitOwnedPercentage   float64
+	pensionPlanOwnedPercentage float64
+	otherPlanOwnedPercentage   float64
+	usPersonOwnedPercentage    float64
 }
 
 // FundPerformanceData represents the strucure that holds the fund performance on three quarters
 type FundPerformanceData struct {
-	q1GrossPercentage int
-	q2GrossPercentage int
-	q3GrossPercentage int
-	q1NetPercentage   int
-	q2NetPercentage   int
-	q3NetPercentage   int
+	q1GrossPercentage float64
+	q2GrossPercentage float64
+	q3GrossPercentage float64
+	q1NetPercentage   float64
+	q2NetPercentage   float64
+	q3NetPercentage   float64
 }
 
 // Holder holds the path of the files needed for a extraction of a single Private Fund
@@ -49,4 +49,4 @@ type Holder struct {
 }
 
 // liquidityDataHolder represents the map that holds the liquidityData for the reference fund
-type liquidityDataHolder map[string]LiquidityData
+type liquidityDataHolder map[string]*LiquidityData
