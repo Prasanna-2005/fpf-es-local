@@ -6,6 +6,8 @@ import (
 	"unicode"
 )
 
+// IndexToExcel converts (x,y) coordinate to a excel cell reference
+// (0,1) will translates to B1
 func IndexToExcel(row, col int) string {
 	colName := ""
 	for col >= 0 {
@@ -15,6 +17,7 @@ func IndexToExcel(row, col int) string {
 	return fmt.Sprintf("%s%d", colName, row+1)
 }
 
+// CleanNonNumeric takes a string and removes non-numeric characters except "." to hold the decimals
 func CleanNonNumeric(s string) string {
 	var result strings.Builder
 	for _, r := range s {
