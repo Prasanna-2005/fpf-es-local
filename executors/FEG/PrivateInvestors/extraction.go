@@ -10,6 +10,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+// extractQ15Data extracts all the funds Q15 answer and returns them with fund mapped values
 func extractQ15Data(f *excelize.File) (*map[string]float64, error) {
 
 	q15Holder := make(map[string]float64)
@@ -40,6 +41,7 @@ func extractQ15Data(f *excelize.File) (*map[string]float64, error) {
 	return &q15Holder, nil
 }
 
+// getQ16Markers retrieves all the markers used to get the contributions of investors for a particular fund from Q16 sheet
 func getQ16Markers(rows [][]string) [][]int {
 
 	var markers [][]int
@@ -53,6 +55,8 @@ func getQ16Markers(rows [][]string) [][]int {
 	return markers
 }
 
+// extractQ16Data extracts all the funds contributions and write them in the liquidityDataHolder.
+// Same fund code is followed across Q15 and Q16
 func extractQ16Data(f *excelize.File, ldataHolder *liquidityDataHolder) error {
 
 	dataHolder := *ldataHolder
@@ -101,6 +105,8 @@ func extractQ16Data(f *excelize.File, ldataHolder *liquidityDataHolder) error {
 
 }
 
+// ExtractInvestorLiquidity acts as fund agnostic extraction with the input investorLiquidity file.
+// Stores all funds data and returns the reference of the holder
 func ExtractInvestorLiquidity(filePath string) (*liquidityDataHolder, error) {
 
 	ldataHolder := make(liquidityDataHolder)
