@@ -3,6 +3,7 @@ package privateinvestors
 // PrivateFund represents a single fund in private investment series. This act as the parent for underlying structures.
 type PrivateFund struct {
 	fundID        string
+	referenceID   string
 	workPaperData WorkPaperData
 	holder        Holder
 }
@@ -42,8 +43,10 @@ type FundPerformanceData struct {
 
 // Holder holds the path of the files needed for a extraction of a single Private Fund
 type Holder struct {
-	q1FilePath                string
-	q2FilePath                string
-	q3FilePath                string
-	investorLiquidityFilePath string
+	q1FilePath string
+	q2FilePath string
+	q3FilePath string
 }
+
+// liquidityDataHolder represents the map that holds the liquidityData for the reference fund
+type liquidityDataHolder map[string]LiquidityData
