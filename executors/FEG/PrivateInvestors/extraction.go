@@ -145,7 +145,9 @@ func extractQTDData(f *excelize.File, series string) (float64, float64, float64,
 
 	var unfunded, net, gross float64
 
-	qtdRows, err := f.GetRows("Capital Roll QTD")
+	var sheet = "Capital Roll QTD"
+
+	qtdRows, err := f.GetRows(sheet)
 	if err != nil {
 		return unfunded, net, gross, fmt.Errorf("getting QTD Rows: " + err.Error())
 	}
@@ -190,9 +192,9 @@ Outer:
 	rowIndex += (start + 1)
 	allPartnerIndex += (start + 1)
 
-	netValue, _ := f.GetCellValue("Capital Roll QTD", executors.IndexToExcel(rowIndex+1, netIndex))
-	grossValue, _ := f.GetCellValue("Capital Roll QTD", executors.IndexToExcel(rowIndex+1, grossIndex))
-	unfundedValue, _ := f.GetCellValue("Capital Roll QTD", executors.IndexToExcel(allPartnerIndex, unfundedIndex))
+	netValue, _ := f.GetCellValue(sheet, executors.IndexToExcel(rowIndex+1, netIndex))
+	grossValue, _ := f.GetCellValue(sheet, executors.IndexToExcel(rowIndex+1, grossIndex))
+	unfundedValue, _ := f.GetCellValue(sheet, executors.IndexToExcel(allPartnerIndex, unfundedIndex))
 
 	netValue = executors.CleanNonNumeric(netValue)
 	grossValue = executors.CleanNonNumeric(grossValue)
