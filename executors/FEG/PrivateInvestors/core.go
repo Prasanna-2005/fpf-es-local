@@ -3,9 +3,19 @@ package privateinvestors
 // PrivateFund represents a single fund in private investment series. This act as the parent for underlying structures.
 type PrivateFund struct {
 	fundID        string
-	referenceID   string
+	series        string
 	workPaperData WorkPaperData
 	holder        Holder
+}
+
+func NewPrivateFund(fundId string, series string) *PrivateFund {
+	return &PrivateFund{fundID: fundId, series: series, workPaperData: WorkPaperData{fundPerformanceData: FundPerformanceData{}}}
+}
+
+func (F *PrivateFund) SetHolder(f1Path, f2Path, f3Path string) {
+	F.holder.q1FilePath = f1Path
+	F.holder.q2FilePath = f2Path
+	F.holder.q3FilePath = f3Path
 }
 
 // WorkPaperData represents the core structure that holds all the data for a particular Fund-Series combination
