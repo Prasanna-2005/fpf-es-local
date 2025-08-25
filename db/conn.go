@@ -18,11 +18,11 @@ func InitialseDB() error {
 
 	connAddr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName)
 
-	_db, err := sqlx.Connect("mysql", connAddr)
+	dbConn, err := sqlx.Connect("mysql", connAddr)
 	if err != nil {
 		return fmt.Errorf("opening remote sql connection: " + err.Error())
 	}
 
-	db = _db
+	db = dbConn
 	return nil
 }
