@@ -21,7 +21,7 @@ func IndexToExcel(row, col int) string {
 func CleanNonNumeric(s string) string {
 	var result strings.Builder
 	for _, r := range s {
-		if unicode.IsDigit(r) || r == '.' {
+		if unicode.IsDigit(r) || r == '.' || r == '-' {
 			result.WriteRune(r)
 		}
 	}
