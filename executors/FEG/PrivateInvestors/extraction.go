@@ -332,7 +332,5 @@ func (F *PrivateFund) ExtractWorkPaperData() error {
 		return fmt.Errorf("extracing other quarter data: " + err.Error())
 	}
 
-	fmt.Printf("%+v\n", F.workPaperData)
-
 	return nil
 }
