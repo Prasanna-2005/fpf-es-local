@@ -56,6 +56,17 @@ func main() {
 
 	// Main Forwarder/Handler from the Listener
 	for {
+
+		select {
+		case m := <-ipc.InboundChannel:
+			logging.Info("Recieved processing signal for the filing with ID: " + m.FilingID)
+			go startExecution(m.FilingID)
+		}
+
 	}
 
+}
+
+func startExecution(filingID string) {
+	logging.Info("Execution Started for the filing with ID: " + filingID)
 }
