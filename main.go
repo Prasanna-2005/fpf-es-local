@@ -131,6 +131,11 @@ func execute(filingID string) {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
 				continue
 			}
+			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
+
+			logging.Info("Computation Started for the Fund: " + fund.GetFundID())
+			fund.Compute()
+			logging.Info("Computation Completed for the Fund: " + fund.GetFundID())
 		}
 
 	}
