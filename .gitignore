@@ -54,3 +54,4 @@ bin/
 Makefile
 .env
 .scannerwork
+*.sql
