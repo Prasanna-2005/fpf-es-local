@@ -9,5 +9,5 @@ var FundtoSeriesMapper = map[string][]string{
 	"FEGOF_4": {"A", "B", "C", "D"},
 	"FEGOF_5": {"A", "B", "C", "D"},
 	"FEGOF_6": {"A", "A_ESG", "B", "C", "C_ESG", "D"},
-	"FEGOF_7": {"B", "C", "C_ESG", "E", "D", "E"},
+	"FEGOF_7": {"B", "C", "C_ESG", "D", "E"},
 }
