@@ -14,8 +14,13 @@ type config struct {
 	DBName     string
 }
 
+type tableConfig struct {
+	MappingTable string
+}
+
 var (
-	Cfg *config
+	Cfg      *config
+	TableCfg *tableConfig
 )
 
 // InitialiseConfig initialises the exported Cfg for other modules to use
@@ -28,6 +33,10 @@ func InitialiseConfig() {
 		DBHost:     os.Getenv("DB_HOST"),
 		DBPort:     os.Getenv("DB_PORT"),
 		DBName:     os.Getenv("DB_NAME"),
+	}
+
+	TableCfg = &tableConfig{
+		MappingTable: os.Getenv("MAPPING_TABLE"),
 	}
 
 }

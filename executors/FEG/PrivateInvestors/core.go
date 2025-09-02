@@ -8,14 +8,33 @@ type PrivateFund struct {
 	holder        Holder
 }
 
+// NewPrivateFund creates a new PrivateFund with the given fundId and series
 func NewPrivateFund(fundId string, series string) *PrivateFund {
 	return &PrivateFund{fundID: fundId, series: series, workPaperData: WorkPaperData{fundPerformanceData: FundPerformanceData{}}}
 }
 
-func (F *PrivateFund) SetHolder(f1Path, f2Path, f3Path string) {
-	F.holder.q1FilePath = f1Path
-	F.holder.q2FilePath = f2Path
-	F.holder.q3FilePath = f3Path
+// SetHolder takes up a quarterNo and filePath and sets them in the file holder of the fund
+func (F *PrivateFund) SetHolder(quarterNo int, filePath string) {
+
+	switch quarterNo {
+	case 1:
+		F.holder.q1FilePath = filePath
+	case 2:
+		F.holder.q2FilePath = filePath
+	case 3:
+		F.holder.q3FilePath = filePath
+	}
+
+}
+
+// GetFundID returns the fundID used internally
+func (F *PrivateFund) GetFundID() string {
+	return F.fundID
+}
+
+// SetLiquidityData takes up a reference of LiquidityData and set upon the fund
+func (F *PrivateFund) SetLiquidityData(data *LiquidityData) {
+	F.workPaperData.liquidityData = *data
 }
 
 // WorkPaperData represents the core structure that holds all the data for a particular Fund-Series combination
