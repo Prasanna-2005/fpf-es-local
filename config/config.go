@@ -15,7 +15,8 @@ type config struct {
 }
 
 type tableConfig struct {
-	MappingTable string
+	MappingTable    string
+	ExtractionTable string
 }
 
 var (
@@ -36,7 +37,8 @@ func InitialiseConfig() {
 	}
 
 	TableCfg = &tableConfig{
-		MappingTable: os.Getenv("MAPPING_TABLE"),
+		MappingTable:    os.Getenv("MAPPING_TABLE"),
+		ExtractionTable: os.Getenv("EXTRACTION_TABLE"),
 	}
 
 }
