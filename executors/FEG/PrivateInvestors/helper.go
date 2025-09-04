@@ -1,6 +1,8 @@
 package privateinvestors
 
-import "strings"
+import (
+	"strings"
+)
 
 // CreateAllFundSeries is a helper function that takes up a fund and creates all of the fund-series combination and returns them
 func CreateAllFundSeries(fundCode string) []*PrivateFund {
