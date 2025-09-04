@@ -1,9 +1,6 @@
 package db
 
-import (
-	"fmt"
-	"quantrium-tech/form_pf_extractor_service/config"
-)
+import "time"
 
 // FileMapper represents the reduced mapper with respect to DB that only holds the neccessary information for execution
 type FileMapper struct {
@@ -12,21 +9,19 @@ type FileMapper struct {
 	QuarterNo     int    `db:"quarterNo"`
 }
 
-// PullFiling pulls all the mappings attached to the filingID and returns the list of reduced FileMapper
-func PullFiling(filingID int) (*[]FileMapper, error) {
+type ExtractionEntity struct {
+	FilingId  int       `db:"filingId"`
+	FundId    string    `db:"fundId"`
+	Entity    string    `db:"entity"`
+	Value     string    `db:"value"`
+	CreatedAt time.Time `db:"createdAt"`
+	CreatedBy int       `db:"createdBy"`
+	UpdatedAt time.Time `db:"updatedAt"`
+	UpdatedBy int       `db:"updatedBy"`
+}
 
-	var mappings []FileMapper
-	query := fmt.Sprintf("SELECT filingPath, fundShortCode, quarterNo from %s WHERE filingId=%d", config.TableCfg.MappingTable, filingID)
+type Fund struct {
+}
 
-	err := db.Select(&mappings, query)
-	if err != nil {
-		return &mappings, fmt.Errorf("retrieving mappings attached to the filingId: " + err.Error())
-	}
-
-	if len(mappings) == 0 {
-		return &mappings, fmt.Errorf("no mappings attached to the filingId")
-	}
-
-	return &mappings, nil
-
+type FundData struct {
 }
