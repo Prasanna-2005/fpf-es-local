@@ -2,6 +2,8 @@ package executors
 
 import (
 	"fmt"
+	"reflect"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -26,4 +28,28 @@ func CleanNonNumeric(s string) string {
 		}
 	}
 	return result.String()
+}
+
+func CollectTagsValues(v reflect.Value, store map[string]string) {
+	t := v.Type()
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		value := v.Field(i)
+
+		if value.Kind() == reflect.Struct {
+			CollectTagsValues(value, store)
+		}
+
+		entity := field.Tag.Get("entity")
+		switch value.Kind() {
+		case reflect.Float64:
+			store[entity] = strconv.FormatFloat(value.Float(), 'f', -1, 64)
+		case reflect.String:
+			store[entity] = v.String()
+		default:
+			continue
+		}
+	}
+
 }
