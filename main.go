@@ -133,6 +133,13 @@ func execute(filingID string) {
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
 
+			extractionData := fund.ExportWorkPaperData()
+			err = db.PushEntities(filingID, fund.GetFundID(), 1, extractionData)
+			if err != nil {
+				logging.Error("Error in Pushing to Extraction Table: " + err.Error())
+				continue
+			}
+
 			logging.Info("Computation Started for the Fund: " + fund.GetFundID())
 			fund.Compute()
 			logging.Info("Computation Completed for the Fund: " + fund.GetFundID())
