@@ -1,5 +1,10 @@
 package privateinvestors
 
+import (
+	"quantrium-tech/form_pf_extractor_service/executors"
+	"reflect"
+)
+
 // PrivateFund represents a single fund in private investment series. This act as the parent for underlying structures.
 type PrivateFund struct {
 	fundID        string
@@ -37,37 +42,45 @@ func (F *PrivateFund) SetLiquidityData(data *LiquidityData) {
 	F.workPaperData.liquidityData = *data
 }
 
+func (F *PrivateFund) ExportWorkPaperData() map[string]string {
+
+	entityValueMapper := make(map[string]string)
+	executors.CollectTagsValues(reflect.ValueOf(F.workPaperData), entityValueMapper)
+	return entityValueMapper
+
+}
+
 // WorkPaperData represents the core structure that holds all the data for a particular Fund-Series combination
 type WorkPaperData struct {
-	totalAssets                   float64
-	unfundedCommitments           float64
-	totalPartnerCaptial           float64
-	totalLiabilities              float64
-	investments                   float64
-	investmentsUnrealisedGainLoss float64
-	cashSweep                     float64
-	cashGeneralAccount            float64
-	liquidityData                 LiquidityData
-	fundPerformanceData           FundPerformanceData
+	totalAssets                   float64             `entity:"q3_total_assets_bs"`
+	unfundedCommitments           float64             `entity:"q3_unfunded_commitments_captial_roll_qtd"`
+	totalPartnerCaptial           float64             `entity:"q3_total_partner_captial_bs"`
+	totalLiabilities              float64             `entity:"q3_total_liabilities_bs"`
+	investments                   float64             `entity:"q3_investments_bs"`
+	investmentsUnrealisedGainLoss float64             `entity:"q3_investments_unrealised_gain_loss_bs"`
+	cashSweep                     float64             `entity:"q3_cash_sweep_bs"`
+	cashGeneralAccount            float64             `entity:"q3_cash_general_account_bs"`
+	liquidityData                 LiquidityData       `entity:"liquidity_data"`
+	fundPerformanceData           FundPerformanceData `entity:"fund_performance_data"`
 }
 
 // LiquidityData represents the structure that holds all the data retrieved from the investorLiquidity File
 type LiquidityData struct {
-	top5OwnedPercentage        float64
-	nonProfitOwnedPercentage   float64
-	pensionPlanOwnedPercentage float64
-	otherPlanOwnedPercentage   float64
-	usPersonOwnedPercentage    float64
+	top5OwnedPercentage        float64 `entity:"top_5_owned_percentage"`
+	nonProfitOwnedPercentage   float64 `entity:"non_profit_percentage"`
+	pensionPlanOwnedPercentage float64 `entity:"pension_plan_percentage"`
+	otherPlanOwnedPercentage   float64 `entity:"others_plan_percentage"`
+	usPersonOwnedPercentage    float64 `entity:"us_person_percentage"`
 }
 
 // FundPerformanceData represents the strucure that holds the fund performance on three quarters
 type FundPerformanceData struct {
-	q1GrossPercentage float64
-	q2GrossPercentage float64
-	q3GrossPercentage float64
-	q1NetPercentage   float64
-	q2NetPercentage   float64
-	q3NetPercentage   float64
+	q1GrossPercentage float64 `entity:"q1_gross_percentage_captial_roll_qtd"`
+	q2GrossPercentage float64 `entity:"q2_gross_percentage_captial_roll_qtd"`
+	q3GrossPercentage float64 `entity:"q3_gross_percentage_captial_roll_qtd"`
+	q1NetPercentage   float64 `entity:"q1_net_percentage_captial_roll_qtd"`
+	q2NetPercentage   float64 `entity:"q2_net_percentage_captial_roll_qtd"`
+	q3NetPercentage   float64 `entity:"q3_net_percentage_captial_roll_qtd"`
 }
 
 // Holder holds the path of the files needed for a extraction of a single Private Fund
