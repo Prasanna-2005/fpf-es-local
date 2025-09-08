@@ -1,5 +1,6 @@
 package db
 
+// FundCodeMapper mapps fund short code to the fegFundId
 var FundCodeMapper = map[string]string{
 	"FEGOF_1":       "805-1105987387",
 	"FEGOF_2_A":     "805-5564846140",
