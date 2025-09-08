@@ -14,9 +14,11 @@ type config struct {
 	DBName     string
 }
 
+// tableConfig represents the DB Table configuration
 type tableConfig struct {
 	MappingTable    string
 	ExtractionTable string
+	FormDataTable   string
 }
 
 var (
@@ -39,6 +41,7 @@ func InitialiseConfig() {
 	TableCfg = &tableConfig{
 		MappingTable:    os.Getenv("MAPPING_TABLE"),
 		ExtractionTable: os.Getenv("EXTRACTION_TABLE"),
+		FormDataTable:   os.Getenv("FORM_DATA_TABLE"),
 	}
 
 }
