@@ -42,10 +42,11 @@ func (F *PrivateFund) SetLiquidityData(data *LiquidityData) {
 	F.workPaperData.liquidityData = *data
 }
 
+// ExportWorkPaperData returns a mapped entityname to value mapper for further push
 func (F *PrivateFund) ExportWorkPaperData() map[string]string {
 
 	entityValueMapper := make(map[string]string)
-	executors.CollectTagsValues(reflect.ValueOf(F.workPaperData), entityValueMapper)
+	executors.CollectEntities(reflect.ValueOf(F.workPaperData), entityValueMapper)
 	return entityValueMapper
 
 }
