@@ -1,6 +1,9 @@
 package db
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 // FileMapper represents the reduced mapper with respect to DB that only holds the neccessary information for execution
 type FileMapper struct {
@@ -9,6 +12,7 @@ type FileMapper struct {
 	QuarterNo     int    `db:"quarterNo"`
 }
 
+// ExtractionEntity represents the structure of extraction table that stores the extracted Entity
 type ExtractionEntity struct {
 	FilingId  int       `db:"filingId"`
 	FundId    string    `db:"fundId"`
@@ -20,8 +24,16 @@ type ExtractionEntity struct {
 	UpdatedBy int       `db:"updatedBy"`
 }
 
-type Fund struct {
-}
-
-type FundData struct {
+// FormData represents the structure of form_data table that stores the answers/form data from the computations
+type FormData struct {
+	FilingId   int            `db:"filingId"`
+	FegFundId  string         `db:"fegFundId"`
+	FieldNo    string         `db:"fieldNo"`
+	FormLineNo sql.NullString `db:"formLineNo"`
+	Value      string         `db:"value"`
+	Date       sql.NullTime   `db:"date"`
+	CreatedAt  time.Time      `db:"createdAt"`
+	CreatedBy  int            `db:"createdBy"`
+	UpdatedAt  time.Time      `db:"updatedAt"`
+	UpdatedBy  int            `db:"updatedBy"`
 }
