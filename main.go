@@ -6,9 +6,11 @@ import (
 	"os/signal"
 	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/db"
+	"quantrium-tech/form_pf_extractor_service/executors"
 	privateinvestors "quantrium-tech/form_pf_extractor_service/executors/FEG/PrivateInvestors"
 	"quantrium-tech/form_pf_extractor_service/ipc"
 	"quantrium-tech/form_pf_extractor_service/logging"
+	"reflect"
 	"strconv"
 	"syscall"
 )
@@ -63,7 +65,7 @@ func main() {
 		select {
 		case m := <-ipc.InboundChannel:
 			logging.Info("Recieved processing signal for the filing with ID: " + m.FilingID)
-			go execute(m.FilingID)
+			go execute(m.FilingID, m.UserID)
 		}
 
 	}
@@ -106,7 +108,7 @@ func prepareFilingPrivateInvestors(filingID string) (map[string][]*privateinvest
 }
 
 // execute acts as the core execution and triggering point for both extraction and computation.
-func execute(filingID string) {
+func execute(filingID string, userID int) {
 
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, investorLiquidityPath, err := prepareFilingPrivateInvestors(filingID)
@@ -124,6 +126,9 @@ func execute(filingID string) {
 	deferedHolder := *(liqudityHolder)
 	for _, list := range mapper {
 		for _, fund := range list {
+
+			answersMapper := make(map[[3]string]string)
+
 			fund.SetLiquidityData(deferedHolder[fund.GetFundID()])
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractWorkPaperData()
@@ -134,15 +139,27 @@ func execute(filingID string) {
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
 
 			extractionData := fund.ExportWorkPaperData()
-			err = db.PushEntities(filingID, fund.GetFundID(), 1, extractionData)
+			err = db.PushEntities(filingID, fund.GetFundID(), userID, extractionData)
 			if err != nil {
 				logging.Error("Error in Pushing to Extraction Table: " + err.Error())
 				continue
 			}
+			logging.Info("Entraction Entities are Pushed to the DB")
 
 			logging.Info("Computation Started for the Fund: " + fund.GetFundID())
-			fund.Compute()
+			formData := fund.Compute()
 			logging.Info("Computation Completed for the Fund: " + fund.GetFundID())
+
+			executors.CollectAnswers(reflect.ValueOf(*formData), answersMapper)
+			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper)
+			if err != nil {
+				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
+			}
+
+			logging.Info("Form Data Entries are Pushed to the DB")
+
+			logging.Info("Execution Completed for the Fund: " + fund.GetFundID())
+
 		}
 
 	}
