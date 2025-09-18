@@ -71,6 +71,12 @@ func extractQ16Data(f *excelize.File, ldataHolder *liquidityDataHolder) error {
 	for _, m := range markers {
 		i, j := m[0], m[1]
 		fund, _ := f.GetCellValue("Q16", executors.IndexToExcel(i-3, j+2))
+
+		if !strings.HasPrefix(fund, "FEG") {
+			logging.Warn("Fund Code not present in expected cell. Skipping the current table")
+			continue
+		}
+
 		fundData := dataHolder[fund]
 		for {
 			cellValue, _ := f.GetCellValue("Q16", executors.IndexToExcel(i, j))

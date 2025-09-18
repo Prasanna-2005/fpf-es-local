@@ -92,6 +92,14 @@ func prepareFilingPrivateInvestors(filingID string) (map[string][]*privateinvest
 			continue
 		}
 
+		converted := privateinvestors.ShortCodeConvertor[mapping.FundShortCode]
+
+		if converted == "" {
+			logging.Warn(mapping.FundShortCode + "->" + "Unknown Short Code Encountered. Conversion Failed")
+			continue
+		}
+
+		mapping.FundShortCode = converted
 		if _, ok := fundsMapper[mapping.FundShortCode]; !ok {
 			fundsMapper[mapping.FundShortCode] = privateinvestors.CreateAllFundSeries(mapping.FundShortCode)
 		}
@@ -117,12 +125,20 @@ func execute(filingID string, userID int) {
 		return
 	}
 
+	if len(mapper) == 0 {
+		logging.Error("No Funds Mapped. Execution cannot be Started")
+		return
+	}
+
 	liqudityHolder, err := privateinvestors.ExtractInvestorLiquidity(investorLiquidityPath)
 	if err != nil {
 		logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
 		return
 	}
 
+	logging.Info("Extraction of Investor Liquidity Completed")
+
+	logging.Info(fmt.Sprintf("Total number of funds mapped: %d", len(mapper)))
 	deferedHolder := *(liqudityHolder)
 	for _, list := range mapper {
 		for _, fund := range list {
@@ -163,5 +179,5 @@ func execute(filingID string, userID int) {
 		}
 
 	}
-
+	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
