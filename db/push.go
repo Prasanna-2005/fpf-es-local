@@ -29,7 +29,7 @@ func PushEntities(filingId string, fundCode string, userId int, data map[string]
 		batch = append(batch, entity)
 	}
 
-	query := fmt.Sprintf("INSERT INTO %s (filingId, fundId, entity, value, createdAt, createdBy) VALUES (:filingId, :fundId, :entity, :value, :createdAt, :createdBy)", config.TableCfg.ExtractionTable)
+	query := fmt.Sprintf("INSERT INTO %s (filingId, fundSeriesId, entity, value, createdAt, createdBy) VALUES (:filingId, :fundSeriesId, :entity, :value, :createdAt, :createdBy)", config.TableCfg.ExtractionTable)
 
 	_, err := db.NamedExec(query, batch)
 	if err != nil {
@@ -59,7 +59,7 @@ func PushFormData(filingId string, fundCode string, userId int, formdata map[[3]
 		}
 
 		fd.FieldNo = key[0]
-		fd.FormLineNo = ToNullString(key[1])
+		fd.FormLineNo =key[1]
 
 		if key[2] != "" {
 			parts := strings.Split(key[2], "/")
@@ -76,7 +76,7 @@ func PushFormData(filingId string, fundCode string, userId int, formdata map[[3]
 		batch = append(batch, fd)
 	}
 
-	query := fmt.Sprintf("INSERT INTO %s (filingId, fegFundId, fieldNo, formLineNo, value, date, createdAt, createdBy) VALUES (:filingId, :fegFundId, :fieldNo, :formLineNo, :value, :date, :createdAt, :createdBy)", config.TableCfg.FormDataTable)
+	query := fmt.Sprintf("INSERT INTO %s (filingId, fundSeriesId, fieldNo, formLineNo, value, date, createdAt, createdBy) VALUES (:filingId, :fundSeriesId, :fieldNo, :formLineNo, :value, :date, :createdAt, :createdBy)", config.TableCfg.FormDataTable)
 
 	_, err := db.NamedExec(query, batch)
 	if err != nil {

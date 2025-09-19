@@ -9,7 +9,7 @@ type Form1bData struct {
 	Level3Asset        float64 `fieldNo:"20" formLineNo:"level3-asset" date:"09/30"`
 	CostBasedAsset     float64 `fieldNo:"20" formLineNo:"cb-asset" date:"09/30"`
 	CostBasedLiability float64 `fieldNo:"20" formLineNo:"cb-liability" date:"09/30"`
-	Top5Percent        float64 `fieldNo:"21" formLineNo:""`
+	Top5Percent        float64 `fieldNo:"21" formLineNo:"21"`
 	UsPercent          float64 `fieldNo:"22" formLineNo:"a"`
 	NonProfitPercent   float64 `fieldNo:"22" formLineNo:"j"`
 	PensionPlanPercent float64 `fieldNo:"22" formLineNo:"l"`

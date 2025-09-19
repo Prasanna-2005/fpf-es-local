@@ -15,7 +15,7 @@ type FileMapper struct {
 // ExtractionEntity represents the structure of extraction table that stores the extracted Entity
 type ExtractionEntity struct {
 	FilingId  int       `db:"filingId"`
-	FundId    string    `db:"fundId"`
+	FundId    string    `db:"fundSeriesId"`
 	Entity    string    `db:"entity"`
 	Value     string    `db:"value"`
 	CreatedAt time.Time `db:"createdAt"`
@@ -27,9 +27,9 @@ type ExtractionEntity struct {
 // FormData represents the structure of form_data table that stores the answers/form data from the computations
 type FormData struct {
 	FilingId   int            `db:"filingId"`
-	FegFundId  string         `db:"fegFundId"`
+	FegFundId  string         `db:"fundSeriesId"`
 	FieldNo    string         `db:"fieldNo"`
-	FormLineNo sql.NullString `db:"formLineNo"`
+	FormLineNo string `db:"formLineNo"`
 	Value      string         `db:"value"`
 	Date       sql.NullTime   `db:"date"`
 	CreatedAt  time.Time      `db:"createdAt"`
