@@ -23,3 +23,30 @@ func PullFiling(filingID int) (*[]FileMapper, error) {
 	return &mappings, nil
 
 }
+
+func SetFundInfo() error {
+
+	var funds []FundInfo
+	query := fmt.Sprintf("SELECT fundName, fegFundId, nfaId, leiId from %s", config.TableCfg.FundTable)
+
+	err := db.Select(&funds, query)
+	if err != nil {
+		return fmt.Errorf("retrieving funds info: " + err.Error())
+	}
+
+	if len(funds) == 0 {
+		return fmt.Errorf("no funds retrieved")
+	}
+
+	// create a temp reverse map
+	mapper := make(map[string]string)
+	for k, v := range FundCodeMapper {
+		mapper[v] = k
+	}
+
+	for _, fund := range funds {
+		FundStorer[mapper[fund.FundID]] = fund
+	}
+
+	return nil
+}

@@ -3,6 +3,11 @@ package executors
 // Form1bData holds the structure of the section 1b in Form PF.
 // It will be dynamically increased based on the needs to answer other questions
 type Form1bData struct {
+	FundName string `fieldNo:"5" formLineNo:"5_a"`
+	FundID   string `fieldNo:"5" formLineNo:"5_b"`
+	FundNFA  string `fieldNo:"5" formLineNo:"5_c"`
+	FundLEI  string `fieldNo:"5" formLineNo:"5_d"`
+
 	GrossAsset         float64 `fieldNo:"11" formLineNo:"11_a" date:"09/30"`
 	NetAsset           float64 `fieldNo:"12" formLineNo:"12_a" date:"09/30"`
 	EquityInOtherFunds float64 `fieldNo:"15" formLineNo:"15_a"`

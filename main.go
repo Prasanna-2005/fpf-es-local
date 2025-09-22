@@ -35,6 +35,12 @@ func init() {
 	}
 	logging.Info("IPC Daemon Initialised")
 
+	err = db.SetFundInfo()
+	if err != nil {
+		panic(err)
+	}
+	logging.Info("Fund Information Initialised")
+
 	// start the active listener
 	go ipc.Listen()
 
@@ -115,6 +121,17 @@ func prepareFilingPrivateInvestors(filingID string) (map[string][]*privateinvest
 	return fundsMapper, investorLiquidityPath, nil
 }
 
+// setStaticDataPV sets the static information to the form1bData
+func setStaticDataPV(data *executors.Form1bData, fundId string) {
+
+	info := db.FundStorer[fundId]
+
+	data.FundID = info.FundID
+	data.FundName = info.FundName
+	data.FundLEI = info.FundLEI
+	data.FundNFA = info.FundNFA
+}
+
 // execute acts as the core execution and triggering point for both extraction and computation.
 func execute(filingID string, userID int) {
 
@@ -165,6 +182,8 @@ func execute(filingID string, userID int) {
 			logging.Info("Computation Started for the Fund: " + fund.GetFundID())
 			formData := fund.Compute()
 			logging.Info("Computation Completed for the Fund: " + fund.GetFundID())
+
+			setStaticDataPV(formData, fund.GetFundID())
 
 			executors.CollectAnswers(reflect.ValueOf(*formData), answersMapper)
 			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper)
