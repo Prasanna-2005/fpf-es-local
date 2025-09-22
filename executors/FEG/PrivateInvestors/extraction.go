@@ -57,7 +57,7 @@ func getQ16Markers(rows [][]string) [][]int {
 
 // extractQ16Data extracts all the funds contributions and write them in the liquidityDataHolder.
 // Same fund code is followed across Q15 and Q16
-func extractQ16Data(f *excelize.File, ldataHolder *liquidityDataHolder) error {
+func extractQ16Data(f *excelize.File, ldataHolder *LiquidityDataHolder) error {
 
 	dataHolder := *ldataHolder
 
@@ -113,13 +113,13 @@ func extractQ16Data(f *excelize.File, ldataHolder *liquidityDataHolder) error {
 
 // ExtractInvestorLiquidity acts as fund agnostic extraction with the input investorLiquidity file.
 // Stores all funds data and returns the reference of the holder
-func ExtractInvestorLiquidity(filePath string) (*liquidityDataHolder, error) {
+func ExtractInvestorLiquidity(filePath string) (LiquidityDataHolder, error) {
 
-	ldataHolder := make(liquidityDataHolder)
+	ldataHolder := make(LiquidityDataHolder)
 
 	f, err := excelize.OpenFile(filePath)
 	if err != nil {
-		return &ldataHolder, fmt.Errorf("opening file: " + err.Error())
+		return ldataHolder, fmt.Errorf("opening file: " + err.Error())
 	}
 	defer func() {
 		if err := f.Close(); err != nil {
@@ -130,7 +130,7 @@ func ExtractInvestorLiquidity(filePath string) (*liquidityDataHolder, error) {
 
 	q15Holder, err := extractQ15Data(f)
 	if err != nil {
-		return &ldataHolder, fmt.Errorf("extracing Q15: " + err.Error())
+		return ldataHolder, fmt.Errorf("extracing Q15: " + err.Error())
 	}
 
 	for fund, q15Value := range *q15Holder {
@@ -139,10 +139,10 @@ func ExtractInvestorLiquidity(filePath string) (*liquidityDataHolder, error) {
 
 	err = extractQ16Data(f, &ldataHolder)
 	if err != nil {
-		return &ldataHolder, fmt.Errorf("extracting Q16: " + err.Error())
+		return ldataHolder, fmt.Errorf("extracting Q16: " + err.Error())
 	}
 
-	return &ldataHolder, nil
+	return ldataHolder, nil
 }
 
 // extractQTD retrieves the required cells (unfunded commitments, gross and net performance)

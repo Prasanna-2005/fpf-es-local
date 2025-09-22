@@ -92,4 +92,4 @@ type Holder struct {
 }
 
 // liquidityDataHolder represents the map that holds the liquidityData for the reference fund
-type liquidityDataHolder map[string]*LiquidityData
+type LiquidityDataHolder map[string]*LiquidityData

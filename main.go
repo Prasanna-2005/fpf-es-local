@@ -11,7 +11,6 @@ import (
 	"quantrium-tech/form_pf_extractor_service/ipc"
 	"quantrium-tech/form_pf_extractor_service/logging"
 	"reflect"
-	"strconv"
 	"syscall"
 )
 
@@ -85,8 +84,7 @@ func prepareFilingPrivateInvestors(filingID string) (map[string][]*privateinvest
 	fundsMapper := make(map[string][]*privateinvestors.PrivateFund)
 	var investorLiquidityPath string
 
-	Id, _ := strconv.Atoi(filingID)
-	mappings, err := db.PullFiling(Id)
+	mappings, err := db.PullFiling(filingID)
 	if err != nil {
 		return fundsMapper, investorLiquidityPath, fmt.Errorf("pulling filing details from DB: " + err.Error())
 	}
@@ -147,22 +145,36 @@ func execute(filingID string, userID int) {
 		return
 	}
 
-	liqudityHolder, err := privateinvestors.ExtractInvestorLiquidity(investorLiquidityPath)
+	existing, err := db.GetExisitingFunds(filingID)
 	if err != nil {
-		logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+		logging.Error("Error in Getting the Existing Funds in Form Data: " + err.Error())
 		return
+	}
+
+	liqudityHolder := make(privateinvestors.LiquidityDataHolder)
+
+	if investorLiquidityPath != "" {
+		liqudityHolder, err = privateinvestors.ExtractInvestorLiquidity(investorLiquidityPath)
+		if err != nil {
+			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+			return
+		}
 	}
 
 	logging.Info("Extraction of Investor Liquidity Completed")
 
 	logging.Info(fmt.Sprintf("Total number of funds mapped: %d", len(mapper)))
-	deferedHolder := *(liqudityHolder)
 	for _, list := range mapper {
 		for _, fund := range list {
 
+			if _, ok := existing[fund.GetFundID()]; ok {
+				logging.Info(fund.GetFundID() + " Already Populated in the Form Data. Skipping")
+				continue
+			}
+
 			answersMapper := make(map[[3]string]string)
 
-			fund.SetLiquidityData(deferedHolder[fund.GetFundID()])
+			fund.SetLiquidityData(liqudityHolder[fund.GetFundID()])
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractWorkPaperData()
 			if err != nil {

@@ -6,10 +6,10 @@ import (
 )
 
 // PullFiling pulls all the mappings attached to the filingID and returns the list of reduced FileMapper
-func PullFiling(filingID int) (*[]FileMapper, error) {
+func PullFiling(filingID string) (*[]FileMapper, error) {
 
 	var mappings []FileMapper
-	query := fmt.Sprintf("SELECT filingPath, fundShortCode, quarterNo from %s WHERE filingId=%d", config.TableCfg.MappingTable, filingID)
+	query := fmt.Sprintf("SELECT filingPath, fundShortCode, quarterNo from %s WHERE filingId=%s", config.TableCfg.MappingTable, filingID)
 
 	err := db.Select(&mappings, query)
 	if err != nil {
@@ -24,6 +24,33 @@ func PullFiling(filingID int) (*[]FileMapper, error) {
 
 }
 
+func GetExisitingFunds(filingID string) (map[string]struct{}, error) {
+
+	var data []FormData
+	ExisitingFunds := make(map[string]struct{})
+
+	query := fmt.Sprintf("SELECT fundSeriesId from %s where filingId=%s", config.TableCfg.FormDataTable, filingID)
+
+	err := db.Select(&data, query)
+	if err != nil {
+		return ExisitingFunds, fmt.Errorf("retrieiving previous form data attached to the filingId: " + err.Error())
+	}
+
+	// create a temp reverse map
+	mapper := make(map[string]string)
+	for k, v := range FundCodeMapper {
+		mapper[v] = k
+	}
+
+	for _, d := range data {
+		ExisitingFunds[mapper[d.FegFundId]] = struct{}{}
+	}
+
+	return ExisitingFunds, nil
+
+}
+
+// SetFundInfo sets a local storer with the fund data present in the db
 func SetFundInfo() error {
 
 	var funds []FundInfo

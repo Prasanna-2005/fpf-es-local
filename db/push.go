@@ -59,7 +59,7 @@ func PushFormData(filingId string, fundCode string, userId int, formdata map[[3]
 		}
 
 		fd.FieldNo = key[0]
-		fd.FormLineNo =key[1]
+		fd.FormLineNo = key[1]
 
 		if key[2] != "" {
 			parts := strings.Split(key[2], "/")
