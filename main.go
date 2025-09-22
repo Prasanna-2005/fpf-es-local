@@ -128,8 +128,8 @@ func setStaticDataPV(data *executors.Form1bData, fundId string) {
 
 	data.FundID = info.FundID
 	data.FundName = info.FundName
-	data.FundLEI = info.FundLEI
-	data.FundNFA = info.FundNFA
+	data.FundLEI = info.FundLEI.String
+	data.FundNFA = info.FundNFA.String
 }
 
 // execute acts as the core execution and triggering point for both extraction and computation.

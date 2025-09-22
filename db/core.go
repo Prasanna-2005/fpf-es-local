@@ -26,10 +26,10 @@ type ExtractionEntity struct {
 
 // FundInfo stores the static identification info for the funds
 type FundInfo struct {
-	FundName string `db:"fundName"`
-	FundID   string `db:"fegFundId"`
-	FundNFA  string `db:"nfaId"`
-	FundLEI  string `db:"leiId"`
+	FundName string         `db:"fundName"`
+	FundID   string         `db:"fegFundId"`
+	FundNFA  sql.NullString `db:"nfaId"`
+	FundLEI  sql.NullString `db:"leiId"`
 }
 
 // FormData represents the structure of form_data table that stores the answers/form data from the computations
