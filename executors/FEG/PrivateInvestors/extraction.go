@@ -57,7 +57,7 @@ func getQ16Markers(rows [][]string) [][]int {
 
 // extractQ16Data extracts all the funds contributions and write them in the liquidityDataHolder.
 // Same fund code is followed across Q15 and Q16
-func extractQ16Data(f *excelize.File, ldataHolder *liquidityDataHolder) error {
+func extractQ16Data(f *excelize.File, ldataHolder *LiquidityDataHolder) error {
 
 	dataHolder := *ldataHolder
 
@@ -71,6 +71,12 @@ func extractQ16Data(f *excelize.File, ldataHolder *liquidityDataHolder) error {
 	for _, m := range markers {
 		i, j := m[0], m[1]
 		fund, _ := f.GetCellValue("Q16", executors.IndexToExcel(i-3, j+2))
+
+		if !strings.HasPrefix(fund, "FEG") {
+			logging.Warn("Fund Code not present in expected cell. Skipping the current table")
+			continue
+		}
+
 		fundData := dataHolder[fund]
 		for {
 			cellValue, _ := f.GetCellValue("Q16", executors.IndexToExcel(i, j))
@@ -107,13 +113,13 @@ func extractQ16Data(f *excelize.File, ldataHolder *liquidityDataHolder) error {
 
 // ExtractInvestorLiquidity acts as fund agnostic extraction with the input investorLiquidity file.
 // Stores all funds data and returns the reference of the holder
-func ExtractInvestorLiquidity(filePath string) (*liquidityDataHolder, error) {
+func ExtractInvestorLiquidity(filePath string) (LiquidityDataHolder, error) {
 
-	ldataHolder := make(liquidityDataHolder)
+	ldataHolder := make(LiquidityDataHolder)
 
 	f, err := excelize.OpenFile(filePath)
 	if err != nil {
-		return &ldataHolder, fmt.Errorf("opening file: " + err.Error())
+		return ldataHolder, fmt.Errorf("opening file: " + err.Error())
 	}
 	defer func() {
 		if err := f.Close(); err != nil {
@@ -124,7 +130,7 @@ func ExtractInvestorLiquidity(filePath string) (*liquidityDataHolder, error) {
 
 	q15Holder, err := extractQ15Data(f)
 	if err != nil {
-		return &ldataHolder, fmt.Errorf("extracing Q15: " + err.Error())
+		return ldataHolder, fmt.Errorf("extracing Q15: " + err.Error())
 	}
 
 	for fund, q15Value := range *q15Holder {
@@ -133,19 +139,17 @@ func ExtractInvestorLiquidity(filePath string) (*liquidityDataHolder, error) {
 
 	err = extractQ16Data(f, &ldataHolder)
 	if err != nil {
-		return &ldataHolder, fmt.Errorf("extracting Q16: " + err.Error())
+		return ldataHolder, fmt.Errorf("extracting Q16: " + err.Error())
 	}
 
-	return &ldataHolder, nil
+	return ldataHolder, nil
 }
 
 // extractQTD retrieves the required cells (unfunded commitments, gross and net performance)
 // from the QTD Sheet of the Q3 Workpaper
-func extractQTDData(f *excelize.File, series string) (float64, float64, float64, error) {
+func extractQTDData(f *excelize.File, series string, sheet string) (float64, float64, float64, error) {
 
 	var unfunded, net, gross float64
-
-	var sheet = "Capital Roll QTD"
 
 	qtdRows, err := f.GetRows(sheet)
 	if err != nil {
@@ -165,12 +169,12 @@ Outer:
 
 		}
 	}
-
+Out:
 	for i, row := range qtdRows[start+1:] {
 		for j, cellValue := range row {
 			switch {
 			case netIndex != 0 && grossIndex != 0 && allPartnerIndex != 0:
-				break
+				break Out
 			case strings.Contains(cellValue, "Unfunded Commitment"):
 				unfundedIndex = j
 				continue
@@ -220,11 +224,12 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 		return fmt.Errorf("getting BS Rows: " + err.Error())
 	}
 
+Out:
 	for i, row := range bsRows {
 		for j, cellValue := range row {
 			switch {
 			case seriesIndex != 0 && j > seriesIndex:
-				break
+				break Out
 			case strings.Contains(cellValue, "Series "+series):
 				seriesIndex = j
 			case strings.Contains(cellValue, "1002 - Cash"):
@@ -266,7 +271,7 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 
 // extractOtherQuartersData retrieves the fund performance (gross and net) for other quarters (q1,q2) and updates
 // inplace in the Fund's FundPerformanceData
-func extractOtherQuartersData(fd *FundPerformanceData, f1Path string, f2Path string, series string) error {
+func extractOtherQuartersData(fd *FundPerformanceData, f1Path string, f2Path string, series string, sheet string) error {
 	f1, err := excelize.OpenFile(f1Path)
 	if err != nil {
 		return fmt.Errorf("opening q1 workpaper: " + err.Error())
@@ -286,11 +291,11 @@ func extractOtherQuartersData(fd *FundPerformanceData, f1Path string, f2Path str
 
 	}()
 
-	_, fd.q1NetPercentage, fd.q1GrossPercentage, err = extractQTDData(f1, series)
+	_, fd.q1NetPercentage, fd.q1GrossPercentage, err = extractQTDData(f1, series, sheet)
 	if err != nil {
 		return fmt.Errorf("extracing QTD Data for quarter 1: " + err.Error())
 	}
-	_, fd.q2NetPercentage, fd.q2GrossPercentage, err = extractQTDData(f2, series)
+	_, fd.q2NetPercentage, fd.q2GrossPercentage, err = extractQTDData(f2, series, sheet)
 	if err != nil {
 		return fmt.Errorf("extracing QTD Data for quarter 2: " + err.Error())
 	}
@@ -313,12 +318,19 @@ func (F *PrivateFund) ExtractWorkPaperData() error {
 
 	}()
 
+	qtdSheet := "Capital Roll QTD"
+
+	// Accomodate Special Case of Fund 3
+	if strings.HasPrefix(F.fundID, "FEGOF_3") {
+		qtdSheet = "Capital Roll (QTD)"
+	}
+
 	err = extractBSData(f3, &F.workPaperData, F.series)
 	if err != nil {
 		return fmt.Errorf("extracting BS Data: " + err.Error())
 	}
 
-	unfunded, net, gross, err := extractQTDData(f3, F.series)
+	unfunded, net, gross, err := extractQTDData(f3, F.series, qtdSheet)
 	if err != nil {
 		return fmt.Errorf("extracting QTD Sheet: " + err.Error())
 	}
@@ -327,7 +339,7 @@ func (F *PrivateFund) ExtractWorkPaperData() error {
 	F.workPaperData.fundPerformanceData.q3GrossPercentage = gross
 	F.workPaperData.fundPerformanceData.q3NetPercentage = net
 
-	err = extractOtherQuartersData(&F.workPaperData.fundPerformanceData, F.holder.q1FilePath, F.holder.q2FilePath, F.series)
+	err = extractOtherQuartersData(&F.workPaperData.fundPerformanceData, F.holder.q1FilePath, F.holder.q2FilePath, F.series, qtdSheet)
 	if err != nil {
 		return fmt.Errorf("extracing other quarter data: " + err.Error())
 	}

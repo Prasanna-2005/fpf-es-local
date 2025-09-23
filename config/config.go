@@ -19,6 +19,7 @@ type tableConfig struct {
 	MappingTable    string
 	ExtractionTable string
 	FormDataTable   string
+	FundTable       string
 }
 
 var (
@@ -42,6 +43,7 @@ func InitialiseConfig() {
 		MappingTable:    os.Getenv("MAPPING_TABLE"),
 		ExtractionTable: os.Getenv("EXTRACTION_TABLE"),
 		FormDataTable:   os.Getenv("FORM_DATA_TABLE"),
+		FundTable:       os.Getenv("FUND_TABLE"),
 	}
 
 }

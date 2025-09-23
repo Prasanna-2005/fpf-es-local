@@ -15,7 +15,7 @@ type FileMapper struct {
 // ExtractionEntity represents the structure of extraction table that stores the extracted Entity
 type ExtractionEntity struct {
 	FilingId  int       `db:"filingId"`
-	FundId    string    `db:"fundId"`
+	FundId    string    `db:"fundSeriesId"`
 	Entity    string    `db:"entity"`
 	Value     string    `db:"value"`
 	CreatedAt time.Time `db:"createdAt"`
@@ -24,16 +24,26 @@ type ExtractionEntity struct {
 	UpdatedBy int       `db:"updatedBy"`
 }
 
+// FundInfo stores the static identification info for the funds
+type FundInfo struct {
+	FundName string         `db:"fundName"`
+	FundID   string         `db:"fegFundId"`
+	FundNFA  sql.NullString `db:"nfaId"`
+	FundLEI  sql.NullString `db:"leiId"`
+}
+
 // FormData represents the structure of form_data table that stores the answers/form data from the computations
 type FormData struct {
-	FilingId   int            `db:"filingId"`
-	FegFundId  string         `db:"fegFundId"`
-	FieldNo    string         `db:"fieldNo"`
-	FormLineNo sql.NullString `db:"formLineNo"`
-	Value      string         `db:"value"`
-	Date       sql.NullTime   `db:"date"`
-	CreatedAt  time.Time      `db:"createdAt"`
-	CreatedBy  int            `db:"createdBy"`
-	UpdatedAt  time.Time      `db:"updatedAt"`
-	UpdatedBy  int            `db:"updatedBy"`
+	FilingId   int          `db:"filingId"`
+	FegFundId  string       `db:"fundSeriesId"`
+	FieldNo    string       `db:"fieldNo"`
+	FormLineNo string       `db:"formLineNo"`
+	Value      string       `db:"value"`
+	Date       sql.NullTime `db:"date"`
+	CreatedAt  time.Time    `db:"createdAt"`
+	CreatedBy  int          `db:"createdBy"`
+	UpdatedAt  time.Time    `db:"updatedAt"`
+	UpdatedBy  int          `db:"updatedBy"`
 }
+
+var FundStorer = make(map[string]FundInfo)

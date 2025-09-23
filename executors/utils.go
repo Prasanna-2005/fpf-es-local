@@ -77,7 +77,7 @@ func CollectAnswers(v reflect.Value, store map[[3]string]string) {
 		case reflect.Float64:
 			store[l] = strconv.FormatFloat(value.Float(), 'f', -1, 64)
 		case reflect.String:
-			store[l] = v.String()
+			store[l] = value.String()
 		default:
 			continue
 		}
