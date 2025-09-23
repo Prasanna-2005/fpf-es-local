@@ -1,6 +1,7 @@
 package privateinvestors
 
 import (
+	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"reflect"
 )
@@ -20,6 +21,8 @@ func NewPrivateFund(fundId string, series string) *PrivateFund {
 
 // SetHolder takes up a quarterNo and filePath and sets them in the file holder of the fund
 func (F *PrivateFund) SetHolder(quarterNo int, filePath string) {
+
+	filePath = config.Cfg.StoragePath + filePath
 
 	switch quarterNo {
 	case 1:
