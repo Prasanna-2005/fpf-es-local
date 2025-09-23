@@ -224,12 +224,12 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 		return fmt.Errorf("getting BS Rows: " + err.Error())
 	}
 
-Out:
 	for i, row := range bsRows {
+	In:
 		for j, cellValue := range row {
 			switch {
 			case seriesIndex != 0 && j > seriesIndex:
-				break Out
+				break In
 			case strings.Contains(cellValue, "Series "+series):
 				seriesIndex = j
 			case strings.Contains(cellValue, "1002 - Cash"):
