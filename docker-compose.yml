@@ -8,7 +8,7 @@ services:
     env_file: .env
     volumes:
       - form-pf-shared-storage:${STORAGE_PATH}
-      - ../logs/form-pf/:/var/log/form-pf
+      - ../logs/form-pf/service:/var/log/form-pf
 volumes:
   form-pf-shared-storage:
     external: true
