@@ -174,7 +174,12 @@ func execute(filingID string, userID int) {
 
 			answersMapper := make(map[[3]string]string)
 
-			fund.SetLiquidityData(liqudityHolder[fund.GetFundID()])
+			if holder, ok := liqudityHolder[fund.GetFundID()]; ok {
+				fund.SetLiquidityData(holder)
+			} else {
+				logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
+			}
+
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractWorkPaperData()
 			if err != nil {
