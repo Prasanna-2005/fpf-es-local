@@ -6,12 +6,13 @@ import (
 
 // config represents the overall configuration of the service
 type config struct {
-	SockPath   string
-	DBUser     string
-	DBPassword string
-	DBHost     string
-	DBPort     string
-	DBName     string
+	SockPath    string
+	StoragePath string
+	DBUser      string
+	DBPassword  string
+	DBHost      string
+	DBPort      string
+	DBName      string
 }
 
 // tableConfig represents the DB Table configuration
@@ -31,12 +32,13 @@ var (
 // It Acquires the runtime env variables and assign them
 func InitialiseConfig() {
 	Cfg = &config{
-		SockPath:   os.Getenv("SOCKET_PATH"),
-		DBUser:     os.Getenv("DB_USER"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
-		DBHost:     os.Getenv("DB_HOST"),
-		DBPort:     os.Getenv("DB_PORT"),
-		DBName:     os.Getenv("DB_NAME"),
+		SockPath:    os.Getenv("SOCKET_PATH"),
+		StoragePath: os.Getenv("STORAGE_PATH"),
+		DBUser:      os.Getenv("DB_USER"),
+		DBPassword:  os.Getenv("DB_PASSWORD"),
+		DBHost:      os.Getenv("DB_HOST"),
+		DBPort:      os.Getenv("DB_PORT"),
+		DBName:      os.Getenv("DB_NAME"),
 	}
 
 	TableCfg = &tableConfig{
