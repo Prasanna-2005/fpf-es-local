@@ -92,7 +92,7 @@ func prepareFilingPrivateInvestors(filingID string) (map[string][]*privateinvest
 	for _, mapping := range *mappings {
 
 		if mapping.FundShortCode == "Q15_Q16" {
-			investorLiquidityPath = mapping.FilingPath
+			investorLiquidityPath = os.Getenv("STORAGE_PATH") + mapping.FilingPath
 			continue
 		}
 
@@ -172,7 +172,7 @@ func execute(filingID string, userID int) {
 				continue
 			}
 
-			answersMapper := make(map[[3]string]string)
+			answersMapper := make(map[[2]string]string)
 
 			if holder, ok := liqudityHolder[fund.GetFundID()]; ok {
 				fund.SetLiquidityData(holder)
