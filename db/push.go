@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"quantrium-tech/form_pf_extractor_service/config"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -40,7 +39,7 @@ func PushEntities(filingId string, fundCode string, userId int, data map[string]
 }
 
 // PushFormData takes the tagged-value mapped data and does a batched query to push the form data
-func PushFormData(filingId string, fundCode string, userId int, formdata map[[3]string]string) error {
+func PushFormData(filingId string, fundCode string, userId int, formdata map[[2]string]string) error {
 
 	fundId := FundCodeMapper[fundCode]
 	loc, _ := time.LoadLocation("Asia/Kolkata")
@@ -61,22 +60,10 @@ func PushFormData(filingId string, fundCode string, userId int, formdata map[[3]
 		fd.FieldNo = key[0]
 		fd.FormLineNo = key[1]
 
-		if key[2] != "" {
-			parts := strings.Split(key[2], "/")
-			month, _ := strconv.Atoi(parts[0])
-			day, _ := strconv.Atoi(parts[1])
-			year := time.Now().Year() - 1
-
-			date := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
-			fd.Date = ToNullTime(&date)
-		} else {
-			fd.Date = ToNullTime(nil)
-		}
-
 		batch = append(batch, fd)
 	}
 
-	query := fmt.Sprintf("INSERT INTO %s (filingId, fundSeriesId, fieldNo, formLineNo, value, date, createdAt, createdBy) VALUES (:filingId, :fundSeriesId, :fieldNo, :formLineNo, :value, :date, :createdAt, :createdBy)", config.TableCfg.FormDataTable)
+	query := fmt.Sprintf("INSERT INTO %s (filingId, fundSeriesId, fieldNo, formLineNo, value, createdAt, createdBy) VALUES (:filingId, :fundSeriesId, :fieldNo, :formLineNo, :value, :createdAt, :createdBy)", config.TableCfg.FormDataTable)
 
 	_, err := db.NamedExec(query, batch)
 	if err != nil {

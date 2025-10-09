@@ -56,7 +56,7 @@ func CollectEntities(v reflect.Value, store map[string]string) {
 }
 
 // CollectAnswers takes a reflect.Value and a store (referenced) and collect the tags and values of formdata
-func CollectAnswers(v reflect.Value, store map[[3]string]string) {
+func CollectAnswers(v reflect.Value, store map[[2]string]string) {
 	t := v.Type()
 
 	for i := 0; i < t.NumField(); i++ {
@@ -69,9 +69,8 @@ func CollectAnswers(v reflect.Value, store map[[3]string]string) {
 
 		fieldNo := field.Tag.Get("fieldNo")
 		lineNo := field.Tag.Get("formLineNo")
-		date := field.Tag.Get("date")
 
-		l := [3]string{fieldNo, lineNo, date}
+		l := [2]string{fieldNo, lineNo}
 
 		switch value.Kind() {
 		case reflect.Float64:
