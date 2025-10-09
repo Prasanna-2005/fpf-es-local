@@ -21,7 +21,7 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 	ld := F.workPaperData.liquidityData
 	pd := F.workPaperData.fundPerformanceData
 
-	data := executors.Form1bData{}
+	data := executors.NewForm1bData()
 
 	// workpaper data
 	data.GrossAsset = executors.CalculateGrossAssets(wd.totalAssets, wd.unfundedCommitments)
@@ -46,6 +46,6 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 	data.Q2NetValue = pd.q2NetPercentage
 	data.Q3NetValue = pd.q3NetPercentage
 
-	return &data
+	return data
 
 }
