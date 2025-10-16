@@ -25,17 +25,17 @@ type Form1bData struct {
 	PensionPlanPercent float64 `fieldNo:"16" formLineNo:"22_h"`
 	OtherPercent       float64 `fieldNo:"16" formLineNo:"22_n"`
 
-	Q1EndDate    string  `fieldNo:"17" formLineNo:"17_d_last_day_of_fiscal_period"`
-	Q1GrossValue float64 `fieldNo:"17" formLineNo:"17_d_gross_performance"`
-	Q1NetValue   float64 `fieldNo:"17" formLineNo:"17_d_Net_of_management_fees_and_incentives_fees_and_allocation"`
+	Q1EndDate    string  `fieldNo:"17" formLineNo:"17_(d)_last_day_of_fiscal_period"`
+	Q1GrossValue float64 `fieldNo:"17" formLineNo:"17_(d)_gross_performance"`
+	Q1NetValue   float64 `fieldNo:"17" formLineNo:"17_(d)_Net_of_management_fees_and_incentives_fees_and_allocation"`
 
-	Q2EndDate    string  `fieldNo:"17" formLineNo:"17_h_last_day_of_fiscal_period"`
-	Q2GrossValue float64 `fieldNo:"17" formLineNo:"17_h_gross_performance"`
-	Q2NetValue   float64 `fieldNo:"17" formLineNo:"17_h_Net_of_management_fees_and_incentives_fees_and_allocation"`
+	Q2EndDate    string  `fieldNo:"17" formLineNo:"17_(h)_last_day_of_fiscal_period"`
+	Q2GrossValue float64 `fieldNo:"17" formLineNo:"17_(h)_gross_performance"`
+	Q2NetValue   float64 `fieldNo:"17" formLineNo:"17_(h)_Net_of_management_fees_and_incentives_fees_and_allocation"`
 
-	Q3EndDate    string  `fieldNo:"17" formLineNo:"17_l_last_day_of_fiscal_period"`
-	Q3GrossValue float64 `fieldNo:"17" formLineNo:"17_l_gross_performance"`
-	Q3NetValue   float64 `fieldNo:"17" formLineNo:"17_l_Net_of_management_fees_and_incentives_fees_and_allocation"`
+	Q3EndDate    string  `fieldNo:"17" formLineNo:"17_(l)_last_day_of_fiscal_period"`
+	Q3GrossValue float64 `fieldNo:"17" formLineNo:"17_(l)_gross_performance"`
+	Q3NetValue   float64 `fieldNo:"17" formLineNo:"17_(l)_Net_of_management_fees_and_incentives_fees_and_allocation"`
 }
 
 func NewForm1bData() *Form1bData {
