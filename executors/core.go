@@ -42,7 +42,7 @@ type Form1bData struct {
 	InvestmentCompaniesPercent float64 `fieldNo:"16" formLineNo:"16_e"`
 	PrivateFundsPercent        float64 `fieldNo:"16" formLineNo:"16_f"`
 	NonProfitPercent           float64 `fieldNo:"16" formLineNo:"16_g"`
-	PensionPlanPercent         float64 `fieldNo:"16" formLineNo:"22_h"`
+	PensionPlanPercent         float64 `fieldNo:"16" formLineNo:"16_h"`
 	BankingInstitutionsPercent float64 `fieldNo:"16" formLineNo:"16_i"`
 	GovernmentEntitiesPercent  float64 `fieldNo:"16" formLineNo:"16_j"`
 	GovernmentPensionsPercent  float64 `fieldNo:"16" formLineNo:"16_k"`
@@ -66,6 +66,10 @@ type Form1bData struct {
 func NewForm1bData() *Form1bData {
 	lastYear := time.Now().Year() - 1
 	return &Form1bData{
+
+		MasterFund:              false, // 6
+		ParallelFundsAggregated: false, // 7
+		HasDerivativesPositions: false, //13_b
 
 		// prev existing code
 		Q1EndDate: fmt.Sprintf("03/31/%d", lastYear),
