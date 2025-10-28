@@ -25,8 +25,8 @@ type Form1bData struct {
 	BorrowedUSNonFinInstiAmt    float64 `fieldNo:"12" formLineNo:"12_d"`
 	BorrowedNonUSNonFinInstiAmt float64 `fieldNo:"12" formLineNo:"12_e"`
 	HasDerivativesPositions     bool    `fieldNo:"13" formLineNo:"13_a"`
-	DerivativesPositionsValue   float64 `fieldNo:"13" formLineNo:"13_b"`
-	Level1Asset                 float64 `fieldNo:"14" formLineNo:"14_assets_level1"`
+	// DerivativesPositionsValue   float64 `fieldNo:"13" formLineNo:"13_b"`
+	Level1Asset float64 `fieldNo:"14" formLineNo:"14_assets_level1"`
 	// Level2Asset                 float64 `fieldNo:"14" formLineNo:"14_assets_level2"`
 	Level3Asset     float64 `fieldNo:"14" formLineNo:"14_assets_level3"`
 	CostBasedAsset  float64 `fieldNo:"14" formLineNo:"14_assets_costbased"`
