@@ -13,7 +13,7 @@ type Form1bData struct {
 	FundNFA                 string `fieldNo:"5" formLineNo:"5_c"`
 	FundLEI                 string `fieldNo:"5" formLineNo:"5_d"`
 	MasterFund              bool   `fieldNo:"6" formLineNo:"6"`
-	ParallelFundsAggregated bool   `fieldNo:"7" formLineNo:"7"`
+	ParallelFundsAggregated bool   `fieldNo:"7" formLineNo:"7_a"`
 
 	GrossAsset                  float64 `fieldNo:"8" formLineNo:"8"`
 	NetAsset                    float64 `fieldNo:"9" formLineNo:"9"`
