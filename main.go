@@ -121,13 +121,21 @@ func prepareFilingPrivateInvestors(filingID string) (map[string][]*privateinvest
 
 // setStaticDataPV sets the static information to the form1bData
 func setStaticDataPV(data *executors.Form1bData, fundId string) {
-
 	info := db.FundStorer[fundId]
 
 	data.FundID = info.FundID
 	data.FundName = info.FundName
-	data.FundLEI = info.FundLEI.String
-	data.FundNFA = info.FundNFA.String
+
+	if info.FundLEI.Valid {
+		data.FundLEI = info.FundLEI.String
+	} else {
+		data.FundLEI = "N"
+	}
+
+	if info.FundNFA.Valid {
+		data.FundNFA = info.FundNFA.String
+	}
+
 }
 
 // execute acts as the core execution and triggering point for both extraction and computation.
