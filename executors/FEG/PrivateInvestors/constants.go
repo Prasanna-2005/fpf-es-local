@@ -33,3 +33,11 @@ var FundtoSeriesMapper = map[string][]string{
 	"FEGOF_6": {"A", "A_ESG", "B", "C", "C_ESG", "D"},
 	"FEGOF_7": {"B", "C", "C_ESG", "D", "E"},
 }
+
+var MaturedFunds = []string{
+	"FEGOF_2_A",
+	"FEGOF_2_B",
+	"FEGOF_2_C",
+	"FEGOF_3_C",
+	"FEGOF_3_D",
+}
