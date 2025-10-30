@@ -72,8 +72,8 @@ func NewForm1bData() *Form1bData {
 		HasDerivativesPositions: false, //13_b
 
 		// prev existing code
-		Q1EndDate: fmt.Sprintf("03/31/%d", lastYear),
-		Q2EndDate: fmt.Sprintf("06/30/%d", lastYear),
-		Q3EndDate: fmt.Sprintf("09/30/%d", lastYear),
+		Q1EndDate: fmt.Sprintf("%d/03/31", lastYear),
+		Q2EndDate: fmt.Sprintf("%d/06/30", lastYear),
+		Q3EndDate: fmt.Sprintf("%d/09/30", lastYear),
 	}
 }
