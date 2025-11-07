@@ -14,14 +14,14 @@ type FileMapper struct {
 
 // ExtractionEntity represents the structure of extraction table that stores the extracted Entity
 type ExtractionEntity struct {
-	FilingId  int       `db:"filingId"`
+	FilingId  string    `db:"filingId"`
 	FundId    string    `db:"fundSeriesId"`
 	Entity    string    `db:"entity"`
 	Value     string    `db:"value"`
 	CreatedAt time.Time `db:"createdAt"`
-	CreatedBy int       `db:"createdBy"`
+	CreatedBy string    `db:"createdBy"`
 	UpdatedAt time.Time `db:"updatedAt"`
-	UpdatedBy int       `db:"updatedBy"`
+	UpdatedBy string    `db:"updatedBy"`
 }
 
 // FundInfo stores the static identification info for the funds
@@ -34,16 +34,16 @@ type FundInfo struct {
 
 // FormData represents the structure of form_data table that stores the answers/form data from the computations
 type FormData struct {
-	FilingId   int          `db:"filingId"`
+	FilingId   string       `db:"filingId"`
 	FegFundId  string       `db:"fundSeriesId"`
 	FieldNo    string       `db:"fieldNo"`
 	FormLineNo string       `db:"formLineNo"`
 	Value      string       `db:"value"`
 	Date       sql.NullTime `db:"date"`
 	CreatedAt  time.Time    `db:"createdAt"`
-	CreatedBy  int          `db:"createdBy"`
+	CreatedBy  string       `db:"createdBy"`
 	UpdatedAt  time.Time    `db:"updatedAt"`
-	UpdatedBy  int          `db:"updatedBy"`
+	UpdatedBy  string       `db:"updatedBy"`
 }
 
 var FundStorer = make(map[string]FundInfo)

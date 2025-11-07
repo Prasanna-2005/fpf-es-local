@@ -3,16 +3,15 @@ package db
 import (
 	"fmt"
 	"quantrium-tech/form_pf_extractor_service/config"
-	"strconv"
 	"time"
 )
 
 // PushEntities takes the entity-value mapped data and does a batched query to push the extracted entities.
-func PushEntities(filingId string, fundCode string, userId int, data map[string]string) error {
+func PushEntities(filingId string, fundCode string, userId string, data map[string]string) error {
 
 	fundId := FundCodeMapper[fundCode]
 	loc, _ := time.LoadLocation("Asia/Kolkata")
-	filingIdConv, _ := strconv.Atoi(filingId)
+	filingIdConv := filingId
 
 	var batch []ExtractionEntity
 
@@ -39,11 +38,11 @@ func PushEntities(filingId string, fundCode string, userId int, data map[string]
 }
 
 // PushFormData takes the tagged-value mapped data and does a batched query to push the form data
-func PushFormData(filingId string, fundCode string, userId int, formdata map[[2]string]string) error {
+func PushFormData(filingId string, fundCode string, userId string, formdata map[[2]string]string) error {
 
 	fundId := FundCodeMapper[fundCode]
 	loc, _ := time.LoadLocation("Asia/Kolkata")
-	filingIdConv, _ := strconv.Atoi(filingId)
+	filingIdConv := filingId
 
 	var batch []FormData
 
