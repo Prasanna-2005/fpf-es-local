@@ -131,7 +131,7 @@ func setStaticDataPV(data *executors.Form1bData, fundId string) {
 }
 
 // execute acts as the core execution and triggering point for both extraction and computation.
-func execute(filingID string, userID int) {
+func execute(filingID string, userID string) {
 
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, investorLiquidityPath, err := prepareFilingPrivateInvestors(filingID)
