@@ -9,9 +9,9 @@ import (
 func PullFiling(filingID string) (*[]FileMapper, error) {
 
 	var mappings []FileMapper
-	query := fmt.Sprintf("SELECT filingPath, fundShortCode, quarterNo from %s WHERE filingId=%s", config.TableCfg.MappingTable, filingID)
+	query := fmt.Sprintf("SELECT filingPath, fundShortCode, quarterNo from %s WHERE filingId= ?", config.TableCfg.MappingTable)
 
-	err := db.Select(&mappings, query)
+	err := db.Select(&mappings, query, filingID)
 	if err != nil {
 		return &mappings, fmt.Errorf("retrieving mappings attached to the filingId: " + err.Error())
 	}
@@ -29,9 +29,9 @@ func GetExisitingFunds(filingID string) (map[string]struct{}, error) {
 	var data []FormData
 	ExisitingFunds := make(map[string]struct{})
 
-	query := fmt.Sprintf("SELECT fundSeriesId from %s where filingId=%s", config.TableCfg.FormDataTable, filingID)
+	query := fmt.Sprintf("SELECT fundSeriesId from %s where filingId=?", config.TableCfg.FormDataTable)
 
-	err := db.Select(&data, query)
+	err := db.Select(&data, query, filingID)
 	if err != nil {
 		return ExisitingFunds, fmt.Errorf("retrieiving previous form data attached to the filingId: " + err.Error())
 	}
