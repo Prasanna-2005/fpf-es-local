@@ -18,7 +18,7 @@ func CreateAllFundSeries(fundCode string) []*PrivateFund {
 			fundId = fundId + "_" + series
 		}
 
-		series = strings.Replace(series, "_", "-", 1)
+		series = strings.Replace(series, "_", " - ", 1)
 
 		fund := NewPrivateFund(fundId, series)
 		funds = append(funds, fund)

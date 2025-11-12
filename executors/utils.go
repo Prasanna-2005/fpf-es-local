@@ -22,12 +22,18 @@ func IndexToExcel(row, col int) string {
 // CleanNonNumeric takes a string and removes non-numeric characters except "." to hold the decimals
 func CleanNonNumeric(s string) string {
 	var result strings.Builder
+
 	for _, r := range s {
-		if unicode.IsDigit(r) || r == '.' || r == '-' {
+		if unicode.IsDigit(r) || r == '.' || r == '-' || r == '(' || r == ')' {
 			result.WriteRune(r)
 		}
 	}
-	return result.String()
+
+	res := result.String()
+	if res[0] == '(' && res[len(res)-1] == ')' {
+		res = "-" + res[1:len(res)-1]
+	}
+	return res
 }
 
 // CollectEntities takes a reflect.Value and a store (referenced) and collect the tags and values of a workpaperdata
