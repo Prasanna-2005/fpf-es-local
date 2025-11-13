@@ -30,9 +30,12 @@ func CleanNonNumeric(s string) string {
 	}
 
 	res := result.String()
-	if res[0] == '(' && res[len(res)-1] == ')' {
-		res = "-" + res[1:len(res)-1]
+	if res != "" {
+		if res[0] == '(' && res[len(res)-1] == ')' {
+			res = "-" + res[1:len(res)-1]
+		}
 	}
+
 	return res
 }
 
