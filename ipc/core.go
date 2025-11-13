@@ -16,7 +16,7 @@ type ipcDaemon struct {
 // inboundMessage represents the structure that holds the information passed from the backend
 type inboundMessage struct {
 	FilingID string `json:"filing_id"`
-	UserID   int    `json:"user_id"`
+	UserID   string `json:"user_id"`
 }
 
 var InboundChannel = make(chan inboundMessage)
