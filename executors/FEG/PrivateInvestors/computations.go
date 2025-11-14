@@ -10,8 +10,8 @@ func calculateLevel3Asset(investment1900 float64, unrealisedGainLoss1910 float64
 }
 
 // calculateCBAsset calculates the CB Asset for PV based on backtracked formula
-func calculateCBAsset(cash1000 float64, cashSweep1002 float64) float64 {
-	return cash1000 + cashSweep1002
+func calculateCBAsset(cashChecking1000 float64, cashSweep1002 float64, cashGeneral1005 float64) float64 {
+	return cashChecking1000 + cashSweep1002 + cashGeneral1005
 }
 
 // Compute act over a private fund to calculate all the required compuations and returns a 1bData since PV only uses it in computations
@@ -28,7 +28,7 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 	data.NetAsset = executors.CalculateNetAsset(wd.totalPartnerCaptial, wd.unfundedCommitments)
 	data.EquityInOtherFunds = calculateLevel3Asset(wd.investments, wd.investmentsUnrealisedGainLoss)
 	data.Level3Asset = data.EquityInOtherFunds
-	data.CostBasedAsset = calculateCBAsset(wd.cashGeneralAccount, wd.cashSweep)
+	data.CostBasedAsset = calculateCBAsset(wd.cashChecking, wd.cashSweep, wd.cashGeneralAccount)
 	data.CostBasedLiability = wd.totalLiabilities
 
 	// investor liquidity data

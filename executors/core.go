@@ -8,6 +8,7 @@ import (
 // Form1bData holds the structure of the section 1b in Form PF.
 // It will be dynamically increased based on the needs to answer other questions
 type Form1bData struct {
+<<<<<<< HEAD
 	FundName                string `fieldNo:"5" formLineNo:"5_a"`
 	FundID                  string `fieldNo:"5" formLineNo:"5_b"`
 	FundNFA                 string `fieldNo:"5" formLineNo:"5_c"`
@@ -49,6 +50,24 @@ type Form1bData struct {
 	ForeignInstitutionsPercent float64 `fieldNo:"16" formLineNo:"16_l"`
 	NonUSIntermediariesPercent float64 `fieldNo:"16" formLineNo:"16_m"`
 	OtherPercent               float64 `fieldNo:"16" formLineNo:"16_n"`
+=======
+	FundName string `fieldNo:"5" formLineNo:"5_a"`
+	FundID   string `fieldNo:"5" formLineNo:"5_b"`
+	FundNFA  string `fieldNo:"5" formLineNo:"5_c"`
+	FundLEI  string `fieldNo:"5" formLineNo:"5_d"`
+
+	GrossAsset         float64 `fieldNo:"8" formLineNo:"8"`
+	NetAsset           float64 `fieldNo:"9" formLineNo:"9"`
+	EquityInOtherFunds float64 `fieldNo:"10" formLineNo:"10"`
+	Level3Asset        float64 `fieldNo:"14" formLineNo:"14_assets_level3"`
+	CostBasedAsset     float64 `fieldNo:"14" formLineNo:"14_assets_costbased"`
+	CostBasedLiability float64 `fieldNo:"14" formLineNo:"14_liabilities_costbased"`
+	Top5Percent        float64 `fieldNo:"15" formLineNo:"15"`
+	UsPercent          float64 `fieldNo:"16" formLineNo:"16_a"`
+	NonProfitPercent   float64 `fieldNo:"16" formLineNo:"16_g"`
+	PensionPlanPercent float64 `fieldNo:"16" formLineNo:"16_h"`
+	OtherPercent       float64 `fieldNo:"16" formLineNo:"16_n"`
+>>>>>>> dev
 
 	Q1EndDate    string  `fieldNo:"17" formLineNo:"17_(d)_last_day_of_fiscal_period"`
 	Q1GrossValue float64 `fieldNo:"17" formLineNo:"17_(d)_gross_performance"`
