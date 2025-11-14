@@ -157,17 +157,18 @@ func extractQTDData(f *excelize.File, series string, sheet string) (float64, flo
 	}
 
 	var start, rowIndex, netIndex, grossIndex int
-
 	var unfundedIndex, allPartnerIndex int
 Outer:
 	for i, row := range qtdRows {
-		for _, cellValue := range row {
-			if strings.Contains(cellValue, "Series "+series) {
-				start = i
-				break Outer
+		if len(row) >= 2 {
+			for j, cellValue := range row {
+				if strings.Contains(cellValue, "Series "+series) && strings.Contains(row[j-1], "Entity") {
+					start = i
+					break Outer
+				}
 			}
-
 		}
+
 	}
 Out:
 	for i, row := range qtdRows[start+1:] {
@@ -223,7 +224,6 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 	if err != nil {
 		return fmt.Errorf("getting BS Rows: " + err.Error())
 	}
-
 	for i, row := range bsRows {
 	In:
 		for j, cellValue := range row {
@@ -236,6 +236,8 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 				entitytoMarker["cash1002"] = i
 			case strings.Contains(cellValue, "1005 - Cash"):
 				entitytoMarker["cash1005"] = i
+			case strings.Contains(cellValue, "1000 - Cash"):
+				entitytoMarker["cash1000"] = i
 			case strings.Contains(cellValue, "1900 - Investment"):
 				entitytoMarker["investment1900"] = i
 			case strings.Contains(cellValue, "1910 - Investment"):
@@ -249,7 +251,6 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 			}
 		}
 	}
-
 	for entity, marker := range entitytoMarker {
 
 		rawValue, _ := f.GetCellValue("BS", executors.IndexToExcel(marker, seriesIndex))
@@ -261,6 +262,7 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 	wpdata.totalAssets = entitytoValue["assets"]
 	wpdata.cashGeneralAccount = entitytoValue["cash1005"]
 	wpdata.cashSweep = entitytoValue["cash1002"]
+	wpdata.cashChecking = entitytoValue["cash1000"]
 	wpdata.totalLiabilities = entitytoValue["liabilities"]
 	wpdata.totalPartnerCaptial = entitytoValue["partnersCapital"]
 	wpdata.investments = entitytoValue["investment1900"]
