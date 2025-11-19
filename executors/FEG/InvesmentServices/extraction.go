@@ -297,6 +297,9 @@ func extGrossAndNetAssests(f *excelize.File, tbdata *WorkPaperData) (int, error)
 				}
 				rawValue = executors.CleanNonNumeric(rawValue)
 				tbdata.totalPartnerCaptial, _ = strconv.ParseFloat(rawValue, 64)
+				if tbdata.totalPartnerCaptial < 0 {
+					tbdata.totalPartnerCaptial *= (-1)
+				}
 			}
 			tbdata.unfundedCommitments = 0
 		}
