@@ -16,7 +16,12 @@ type Form1bData struct {
 	GrossAsset         float64 `fieldNo:"8" formLineNo:"8"`
 	NetAsset           float64 `fieldNo:"9" formLineNo:"9"`
 	EquityInOtherFunds float64 `fieldNo:"10" formLineNo:"10"`
+	Level1Asset        float64 `fieldNo:"14" formLineNo:"14_assets_level1"`
+	Level2Asset        float64 `fieldNo:"14" formLineNo:"14_assets_level2"`
 	Level3Asset        float64 `fieldNo:"14" formLineNo:"14_assets_level3"`
+	Level1Liabilities  float64 `fieldNo:"14" formLineNo:"14_liabilities_level1"`
+	Level2Liabilities  float64 `fieldNo:"14" formLineNo:"14_liabilities_level2"`
+	Level3Liabilities  float64 `fieldNo:"14" formLineNo:"14_liabilities_level3"`
 	CostBasedAsset     float64 `fieldNo:"14" formLineNo:"14_assets_costbased"`
 	CostBasedLiability float64 `fieldNo:"14" formLineNo:"14_liabilities_costbased"`
 	Top5Percent        float64 `fieldNo:"15" formLineNo:"15"`
