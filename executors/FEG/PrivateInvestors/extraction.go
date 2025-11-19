@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"quantrium-tech/form_pf_extractor_service/logging"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -338,6 +339,9 @@ func (F *PrivateFund) ExtractWorkPaperData() error {
 	}
 
 	F.workPaperData.unfundedCommitments = unfunded
+	if slices.Contains(MaturedFunds, F.fundID) {
+		F.workPaperData.unfundedCommitments = 0
+	}
 	F.workPaperData.fundPerformanceData.q3GrossPercentage = gross
 	F.workPaperData.fundPerformanceData.q3NetPercentage = net
 
