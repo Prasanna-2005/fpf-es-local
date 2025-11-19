@@ -24,6 +24,8 @@ type Form1bData struct {
 	NonProfitPercent   float64 `fieldNo:"16" formLineNo:"16_g"`
 	PensionPlanPercent float64 `fieldNo:"16" formLineNo:"16_h"`
 	OtherPercent       float64 `fieldNo:"16" formLineNo:"16_n"`
+	SovereignPercent   float64 `fieldNo:"16" formLineNo:"16_l"`
+	PrivateFundPercent float64 `fieldNo:"16" formLineNo:"16_f"`
 
 	Q1EndDate    string  `fieldNo:"17" formLineNo:"17_(d)_last_day_of_fiscal_period"`
 	Q1GrossValue float64 `fieldNo:"17" formLineNo:"17_(d)_gross_performance"`
