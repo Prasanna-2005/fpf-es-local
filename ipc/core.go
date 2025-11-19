@@ -17,6 +17,7 @@ type ipcDaemon struct {
 type inboundMessage struct {
 	FilingID string `json:"filing_id"`
 	UserID   string `json:"user_id"`
+	Series   string `json:"series"`
 }
 
 var InboundChannel = make(chan inboundMessage)
