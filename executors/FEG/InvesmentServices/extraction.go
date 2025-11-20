@@ -49,7 +49,6 @@ func ExtractInvestorLiquidity(filePath string) (LiquidityDataHolder, error) {
 }
 
 func ExtractUnfundedCmts(filePath string) (UnfundedCommitmentsHolder, error) {
-	fmt.Println(filePath)
 	UfdataHolder := make(UnfundedCommitmentsHolder)
 
 	f, err := excelize.OpenFile(filePath)
@@ -67,13 +66,13 @@ func ExtractUnfundedCmts(filePath string) (UnfundedCommitmentsHolder, error) {
 	fmt.Println("UF cmmts")
 	fmt.Println(unfdCmtsHolder)
 	if err != nil {
-		return *unfdCmtsHolder, fmt.Errorf("extracing unfndcmts: " + err.Error())
+		return unfdCmtsHolder, fmt.Errorf("extracing unfndcmts: " + err.Error())
 	}
-
+	UfdataHolder = unfdCmtsHolder
 	return UfdataHolder, nil
 }
 
-func extUnfndCmts(f *excelize.File) (*map[string]float64, error) {
+func extUnfndCmts(f *excelize.File) (map[string]float64, error) {
 	rows, err := f.GetRows(os.Getenv("UNFND_CMTS_SHEET"))
 	fmt.Println(rows)
 	if err != nil {
@@ -138,7 +137,7 @@ func extUnfndCmts(f *excelize.File) (*map[string]float64, error) {
 		result[ShortCodeConvertor[billID]] += amount
 	}
 
-	return &result, nil
+	return result, nil
 }
 
 // extractQ15Data extracts all the funds Q15 answer and returns them with fund mapped values

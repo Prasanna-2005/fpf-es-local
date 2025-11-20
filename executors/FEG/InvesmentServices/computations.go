@@ -1,6 +1,10 @@
 package invesmentservices
 
-import "quantrium-tech/form_pf_extractor_service/executors"
+import (
+	"fmt"
+	"quantrium-tech/form_pf_extractor_service/executors"
+	"slices"
+)
 
 // Compute act over a private fund to calculate all the required compuations and returns a 1bData since PV only uses it in computations
 func (F *Fund) Compute() *executors.Form1bData {
@@ -15,6 +19,10 @@ func (F *Fund) Compute() *executors.Form1bData {
 	data.GrossAsset = executors.CalculateGrossAssets(wd.totalAssets, wd.unfundedCommitments)
 	data.NetAsset = executors.CalculateNetAsset(wd.totalPartnerCaptial, wd.unfundedCommitments)
 	data.EquityInOtherFunds = wd.sumLevelExtData
+	if slices.Contains(NotSame, F.fundID) {
+		fmt.Printf("\nInside\n %v", F.fundID)
+		data.EquityInOtherFunds = 0
+	}
 	data.Level1Asset = wd.l1
 	data.Level2Asset = wd.l2
 	data.Level3Asset = wd.l3

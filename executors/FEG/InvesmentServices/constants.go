@@ -80,31 +80,45 @@ var LevelMapper = map[string]map[string][]string{
 	"FSOPO": {
 		"l3": {"private eq @ cost", "private eq u/r g/l"},
 	},
-	"FSTGX1": {
+	"FSTGXI": {
 		"l3": {"private eq @ cost", "private eq u/r g/l"},
 	},
 	"FSTGX2": {
 		"l3": {"private eq @ cost", "private eq u/r g/l"},
 	},
 	"FSTGX4": {
-		"l3": {"equities @ cost", "equities u/r g/l", "reit @ cost", "reit u/r g/l"},
+		"l3": {"private eq @ cost", "private eq u/r g/l"},
 	},
 	"FSSUS": {
-		"l2": {
+		"l1": {
 			"equities @ cost",
 			"equities u/r g/l",
+			"equities u/r fx g/l",
+			"adr @ cost",
+			"adr u/r g/l",
 			"reit @ cost",
 			"reit u/r g/l",
+			"reit u/r fx g/l",
 		},
 	},
 	"FSSIE": {
-		"l2": {
+		"l1": {
 			"equities @ cost",
 			"equities u/r g/l",
+			"equities u/r fx g/l",
+			"adr @ cost",
+			"adr u/r g/l",
 			"reit @ cost",
 			"reit u/r g/l",
+			"reit u/r fx g/l",
 		},
 	},
+}
+
+var NotSame = []string{
+	"FSSIE",
+	"FSSUS",
+	"FSCFI",
 }
 
 var LevelingEntityMapper = map[string]string{
@@ -131,6 +145,7 @@ var LevelingEntityMapper = map[string]string{
 	"private eq u/r g/l":      "privateEqURGL",
 	"reit @ cost":             "reitCost",
 	"reit u/r g/l":            "reitURGL",
+	"reit u/r fx g/l":         "reitURFXGL",
 	"invt. in master fund":    "invtInMasterFund",
 	"treasuries @ cost":       "treasuriesCost",
 	"treasuries u/r g/l":      "treasuriesURGL",
