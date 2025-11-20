@@ -243,7 +243,8 @@ func execute(filingID string, userID string) {
 func executeInvServ(filingID string, userID string) {
 
 	logging.Info("Execution Started for the filing with ID: " + filingID)
-	mapper, investorLiquidityPath, err := prepareFilingInvestmentServices(filingID)
+	mapper, investorLiquidityPath, unfndCmtsPath, err := prepareFilingInvestmentServices(filingID)
+	fmt.Println(unfndCmtsPath)
 	if err != nil {
 		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
 		return
@@ -261,9 +262,17 @@ func executeInvServ(filingID string, userID string) {
 	}
 
 	liqudityHolder := make(invesmentservices.LiquidityDataHolder)
+	unfndCmtHolder := make(invesmentservices.UnfundedCommitmentsHolder)
 
 	if investorLiquidityPath != "" {
 		liqudityHolder, err = invesmentservices.ExtractInvestorLiquidity(investorLiquidityPath)
+		if err != nil {
+			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+			return
+		}
+	}
+	if unfndCmtsPath != "" {
+		unfndCmtHolder, err = invesmentservices.ExtractUnfundedCmts(unfndCmtsPath)
 		if err != nil {
 			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
 			return
@@ -289,6 +298,12 @@ func executeInvServ(filingID string, userID string) {
 				fund.SetLiquidityData(holder)
 			} else {
 				logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
+			}
+
+			if holder, ok := unfndCmtHolder[fund.GetFundID()]; ok {
+				fund.SetUnfdCmtsData(holder)
+			} else {
+				logging.Warn("Unfunded commitments Data not available for the Fund: " + fund.GetFundID())
 			}
 
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
@@ -329,14 +344,15 @@ func executeInvServ(filingID string, userID string) {
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
-func prepareFilingInvestmentServices(filingID string) (map[string][]*invesmentservices.Fund, string, error) {
+func prepareFilingInvestmentServices(filingID string) (map[string][]*invesmentservices.Fund, string, string, error) {
 
 	fundsMapper := make(map[string][]*invesmentservices.Fund)
 	var investorLiquidityPath string
+	var unfndCmts string
 
 	mappings, err := db.PullFiling(filingID)
 	if err != nil {
-		return fundsMapper, investorLiquidityPath, fmt.Errorf("pulling filing details from DB: " + err.Error())
+		return fundsMapper, investorLiquidityPath, unfndCmts, fmt.Errorf("pulling filing details from DB: " + err.Error())
 	}
 
 	for _, mapping := range *mappings {
@@ -344,6 +360,9 @@ func prepareFilingInvestmentServices(filingID string) (map[string][]*invesmentse
 		if mapping.FundShortCode == "Q15_Q16" {
 			investorLiquidityPath = os.Getenv("STORAGE_PATH") + mapping.FilingPath
 			continue
+		}
+		if mapping.FundShortCode == "UNFDCMTS" {
+			unfndCmts = os.Getenv("STORAGE_PATH") + mapping.FilingPath
 		}
 
 		// converted := invesmentservices.ShortCodeConvertor[mapping.FundShortCode]
@@ -366,5 +385,5 @@ func prepareFilingInvestmentServices(filingID string) (map[string][]*invesmentse
 
 	}
 
-	return fundsMapper, investorLiquidityPath, nil
+	return fundsMapper, investorLiquidityPath, unfndCmts, nil
 }

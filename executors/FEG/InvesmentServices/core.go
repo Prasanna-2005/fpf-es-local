@@ -48,6 +48,10 @@ func (F *Fund) SetLiquidityData(data *LiquidityData) {
 	F.workPaperData.liquidityData = *data
 }
 
+func (F *Fund) SetUnfdCmtsData(data float64) {
+	F.workPaperData.unfundedCommitments = data
+}
+
 // ExportWorkPaperData returns a mapped entityname to value mapper for further push
 func (F *Fund) ExportWorkPaperData() map[string]string {
 
@@ -123,3 +127,4 @@ type FundPerformanceData struct {
 
 // liquidityDataHolder represents the map that holds the liquidityData for the reference fund
 type LiquidityDataHolder map[string]*LiquidityData
+type UnfundedCommitmentsHolder map[string]float64

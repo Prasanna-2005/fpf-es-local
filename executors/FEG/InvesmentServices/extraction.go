@@ -48,6 +48,99 @@ func ExtractInvestorLiquidity(filePath string) (LiquidityDataHolder, error) {
 	return ldataHolder, nil
 }
 
+func ExtractUnfundedCmts(filePath string) (UnfundedCommitmentsHolder, error) {
+	fmt.Println(filePath)
+	UfdataHolder := make(UnfundedCommitmentsHolder)
+
+	f, err := excelize.OpenFile(filePath)
+	if err != nil {
+		return UfdataHolder, fmt.Errorf("opening file: " + err.Error())
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			logging.Error("Error in closing the file: " + err.Error())
+		}
+
+	}()
+
+	unfdCmtsHolder, err := extUnfndCmts(f)
+	fmt.Println("UF cmmts")
+	fmt.Println(unfdCmtsHolder)
+	if err != nil {
+		return *unfdCmtsHolder, fmt.Errorf("extracing unfndcmts: " + err.Error())
+	}
+
+	return UfdataHolder, nil
+}
+
+func extUnfndCmts(f *excelize.File) (*map[string]float64, error) {
+	rows, err := f.GetRows(os.Getenv("UNFND_CMTS_SHEET"))
+	fmt.Println(rows)
+	if err != nil {
+		return nil, fmt.Errorf("getting unfunded commitments rows: %w", err)
+	}
+
+	ymarkers := make(map[string]int)
+
+	// Find column indices for BillingID and Unfunded Commitment
+	for i, row := range rows {
+		for j, cellValue := range row {
+			lowerCellValue := strings.ToLower(cellValue)
+			if strings.Contains(lowerCellValue, "billingid") {
+				ymarkers["billid"] = j
+				ymarkers["startx"] = i
+			}
+			if strings.Contains(lowerCellValue, "unfunded commitment") {
+				ymarkers["unfdCmts"] = j
+				ymarkers["startx"] = i
+			}
+		}
+	}
+
+	// Validate that we found both columns
+	billIDCol, billIDOk := ymarkers["billid"]
+	unfdCmtsCol, unfdCmtsOk := ymarkers["unfdCmts"]
+	startRow, startRowOk := ymarkers["startx"]
+
+	if !billIDOk || !unfdCmtsOk || !startRowOk {
+		return nil, fmt.Errorf("could not find BillingID or Unfunded Commitment columns")
+	}
+
+	// Group unfunded commitments by billing ID
+	result := make(map[string]float64)
+
+	for i := startRow + 1; i < len(rows); i++ {
+		row := rows[i]
+
+		// Validate row has enough columns
+		if len(row) <= billIDCol || len(row) <= unfdCmtsCol {
+			continue
+		}
+
+		billID := strings.TrimSpace(row[billIDCol])
+		unfdCmtStr := strings.TrimSpace(row[unfdCmtsCol])
+
+		// Skip empty rows
+		if billID == "" || unfdCmtStr == "" {
+			break
+		}
+
+		// Parse unfunded commitment as float64
+		unfdCmtStr = executors.CleanNonNumeric(unfdCmtStr)
+		amount, err := strconv.ParseFloat(unfdCmtStr, 64)
+		if err != nil {
+			// Log warning and skip malformed entries
+			logging.Warn(fmt.Sprintf("warning: skipping row %d - invalid amount: %s\n", i, unfdCmtStr))
+			continue
+		}
+
+		// Add to existing sum or create new entry
+		result[ShortCodeConvertor[billID]] += amount
+	}
+
+	return &result, nil
+}
+
 // extractQ15Data extracts all the funds Q15 answer and returns them with fund mapped values
 func extractQ15Data(f *excelize.File) (*map[string]float64, error) {
 
@@ -175,10 +268,12 @@ func (F *Fund) ExtractTrialBalanceData() error {
 	if err != nil {
 		return fmt.Errorf("extracting TB,Unfunded cmts Data for GA NA: " + err.Error())
 	}
+
 	err = extLevelingData(ymarker, fTrialBalance, &F.workPaperData, F)
 	if err != nil {
 		return fmt.Errorf("extracting TB Data for leveling: " + err.Error())
 	}
+
 	return nil
 }
 
