@@ -300,12 +300,6 @@ func executeInvServ(filingID string, userID string) {
 				logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
 			}
 
-			if holder, ok := unfndCmtHolder[fund.GetFundID()]; ok {
-				fund.SetUnfdCmtsData(holder)
-			} else {
-				logging.Warn("Unfunded commitments Data not available for the Fund: " + fund.GetFundID())
-			}
-
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractTrialBalanceData()
 			if err != nil {
@@ -314,6 +308,12 @@ func executeInvServ(filingID string, userID string) {
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
 
+			if holder, ok := unfndCmtHolder[fund.GetFundID()]; ok {
+				fund.SetUnfdCmtsData(holder)
+
+			} else {
+				logging.Warn("Unfunded commitments Data not available for the Fund: " + fund.GetFundID())
+			}
 			extractionData := fund.ExportWorkPaperData()
 			err = db.PushEntities(filingID, fund.GetFundID(), userID, extractionData)
 			if err != nil {

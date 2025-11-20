@@ -1,6 +1,7 @@
 package invesmentservices
 
 import (
+	"fmt"
 	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"reflect"
@@ -49,7 +50,10 @@ func (F *Fund) SetLiquidityData(data *LiquidityData) {
 }
 
 func (F *Fund) SetUnfdCmtsData(data float64) {
+	fmt.Println("inside setter unfd data")
+	fmt.Printf("\nufCmts: %v\n", data)
 	F.workPaperData.unfundedCommitments = data
+	fmt.Printf("\nufCmts post setting: %v\n", F.workPaperData.unfundedCommitments)
 }
 
 // ExportWorkPaperData returns a mapped entityname to value mapper for further push

@@ -16,6 +16,7 @@ func (F *Fund) Compute() *executors.Form1bData {
 	data := executors.NewForm1bData()
 
 	// workpaper data
+	fmt.Printf("\nfund:%v  computation:%v\n", F.fundID, F.workPaperData.unfundedCommitments)
 	data.GrossAsset = executors.CalculateGrossAssets(wd.totalAssets, wd.unfundedCommitments)
 	data.NetAsset = executors.CalculateNetAsset(wd.totalPartnerCaptial, wd.unfundedCommitments)
 	data.EquityInOtherFunds = wd.sumLevelExtData
