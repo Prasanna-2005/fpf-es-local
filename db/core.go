@@ -9,7 +9,7 @@ import (
 type FileMapper struct {
 	FilingPath    string `db:"filingPath"`
 	FundShortCode string `db:"fundShortCode"`
-	QuarterNo     int    `db:"quarterNo"`
+	QuarterNo     string `db:"quarterNo"`
 }
 
 // ExtractionEntity represents the structure of extraction table that stores the extracted Entity

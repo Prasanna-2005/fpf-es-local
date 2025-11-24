@@ -26,14 +26,19 @@ type Form1bData struct {
 	BorrowedNonUSNonFinInstiAmt float64 `fieldNo:"12" formLineNo:"12_e"`
 	HasDerivativesPositions     bool    `fieldNo:"13" formLineNo:"13_a"`
 	// DerivativesPositionsValue   float64 `fieldNo:"13" formLineNo:"13_b"`
-	Level1Asset                float64 `fieldNo:"14" formLineNo:"14_assets_level1"`
-	Level2Asset                float64 `fieldNo:"14" formLineNo:"14_assets_level2"`
-	Level3Asset                float64 `fieldNo:"14" formLineNo:"14_assets_level3"`
-	CostBasedAsset             float64 `fieldNo:"14" formLineNo:"14_assets_costbased"`
-	Level1Liability            float64 `fieldNo:"14" formLineNo:"14_liabilities_level1"`
-	Level2Liability            float64 `fieldNo:"14" formLineNo:"14_liabilities_level2"`
-	Level3Liability            float64 `fieldNo:"14" formLineNo:"14_liabilities_level3"`
-	CostBasedLiability         float64 `fieldNo:"14" formLineNo:"14_liabilities_costbased"`
+
+	Level1Asset        float64 `fieldNo:"14" formLineNo:"14_assets_level1"`
+	Level2Asset        float64 `fieldNo:"14" formLineNo:"14_assets_level2"`
+	Level3Asset        float64 `fieldNo:"14" formLineNo:"14_assets_level3"`
+	Level1Liabilities  float64 `fieldNo:"14" formLineNo:"14_liabilities_level1"`
+	Level2Liabilities  float64 `fieldNo:"14" formLineNo:"14_liabilities_level2"`
+	Level3Liabilities  float64 `fieldNo:"14" formLineNo:"14_liabilities_level3"`
+	CostBasedAsset     float64 `fieldNo:"14" formLineNo:"14_assets_costbased"`
+	Level1Liability    float64 `fieldNo:"14" formLineNo:"14_liabilities_level1"`
+	Level2Liability    float64 `fieldNo:"14" formLineNo:"14_liabilities_level2"`
+	Level3Liability    float64 `fieldNo:"14" formLineNo:"14_liabilities_level3"`
+	CostBasedLiability float64 `fieldNo:"14" formLineNo:"14_liabilities_costbased"`
+
 	Top5Percent                float64 `fieldNo:"15" formLineNo:"15"`
 	UsPercent                  float64 `fieldNo:"16" formLineNo:"16_a"`
 	NonUSPersonsPercent        float64 `fieldNo:"16" formLineNo:"16_b"`
@@ -49,6 +54,8 @@ type Form1bData struct {
 	ForeignInstitutionsPercent float64 `fieldNo:"16" formLineNo:"16_l"`
 	NonUSIntermediariesPercent float64 `fieldNo:"16" formLineNo:"16_m"`
 	OtherPercent               float64 `fieldNo:"16" formLineNo:"16_n"`
+	SovereignPercent           float64 `fieldNo:"16" formLineNo:"16_l"`
+	PrivateFundPercent         float64 `fieldNo:"16" formLineNo:"16_f"`
 
 	Q1EndDate    string  `fieldNo:"17" formLineNo:"17_(d)_last_day_of_fiscal_period"`
 	Q1GrossValue float64 `fieldNo:"17" formLineNo:"17_(d)_gross_performance"`

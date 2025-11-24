@@ -7,10 +7,12 @@ import (
 	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/db"
 	"quantrium-tech/form_pf_extractor_service/executors"
+	invesmentservices "quantrium-tech/form_pf_extractor_service/executors/FEG/InvesmentServices"
 	privateinvestors "quantrium-tech/form_pf_extractor_service/executors/FEG/PrivateInvestors"
 	"quantrium-tech/form_pf_extractor_service/ipc"
 	"quantrium-tech/form_pf_extractor_service/logging"
 	"reflect"
+	"strconv"
 	"syscall"
 )
 
@@ -21,6 +23,7 @@ func init() {
 
 	config.InitialiseConfig()
 	logging.Info("Config Initialised")
+	fmt.Println(config.Cfg)
 
 	err := db.InitialseDB()
 	if err != nil {
@@ -70,7 +73,14 @@ func main() {
 		select {
 		case m := <-ipc.InboundChannel:
 			logging.Info("Recieved processing signal for the filing with ID: " + m.FilingID)
-			go execute(m.FilingID, m.UserID)
+
+			switch m.Series {
+			case "Private Investors":
+				go execute(m.FilingID, m.UserID)
+			case "Investment Services":
+				go executeInvServ(m.FilingID, m.UserID)
+			}
+
 		}
 
 	}
@@ -111,7 +121,11 @@ func prepareFilingPrivateInvestors(filingID string) (map[string][]*privateinvest
 		fundsList := fundsMapper[mapping.FundShortCode]
 
 		for _, fund := range fundsList {
-			fund.SetHolder(mapping.QuarterNo, mapping.FilingPath)
+			qno, err := strconv.Atoi(mapping.QuarterNo)
+			if err != nil {
+				logging.Error(fmt.Sprintf("Error in qno:%v", err.Error()))
+			}
+			fund.SetHolder(qno, mapping.FilingPath)
 		}
 
 	}
@@ -224,4 +238,152 @@ func execute(filingID string, userID string) {
 
 	}
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
+}
+
+func executeInvServ(filingID string, userID string) {
+
+	logging.Info("Execution Started for the filing with ID: " + filingID)
+	mapper, investorLiquidityPath, unfndCmtsPath, err := prepareFilingInvestmentServices(filingID)
+	fmt.Println(unfndCmtsPath)
+	if err != nil {
+		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
+		return
+	}
+
+	if len(mapper) == 0 {
+		logging.Error("No Funds Mapped. Execution cannot be Started")
+		return
+	}
+
+	existing, err := db.GetExisitingFunds(filingID)
+	if err != nil {
+		logging.Error("Error in Getting the Existing Funds in Form Data: " + err.Error())
+		return
+	}
+
+	liqudityHolder := make(invesmentservices.LiquidityDataHolder)
+	unfndCmtHolder := make(invesmentservices.UnfundedCommitmentsHolder)
+
+	if investorLiquidityPath != "" {
+		liqudityHolder, err = invesmentservices.ExtractInvestorLiquidity(investorLiquidityPath)
+		if err != nil {
+			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+			return
+		}
+	}
+	if unfndCmtsPath != "" {
+		unfndCmtHolder, err = invesmentservices.ExtractUnfundedCmts(unfndCmtsPath)
+		if err != nil {
+			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+			return
+		}
+	}
+	for fund, dat := range liqudityHolder {
+		fmt.Printf("\nfund:%v,data:%v\n", fund, *dat)
+	}
+	logging.Info("Extraction of Investor Liquidity Completed")
+
+	logging.Info(fmt.Sprintf("Total number of funds mapped: %d", len(mapper)))
+	for _, list := range mapper {
+		for _, fund := range list {
+
+			if _, ok := existing[fund.GetFundID()]; ok {
+				logging.Info(fund.GetFundID() + " Already Populated in the Form Data. Skipping")
+				continue
+			}
+
+			answersMapper := make(map[[2]string]string)
+
+			if holder, ok := liqudityHolder[fund.GetFundID()]; ok {
+				fund.SetLiquidityData(holder)
+			} else {
+				logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
+			}
+
+			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
+			err := fund.ExtractTrialBalanceData()
+			if err != nil {
+				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
+				continue
+			}
+			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
+
+			if holder, ok := unfndCmtHolder[fund.GetFundID()]; ok {
+				fund.SetUnfdCmtsData(holder)
+
+			} else {
+				logging.Warn("Unfunded commitments Data not available for the Fund: " + fund.GetFundID())
+			}
+			extractionData := fund.ExportWorkPaperData()
+			err = db.PushEntities(filingID, fund.GetFundID(), userID, extractionData)
+			if err != nil {
+				logging.Error("Error in Pushing to Extraction Table: " + err.Error())
+				continue
+			}
+			logging.Info("Entraction Entities are Pushed to the DB")
+
+			logging.Info("Computation Started for the Fund: " + fund.GetFundID())
+			formData := fund.Compute()
+			logging.Info("Computation Completed for the Fund: " + fund.GetFundID())
+
+			setStaticDataPV(formData, fund.GetFundID())
+
+			executors.CollectAnswers(reflect.ValueOf(*formData), answersMapper)
+			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper)
+			if err != nil {
+				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
+			}
+
+			logging.Info("Form Data Entries are Pushed to the DB")
+
+			logging.Info("Execution Completed for the Fund: " + fund.GetFundID())
+
+		}
+
+	}
+	logging.Info("Execution Completed for the filing with ID: " + filingID)
+}
+
+func prepareFilingInvestmentServices(filingID string) (map[string][]*invesmentservices.Fund, string, string, error) {
+
+	fundsMapper := make(map[string][]*invesmentservices.Fund)
+	var investorLiquidityPath string
+	var unfndCmts string
+
+	mappings, err := db.PullFiling(filingID)
+	if err != nil {
+		return fundsMapper, investorLiquidityPath, unfndCmts, fmt.Errorf("pulling filing details from DB: " + err.Error())
+	}
+
+	for _, mapping := range *mappings {
+
+		if mapping.FundShortCode == "Q15_Q16" {
+			investorLiquidityPath = os.Getenv("STORAGE_PATH") + mapping.FilingPath
+			continue
+		}
+		if mapping.FundShortCode == "UNFDCMTS" {
+			unfndCmts = os.Getenv("STORAGE_PATH") + mapping.FilingPath
+		}
+
+		// converted := invesmentservices.ShortCodeConvertor[mapping.FundShortCode]
+
+		// if converted == "" {
+		// 	logging.Warn(mapping.FundShortCode + "->" + "Unknown Short Code Encountered. Conversion Failed")
+		// 	continue
+		// }
+
+		// mapping.FundShortCode = converted
+		if _, ok := fundsMapper[mapping.FundShortCode]; !ok {
+			fundsMapper[mapping.FundShortCode] = invesmentservices.CreateAllFundSeries(mapping.FundShortCode)
+		}
+
+		fundsList := fundsMapper[mapping.FundShortCode]
+
+		for _, fund := range fundsList {
+			fund.SetHolder(mapping.QuarterNo, mapping.FilingPath)
+		}
+
+	}
+
+	return fundsMapper, investorLiquidityPath, unfndCmts, nil
 }
