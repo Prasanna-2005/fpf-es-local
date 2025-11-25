@@ -1,5 +1,9 @@
 package invesmentservices
 
+import (
+	"quantrium-tech/form_pf_extractor_service/executors"
+)
+
 // CreateAllFundSeries is a helper function that takes up a fund and creates all of the fund-series combination and returns them
 func CreateAllFundSeries(fundCode string) []*Fund {
 
@@ -25,3 +29,15 @@ func CreateAllFundSeries(fundCode string) []*Fund {
 // 	}
 // 	return realValue, nil
 // }
+
+func StaticFunds() (*executors.Form1bData, *Fund) {
+	fundData := executors.NewForm1bData()
+	fundData.OtherPercent = 100
+	fundObj := NewFund("FEGSLLC")
+
+	fundObj.fundID = "FSSLC"
+	fundObj.series = "FSSLC"
+
+	return fundData, fundObj
+
+}
