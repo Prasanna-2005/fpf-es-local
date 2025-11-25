@@ -10,7 +10,7 @@ var ShortCodeConvertor = map[string]string{
 	"FEG_SELECTDOMESTICII": "FSADE2",
 	"FEG_SELECTGLOBAL":     "FSAGE",
 	"FEG_SELECTGLOBALII":   "FSAGE2",
-	"FEG_SELECTLLC":        "N/A",
+	"FEG_SELECTLLC":        "FSLLC",
 	"FEG_SELECTPLUS":       "FSCPB",
 	"FEG_SELECTSTREME":     "FSSEM",
 	"FEG_SELECTSTRINT":     "FSSIE",
