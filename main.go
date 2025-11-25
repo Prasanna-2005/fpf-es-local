@@ -151,6 +151,23 @@ func setStaticDataPV(data *executors.Form1bData, fundId string) {
 	}
 
 }
+func setStaticFunds(filingID, userID string) error {
+	answersMapper := make(map[[2]string]string)
+	staticFundData, staticFundObj := invesmentservices.StaticFunds()
+	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
+	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
+	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
+	if err != nil {
+		logging.Error("Error in Pushing to Form Data Table: " + err.Error())
+		return err
+	}
+
+	logging.Info("Form Data Entries are Pushed to the DB")
+
+	logging.Info("Execution Completed for the Fund: " + staticFundObj.GetFundID())
+	return nil
+
+}
 
 // execute acts as the core execution and triggering point for both extraction and computation.
 func execute(filingID string, userID string) {
@@ -244,7 +261,6 @@ func executeInvServ(filingID string, userID string) {
 
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, investorLiquidityPath, unfndCmtsPath, err := prepareFilingInvestmentServices(filingID)
-	fmt.Println(unfndCmtsPath)
 	if err != nil {
 		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
 		return
@@ -284,6 +300,7 @@ func executeInvServ(filingID string, userID string) {
 	logging.Info("Extraction of Investor Liquidity Completed")
 
 	logging.Info(fmt.Sprintf("Total number of funds mapped: %d", len(mapper)))
+
 	for _, list := range mapper {
 		for _, fund := range list {
 
@@ -339,8 +356,12 @@ func executeInvServ(filingID string, userID string) {
 			logging.Info("Execution Completed for the Fund: " + fund.GetFundID())
 
 		}
-
 	}
+	err = setStaticFunds(filingID, userID)
+	if err != nil {
+		logging.Error(fmt.Sprintf("Static funds setting error:%v", err.Error()))
+	}
+	logging.Info("Succefully set static Funds")
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
