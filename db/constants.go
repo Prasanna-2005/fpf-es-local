@@ -50,4 +50,5 @@ var FundCodeMapper = map[string]string{
 	"FSSEM":  "805-4008904887",
 	"FSSIE":  "805-3628107190",
 	"FSSUS":  "805-3848863568",
+	"FSSLC":  "805-5032641783",
 }
