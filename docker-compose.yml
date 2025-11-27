@@ -9,6 +9,7 @@ services:
     volumes:
       - form-pf-shared-storage:${STORAGE_PATH}
       - ../logs/service:/var/log/form-pf
+    restart: always
 volumes:
   form-pf-shared-storage:
     external: true
