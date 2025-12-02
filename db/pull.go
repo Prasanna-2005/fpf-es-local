@@ -54,12 +54,14 @@ func GetExisitingFunds(filingID string) (map[string]struct{}, error) {
 func SetFundInfo() error {
 
 	var funds []FundInfo
-	query := fmt.Sprintf("SELECT fundName, fegFundId, nfaId, leiId from %s", config.TableCfg.FundTable)
+	query := fmt.Sprintf("SELECT fundName, fegFundId, nfaId, leiId,fundType from %s", config.TableCfg.FundTable)
 
 	err := db.Select(&funds, query)
 	if err != nil {
 		return fmt.Errorf("retrieving funds info: " + err.Error())
 	}
+	fmt.Println(funds)
+	fmt.Println()
 
 	if len(funds) == 0 {
 		return fmt.Errorf("no funds retrieved")
@@ -72,6 +74,7 @@ func SetFundInfo() error {
 	}
 
 	for _, fund := range funds {
+		fmt.Println(fund.FundType)
 		FundStorer[mapper[fund.FundID]] = fund
 	}
 
