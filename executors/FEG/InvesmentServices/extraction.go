@@ -305,13 +305,6 @@ func extLevelingData(ordinate int, f *excelize.File, tbdata *WorkPaperData, F *F
 		}
 	}
 
-	fmt.Println(F.fundID)
-	fmt.Println(l1)
-	fmt.Println(markerl1)
-	fmt.Println(l2)
-	fmt.Println(markerl2)
-	fmt.Println(l3)
-	fmt.Println(markerl3)
 	for marker, abscissa := range markerl1 {
 		rawValue, err := f.GetCellValue(tbSheet, executors.IndexToExcel(abscissa, ordinate))
 		if err != nil {
