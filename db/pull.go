@@ -60,8 +60,6 @@ func SetFundInfo() error {
 	if err != nil {
 		return fmt.Errorf("retrieving funds info: " + err.Error())
 	}
-	fmt.Println(funds)
-	fmt.Println()
 
 	if len(funds) == 0 {
 		return fmt.Errorf("no funds retrieved")
