@@ -73,10 +73,101 @@ type Form1cData struct {
 	FundName string `fieldNo:"18" formLineNo:"18_a"`
 	FundID   string `fieldNo:"18" formLineNo:"18_b"`
 
-	Strategy               string  `fieldNo:"19" formLineNo:"19"`
+	Strategy string `fieldNo:"19" formLineNo:"19"`
+	// Equity
+	EquityMarketNeutralStrategy bool `fieldNo:"20" formLineNo:"20_(a)_Strategy"`
+	// EquityMarketNeutralNAV      float64 `fieldNo:"20" formLineNo:"20_(a)_%_of_NAV"`
+	// EquityMarketNeutralCapital  float64 `fieldNo:"20" formLineNo:"20_(a)_%_of_capital"`
+
+	EquityLongShortStrategy bool `fieldNo:"20" formLineNo:"20_(b)_Strategy"`
+	// EquityLongShortNAV      float64 `fieldNo:"20" formLineNo:"20_(b)_%_of_NAV"`
+	// EquityLongShortCapital  float64 `fieldNo:"20" formLineNo:"20_(b)_%_of_capital"`
+
+	EquityShortBiasStrategy bool `fieldNo:"20" formLineNo:"20_(c)_Strategy"`
+	// EquityShortBiasNAV      float64 `fieldNo:"20" formLineNo:"20_(c)_%_of_NAV"`
+	// EquityShortBiasCapital  float64 `fieldNo:"20" formLineNo:"20_(c)_%_of_capital"`
+
 	EquityLongBiasStrategy bool    `fieldNo:"20" formLineNo:"20_(d)_Strategy"`
 	EquityLongBiasNAV      float64 `fieldNo:"20" formLineNo:"20_(d)_%_of_NAV"`
-	// EquityLongBiasCapital  string `fieldNo:"20" formLineNo:"20_d_%_of_capital"`
+	// EquityLongBiasCapital  float64 `fieldNo:"20" formLineNo:"20_(d)_%_of_capital"`
+
+	// Macro
+	MacroActiveTradingStrategy bool `fieldNo:"20" formLineNo:"20_(e)_Strategy"`
+	// MacroActiveTradingNAV      float64 `fieldNo:"20" formLineNo:"20_(e)_%_of_NAV"`
+	// MacroActiveTradingCapital  float64 `fieldNo:"20" formLineNo:"20_(e)_%_of_capital"`
+
+	MacroCommodityStrategy bool `fieldNo:"20" formLineNo:"20_(f)_Strategy"`
+	// MacroCommodityNAV      float64 `fieldNo:"20" formLineNo:"20_(f)_%_of_NAV"`
+	// MacroCommodityCapital  float64 `fieldNo:"20" formLineNo:"20_(f)_%_of_capital"`
+
+	MacroCurrencyStrategy bool `fieldNo:"20" formLineNo:"20_(g)_Strategy"`
+	// MacroCurrencyNAV      float64 `fieldNo:"20" formLineNo:"20_(g)_%_of_NAV"`
+	// MacroCurrencyCapital  float64 `fieldNo:"20" formLineNo:"20_(g)_%_of_capital"`
+
+	MacroGlobalMacroStrategy bool `fieldNo:"20" formLineNo:"20_(h)_Strategy"`
+	// MacroGlobalMacroNAV      float64 `fieldNo:"20" formLineNo:"20_(h)_%_of_NAV"`
+	// MacroGlobalMacroCapital  float64 `fieldNo:"20" formLineNo:"20_(h)_%_of_capital"`
+
+	// Relative Value
+	RVFixedIncomeAssetBackedStrategy bool `fieldNo:"20" formLineNo:"20_(i)_Strategy"`
+	// RVFixedIncomeAssetBackedNAV      float64 `fieldNo:"20" formLineNo:"20_(i)_%_of_NAV"`
+	// RVFixedIncomeAssetBackedCapital  float64 `fieldNo:"20" formLineNo:"20_(i)_%_of_capital"`
+
+	RVFixedIncomeConvArbStrategy bool `fieldNo:"20" formLineNo:"20_(j)_Strategy"`
+	// RVFixedIncomeConvArbNAV      float64 `fieldNo:"20" formLineNo:"20_(j)_%_of_NAV"`
+	// RVFixedIncomeConvArbCapital  float64 `fieldNo:"20" formLineNo:"20_(j)_%_of_capital"`
+
+	RVFixedIncomeCorporateStrategy bool `fieldNo:"20" formLineNo:"20_(k)_Strategy"`
+	// RVFixedIncomeCorporateNAV      float64 `fieldNo:"20" formLineNo:"20_(k)_%_of_NAV"`
+	// RVFixedIncomeCorporateCapital  float64 `fieldNo:"20" formLineNo:"20_(k)_%_of_capital"`
+
+	RVFixedIncomeSovereignStrategy bool `fieldNo:"20" formLineNo:"20_(l)_Strategy"`
+	// RVFixedIncomeSovereignNAV      float64 `fieldNo:"20" formLineNo:"20_(l)_%_of_NAV"`
+	// RVFixedIncomeSovereignCapital  float64 `fieldNo:"20" formLineNo:"20_(l)_%_of_capital"`
+
+	RVVolatilityArbStrategy bool `fieldNo:"20" formLineNo:"20_(m)_Strategy"`
+	// RVVolatilityArbNAV      float64 `fieldNo:"20" formLineNo:"20_(m)_%_of_NAV"`
+	// RVVolatilityArbCapital  float64 `fieldNo:"20" formLineNo:"20_(m)_%_of_capital"`
+
+	// Event Driven
+	EventDrivenDistressedStrategy bool `fieldNo:"20" formLineNo:"20_(n)_Strategy"`
+	// EventDrivenDistressedNAV      float64 `fieldNo:"20" formLineNo:"20_(n)_%_of_NAV"`
+	// EventDrivenDistressedCapital  float64 `fieldNo:"20" formLineNo:"20_(n)_%_of_capital"`
+
+	EventDrivenRiskArbStrategy bool `fieldNo:"20" formLineNo:"20_(o)_Strategy"`
+	// EventDrivenRiskArbNAV      float64 `fieldNo:"20" formLineNo:"20_(o)_%_of_NAV"`
+	// EventDrivenRiskArbCapital  float64 `fieldNo:"20" formLineNo:"20_(o)_%_of_capital"`
+
+	EventDrivenEqSpecialSitStrategy bool `fieldNo:"20" formLineNo:"20_(p)_Strategy"`
+	// EventDrivenEqSpecialSitNAV      float64 `fieldNo:"20" formLineNo:"20_(p)_%_of_NAV"`
+	// EventDrivenEqSpecialSitCapital  float64 `fieldNo:"20" formLineNo:"20_(p)_%_of_capital"`
+
+	// Credit
+	CreditLongShortStrategy bool `fieldNo:"20" formLineNo:"20_(q)_Strategy"`
+	// CreditLongShortNAV      float64 `fieldNo:"20" formLineNo:"20_(q)_%_of_NAV"`
+	// CreditLongShortCapital  float64 `fieldNo:"20" formLineNo:"20_(q)_%_of_capital"`
+
+	CreditAssetBasedLendingStrategy bool `fieldNo:"20" formLineNo:"20_(r)_Strategy"`
+	// CreditAssetBasedLendingNAV      float64 `fieldNo:"20" formLineNo:"20_(r)_%_of_NAV"`
+	// CreditAssetBasedLendingCapital  float64 `fieldNo:"20" formLineNo:"20_(r)_%_of_capital"`
+
+	// Managed Futures / CTA
+	ManagedFuturesFundamentalStrategy bool `fieldNo:"20" formLineNo:"20_(s)_Strategy"`
+	// ManagedFuturesFundamentalNAV      float64 `fieldNo:"20" formLineNo:"20_(s)_%_of_NAV"`
+	// ManagedFuturesFundamentalCapital  float64 `fieldNo:"20" formLineNo:"20_(s)_%_of_capital"`
+
+	ManagedFuturesQuantitativeStrategy bool `fieldNo:"20" formLineNo:"20_(t)_Strategy"`
+	// ManagedFuturesQuantitativeNAV      float64 `fieldNo:"20" formLineNo:"20_(t)_%_of_NAV"`
+	// ManagedFuturesQuantitativeCapital  float64 `fieldNo:"20" formLineNo:"20_(t)_%_of_capital"`
+
+	// Other
+	InvestmentInOtherFundsStrategy bool `fieldNo:"20" formLineNo:"20_(u)_Strategy"`
+	// InvestmentInOtherFundsNAV      float64 `fieldNo:"20" formLineNo:"20_(u)_%_of_NAV"`
+	// InvestmentInOtherFundsCapital  float64 `fieldNo:"20" formLineNo:"20_(u)_%_of_capital"`
+
+	OtherStrategy bool `fieldNo:"20" formLineNo:"20_(v)_Strategy"`
+	// OtherNAV      float64 `fieldNo:"20" formLineNo:"20_(v)_%_of_NAV"`
+	// OtherCapital  float64 `fieldNo:"20" formLineNo:"20_(v)_%_of_capital"`
 
 	HFTPercentage string `fieldNo:"21" formLineNo:"21"`
 	// Row A
@@ -159,10 +250,33 @@ func NewForm1bData() *Form1bData {
 
 func NewForm1cData() *Form1cData {
 	return &Form1cData{
-		Strategy:               "Single primary strategy",
-		EquityLongBiasStrategy: true,
-		EquityLongBiasNAV:      100,
-		HFTPercentage:          "0%",
+		Strategy:                    "Single primary strategy",
+		EquityLongBiasStrategy:      true,
+		EquityLongBiasNAV:           100,
+		EquityMarketNeutralStrategy: false,
+		EquityLongShortStrategy:     false,
+		EquityShortBiasStrategy:     false,
+
+		MacroActiveTradingStrategy:         false,
+		MacroCommodityStrategy:             false,
+		MacroCurrencyStrategy:              false,
+		MacroGlobalMacroStrategy:           false,
+		RVFixedIncomeAssetBackedStrategy:   false,
+		RVFixedIncomeConvArbStrategy:       false,
+		RVFixedIncomeCorporateStrategy:     false,
+		RVFixedIncomeSovereignStrategy:     false,
+		RVVolatilityArbStrategy:            false,
+		EventDrivenDistressedStrategy:      false,
+		EventDrivenRiskArbStrategy:         false,
+		EventDrivenEqSpecialSitStrategy:    false,
+		CreditLongShortStrategy:            false,
+		CreditAssetBasedLendingStrategy:    false,
+		ManagedFuturesFundamentalStrategy:  false,
+		ManagedFuturesQuantitativeStrategy: false,
+		InvestmentInOtherFundsStrategy:     false,
+		OtherStrategy:                      false,
+
+		HFTPercentage: "0%",
 
 		PercentageCounterpartyALegalName:       "NA",
 		PercentageCounterpartyAAffiliatedInsti: "NA",
