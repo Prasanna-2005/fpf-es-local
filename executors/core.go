@@ -74,60 +74,60 @@ type Form1cData struct {
 	FundID   string `fieldNo:"18" formLineNo:"18_b"`
 
 	Strategy               string  `fieldNo:"19" formLineNo:"19"`
-	EquityLongBiasStrategy bool    `fieldNo:"20" formLineNo:"20_d_Strategy"`
-	EquityLongBiasNAV      float64 `fieldNo:"20" formLineNo:"20_d_%_of_NAV"`
+	EquityLongBiasStrategy bool    `fieldNo:"20" formLineNo:"20_(d)_Strategy"`
+	EquityLongBiasNAV      float64 `fieldNo:"20" formLineNo:"20_(d)_%_of_NAV"`
 	// EquityLongBiasCapital  string `fieldNo:"20" formLineNo:"20_d_%_of_capital"`
 
-	HFTPercentage int `fieldNo:"21" formLineNo:"21"`
+	HFTPercentage string `fieldNo:"21" formLineNo:"21"`
 	// Row A
-	PercentageCounterpartyALegalName       string `fieldNo:"22" formLineNo:"22_a_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
-	PercentageCounterpartyAAffiliatedInsti string `fieldNo:"22" formLineNo:"22_a_Indicate below if the counterparty is affiliated with a major financial institution"`
-	PercentageCounterpartyAExposure        string `fieldNo:"22" formLineNo:"22_a_Exposure (% of reporting fund's net asset value)"`
+	PercentageCounterpartyALegalName       string `fieldNo:"22" formLineNo:"22_(a)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
+	PercentageCounterpartyAAffiliatedInsti string `fieldNo:"22" formLineNo:"22_(a)_Indicate below if the counterparty is affiliated with a major financial institution"`
+	PercentageCounterpartyAExposure        string `fieldNo:"22" formLineNo:"22_(a)_Exposure (% of reporting fund's net asset value)"`
 
 	// Row B
-	PercentageCounterpartyBLegalName       string `fieldNo:"22" formLineNo:"22_b_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
-	PercentageCounterpartyBAffiliatedInsti string `fieldNo:"22" formLineNo:"22_b_Indicate below if the counterparty is affiliated with a major financial institution"`
-	PercentageCounterpartyBExposure        string `fieldNo:"22" formLineNo:"22_b_Exposure (% of reporting fund's net asset value)"`
+	PercentageCounterpartyBLegalName       string `fieldNo:"22" formLineNo:"22_(b)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
+	PercentageCounterpartyBAffiliatedInsti string `fieldNo:"22" formLineNo:"22_(b)_Indicate below if the counterparty is affiliated with a major financial institution"`
+	PercentageCounterpartyBExposure        string `fieldNo:"22" formLineNo:"22_(b)_Exposure (% of reporting fund's net asset value)"`
 
 	// Row C
-	PercentageCounterpartyCLegalName       string `fieldNo:"22" formLineNo:"22_c_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
-	PercentageCounterpartyCAffiliatedInsti string `fieldNo:"22" formLineNo:"22_c_Indicate below if the counterparty is affiliated with a major financial institution"`
-	PercentageCounterpartyCExposure        string `fieldNo:"22" formLineNo:"22_c_Exposure (% of reporting fund's net asset value)"`
+	PercentageCounterpartyCLegalName       string `fieldNo:"22" formLineNo:"22_(c)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
+	PercentageCounterpartyCAffiliatedInsti string `fieldNo:"22" formLineNo:"22_(c)_Indicate below if the counterparty is affiliated with a major financial institution"`
+	PercentageCounterpartyCExposure        string `fieldNo:"22" formLineNo:"22_(c)_Exposure (% of reporting fund's net asset value)"`
 
 	// Row D
-	PercentageCounterpartyDLegalName       string `fieldNo:"22" formLineNo:"22_d_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
-	PercentageCounterpartyDAffiliatedInsti string `fieldNo:"22" formLineNo:"22_d_Indicate below if the counterparty is affiliated with a major financial institution"`
-	PercentageCounterpartyDExposure        string `fieldNo:"22" formLineNo:"22_d_Exposure (% of reporting fund's net asset value)"`
+	PercentageCounterpartyDLegalName       string `fieldNo:"22" formLineNo:"22_(d)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
+	PercentageCounterpartyDAffiliatedInsti string `fieldNo:"22" formLineNo:"22_(d)_Indicate below if the counterparty is affiliated with a major financial institution"`
+	PercentageCounterpartyDExposure        string `fieldNo:"22" formLineNo:"22_(d)_Exposure (% of reporting fund's net asset value)"`
 
 	// Row E
-	PercentageCounterpartyELegalName       string `fieldNo:"22" formLineNo:"22_e_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
-	PercentageCounterpartyEAffiliatedInsti string `fieldNo:"22" formLineNo:"22_e_Indicate below if the counterparty is affiliated with a major financial institution"`
-	PercentageCounterpartyEExposure        string `fieldNo:"22" formLineNo:"22_e_Exposure (% of reporting fund's net asset value)"`
+	PercentageCounterpartyELegalName       string `fieldNo:"22" formLineNo:"22_(e)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
+	PercentageCounterpartyEAffiliatedInsti string `fieldNo:"22" formLineNo:"22_(e)_Indicate below if the counterparty is affiliated with a major financial institution"`
+	PercentageCounterpartyEExposure        string `fieldNo:"22" formLineNo:"22_(e)_Exposure (% of reporting fund's net asset value)"`
 
 	// Row A
-	USDCounterpartyALegalName       string `fieldNo:"23" formLineNo:"23_a_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
-	USDCounterpartyAAffiliatedInsti string `fieldNo:"23" formLineNo:"23_a_Indicate below if the counterparty is affiliated with a major financial institution"`
-	USDCounterpartyAExposure        string `fieldNo:"23" formLineNo:"23_a_ Exposure (in U.S. dollars))"`
+	USDCounterpartyALegalName       string `fieldNo:"23" formLineNo:"23_(a)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
+	USDCounterpartyAAffiliatedInsti string `fieldNo:"23" formLineNo:"23_(a)_Indicate below if the counterparty is affiliated with a major financial institution"`
+	USDCounterpartyAExposure        string `fieldNo:"23" formLineNo:"23_(a)_Exposure (in U.S. dollars))"`
 
 	// Row B
-	USDCounterpartyBLegalName       string `fieldNo:"23" formLineNo:"23_b_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
-	USDCounterpartyBAffiliatedInsti string `fieldNo:"23" formLineNo:"23_b_Indicate below if the counterparty is affiliated with a major financial institution"`
-	USDCounterpartyBExposure        string `fieldNo:"23" formLineNo:"23_b_ Exposure (in U.S. dollars))"`
+	USDCounterpartyBLegalName       string `fieldNo:"23" formLineNo:"23_(b)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
+	USDCounterpartyBAffiliatedInsti string `fieldNo:"23" formLineNo:"23_(b)_Indicate below if the counterparty is affiliated with a major financial institution"`
+	USDCounterpartyBExposure        string `fieldNo:"23" formLineNo:"23_(b)_Exposure (in U.S. dollars))"`
 
 	// Row C
-	USDCounterpartyCLegalName       string `fieldNo:"23" formLineNo:"23_c_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
-	USDCounterpartyCAffiliatedInsti string `fieldNo:"23" formLineNo:"23_c_Indicate below if the counterparty is affiliated with a major financial institution"`
-	USDCounterpartyCExposure        string `fieldNo:"23" formLineNo:"23_c_ Exposure (in U.S. dollars))"`
+	USDCounterpartyCLegalName       string `fieldNo:"23" formLineNo:"23_(c)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
+	USDCounterpartyCAffiliatedInsti string `fieldNo:"23" formLineNo:"23_(c)_Indicate below if the counterparty is affiliated with a major financial institution"`
+	USDCounterpartyCExposure        string `fieldNo:"23" formLineNo:"23_(c)_Exposure (in U.S. dollars))"`
 
 	// Row D
-	USDCounterpartyDLegalName       string `fieldNo:"23" formLineNo:"23_d_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
-	USDCounterpartyDAffiliatedInsti string `fieldNo:"23" formLineNo:"23_d_Indicate below if the counterparty is affiliated with a major financial institution"`
-	USDCounterpartyDExposure        string `fieldNo:"23" formLineNo:"23_d_ Exposure (in U.S. dollars))"`
+	USDCounterpartyDLegalName       string `fieldNo:"23" formLineNo:"23_(d)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
+	USDCounterpartyDAffiliatedInsti string `fieldNo:"23" formLineNo:"23_(d)_Indicate below if the counterparty is affiliated with a major financial institution"`
+	USDCounterpartyDExposure        string `fieldNo:"23" formLineNo:"23_(d)_Exposure (in U.S. dollars))"`
 
 	// Row E
-	USDCounterpartyELegalName       string `fieldNo:"23" formLineNo:"23_e_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
-	USDCounterpartyEAffiliatedInsti string `fieldNo:"23" formLineNo:"23_e_Indicate below if the counterparty is affiliated with a major financial institution"`
-	USDCounterpartyEExposure        string `fieldNo:"23" formLineNo:"23_e_ Exposure (in U.S. dollars))"`
+	USDCounterpartyELegalName       string `fieldNo:"23" formLineNo:"23_(e)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
+	USDCounterpartyEAffiliatedInsti string `fieldNo:"23" formLineNo:"23_(e)_Indicate below if the counterparty is affiliated with a major financial institution"`
+	USDCounterpartyEExposure        string `fieldNo:"23" formLineNo:"23_(e)_Exposure (in U.S. dollars))"`
 
 	SecRegExchange         string `fieldNo:"24" formLineNo:"24_a_i"`
 	SecOTC                 string `fieldNo:"24" formLineNo:"24_a_ii"`
@@ -159,10 +159,10 @@ func NewForm1bData() *Form1bData {
 
 func NewForm1cData() *Form1cData {
 	return &Form1cData{
-		Strategy:               "0",
+		Strategy:               "Single primary strategy",
 		EquityLongBiasStrategy: true,
 		EquityLongBiasNAV:      100,
-		HFTPercentage:          0,
+		HFTPercentage:          "0%",
 
 		PercentageCounterpartyALegalName:       "NA",
 		PercentageCounterpartyAAffiliatedInsti: "NA",
