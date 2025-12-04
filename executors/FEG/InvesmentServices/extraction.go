@@ -247,6 +247,22 @@ func extractQ16Data(f *excelize.File, ldataHolder *LiquidityDataHolder) error {
 	return nil
 
 }
+func (F *Fund) ExtractQ17() error {
+	fNAVReport, err := excelize.OpenFile(F.holder.reportFilePath)
+	if err != nil {
+		return fmt.Errorf("opening  NAV reports for q17 data: " + err.Error())
+	}
+	defer func() {
+		if err := fNAVReport.Close(); err != nil {
+			logging.Error("Error in closing the file: " + err.Error())
+		}
+	}()
+	err = extracNAVRepData(fNAVReport, &F.workPaperData)
+	if err != nil {
+		return fmt.Errorf("extracting Q17 data: " + err.Error())
+	}
+
+}
 
 // ExtractWorkPaperData extracts the necessary data from the Workpapers of three quarters and store them in the
 // WorkPaperData allocated to that particular fund
@@ -305,13 +321,6 @@ func extLevelingData(ordinate int, f *excelize.File, tbdata *WorkPaperData, F *F
 		}
 	}
 
-	fmt.Println(F.fundID)
-	fmt.Println(l1)
-	fmt.Println(markerl1)
-	fmt.Println(l2)
-	fmt.Println(markerl2)
-	fmt.Println(l3)
-	fmt.Println(markerl3)
 	for marker, abscissa := range markerl1 {
 		rawValue, err := f.GetCellValue(tbSheet, executors.IndexToExcel(abscissa, ordinate))
 		if err != nil {
@@ -399,6 +408,49 @@ func extGrossAndNetAssests(f *excelize.File, tbdata *WorkPaperData) (int, error)
 		}
 	}
 	return yEntitytoMarker["ed"], nil
+}
+
+func extracNAVRepData(f *excelize.File, Navdata *WorkPaperData) error {
+	absicca := make(map[string]int)
+	ordinate := make(map[string]int)
+	xmarkers := []string{
+		"january", "february", "march", "first",
+		"april", "may", "june", "second",
+		"july", "august", "september", "third",
+		"october", "november", "december", "fourth",
+		"year", "to",
+	}
+	ymarkers := []string{
+		"net of mgmt", "gross of fees",
+	}
+	reportSheet := os.Getenv("Page_1")
+	reportRows, err := f.GetRows(reportSheet)
+	if err != nil {
+		return fmt.Errorf("getting NAV report rows: " + err.Error())
+	}
+
+	for i, row := range reportRows {
+		for j, cellValue := range row {
+			cellval := strings.ToLower(cellValue)
+			switch {
+			case slices.Contains(xmarkers, cellval):
+				absicca[cellval] = i
+			case slices.Contains(ymarkers, cellval):
+				ordinate[cellval] = j
+			}
+		}
+	}
+
+	for _, xcoor := range ordinate {
+		rawValue, err := f.GetCellValue(reportSheet, executors.IndexToExcel(xcoor, ordinate["month"]))
+		if err != nil {
+			logging.Error(fmt.Sprintf("excel error: %v", err.Error()))
+		}
+		rawValue = executors.CleanNonNumeric(rawValue)
+		Navdata.totalPartnerCaptial, _ = strconv.ParseFloat(rawValue, 64)
+
+	}
+	return nil
 }
 
 func FieldPtr(ld *LevelingData, marker string) *float64 {
