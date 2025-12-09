@@ -310,13 +310,13 @@ func NewForm1cData() *Form1cData {
 		USDCounterpartyEAffiliatedInsti: "NA",
 		USDCounterpartyEExposure:        "NA",
 
-		SecRegExchange:        "100", // 24_a_i
-		DerivativesOTC:        "100", // 24_b_ii
-		DerivativesBilateraly: "100", // 24_c_ii
+		SecRegExchange:        "NA", // 24_a_i
+		DerivativesOTC:        "NA", // 24_b_ii
+		DerivativesBilateraly: "NA", // 24_c_ii
 
-		SecOTC:                 "0", // 24_a_ii
-		DerivativesRegExchange: "0", // 24_b_i
-		DerivativesCCP:         "0", //24_c_i
+		SecOTC:                 "NA", // 24_a_ii
+		DerivativesRegExchange: "NA", // 24_b_i
+		DerivativesCCP:         "NA", //24_c_i
 
 		RepoCCP:        "NA", //24_d_i
 		RepoBilateraly: "NA", // 24_d_ii

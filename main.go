@@ -157,6 +157,22 @@ func setStaticDataHedgeFunds(form1cdata *executors.Form1cData, fundId string) {
 	form1cdata.FundName = hedgeInfo.FundName
 
 }
+func setQ24val(form1cdata *executors.Form1cData, fundId string) {
+	fmt.Printf("\nfundid:%v\n", fundId)
+	if fundId == "FSSUS" {
+		form1cdata.SecOTC = "0"
+		form1cdata.SecRegExchange = "100"
+	}
+	if fundId == "FSSIE" {
+		form1cdata.SecOTC = "0"
+		form1cdata.SecRegExchange = "100"
+		form1cdata.DerivativesRegExchange = "0"
+		form1cdata.DerivativesOTC = "100"
+		form1cdata.DerivativesCCP = "0"
+		form1cdata.DerivativesBilateraly = "100"
+	}
+
+}
 
 func setStaticFunds(filingID, userID string) error {
 	answersMapper := make(map[[2]string]string)
@@ -355,6 +371,7 @@ func executeInvServ(filingID string, userID string) {
 			if strings.ToLower(db.FundStorer[fund.GetFundID()].FundType) == strings.ToLower("HEDGE") {
 				form1cData := executors.NewForm1cData()
 				setStaticDataHedgeFunds(form1cData, fund.GetFundID())
+				setQ24val(form1cData, fund.GetFundID())
 				executors.CollectAnswers(reflect.ValueOf(*form1cData), answersMapper)
 			}
 
