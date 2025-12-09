@@ -2,6 +2,7 @@ package invesmentservices
 
 import (
 	"quantrium-tech/form_pf_extractor_service/executors"
+	"reflect"
 )
 
 // CreateAllFundSeries is a helper function that takes up a fund and creates all of the fund-series combination and returns them
@@ -40,4 +41,31 @@ func StaticFunds() (*executors.Form1bData, *Fund) {
 
 	return fundData, fundObj
 
+}
+
+func updateNonZeroFields(source, target interface{}) {
+	src := reflect.ValueOf(source)
+	tgt := reflect.ValueOf(target)
+	// srcType := srcVal.Type()
+	if src.Kind() != reflect.Ptr || tgt.Kind() != reflect.Ptr ||
+		src.Elem().Kind() != reflect.Struct || tgt.Elem().Kind() != reflect.Struct {
+		panic("updateNonZeroFields: both args must be pointers to struct")
+	}
+	srcVal := src.Elem()
+	tgtVal := tgt.Elem()
+
+	for i := 0; i < srcVal.NumField(); i++ {
+		srcField := srcVal.Field(i)
+		tgtField := tgtVal.Field(i)
+
+		// Skip zero values
+		if srcField.IsZero() {
+			continue
+		}
+
+		// Ensure both fields are settable and same type
+		if tgtField.CanSet() && srcField.Type() == tgtField.Type() {
+			tgtField.Set(srcField)
+		}
+	}
 }

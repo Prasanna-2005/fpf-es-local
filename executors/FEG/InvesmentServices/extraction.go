@@ -261,7 +261,7 @@ func (F *Fund) ExtractQ17() error {
 	if err != nil {
 		return fmt.Errorf("extracting Q17 data: " + err.Error())
 	}
-
+	return nil
 }
 
 // ExtractWorkPaperData extracts the necessary data from the Workpapers of three quarters and store them in the
@@ -411,6 +411,8 @@ func extGrossAndNetAssests(f *excelize.File, tbdata *WorkPaperData) (int, error)
 }
 
 func extracNAVRepData(f *excelize.File, Navdata *WorkPaperData) error {
+	netMap := make(map[string]float64)
+	grossMap := make(map[string]float64)
 	absicca := make(map[string]int)
 	ordinate := make(map[string]int)
 	xmarkers := []string{
@@ -418,12 +420,12 @@ func extracNAVRepData(f *excelize.File, Navdata *WorkPaperData) error {
 		"april", "may", "june", "second",
 		"july", "august", "september", "third",
 		"october", "november", "december", "fourth",
-		"year", "to",
+		"year",
 	}
 	ymarkers := []string{
 		"net of mgmt", "gross of fees",
 	}
-	reportSheet := os.Getenv("Page_1")
+	reportSheet := "Page 1"
 	reportRows, err := f.GetRows(reportSheet)
 	if err != nil {
 		return fmt.Errorf("getting NAV report rows: " + err.Error())
@@ -441,16 +443,161 @@ func extracNAVRepData(f *excelize.File, Navdata *WorkPaperData) error {
 		}
 	}
 
-	for _, xcoor := range ordinate {
-		rawValue, err := f.GetCellValue(reportSheet, executors.IndexToExcel(xcoor, ordinate["month"]))
+	for term, xcoor := range ordinate {
+
+		rawValue, err := f.GetCellValue(reportSheet, executors.IndexToExcel(xcoor, ordinate["net of mgmt"]))
 		if err != nil {
 			logging.Error(fmt.Sprintf("excel error: %v", err.Error()))
 		}
 		rawValue = executors.CleanNonNumeric(rawValue)
-		Navdata.totalPartnerCaptial, _ = strconv.ParseFloat(rawValue, 64)
+		netPercent, _ := strconv.ParseFloat(rawValue, 64)
+		if netPercent != 0 {
+			netMap[term] = netPercent
+		}
+		rawValue, err = f.GetCellValue(reportSheet, executors.IndexToExcel(xcoor, ordinate["gross of fees"]))
+		if err != nil {
+			logging.Error(fmt.Sprintf("excel error: %v", err.Error()))
+		}
+		rawValue = executors.CleanNonNumeric(rawValue)
+		grossPercent, _ := strconv.ParseFloat(rawValue, 64)
+		if grossPercent != 0 {
+			grossMap[term] = grossPercent
+		}
 
 	}
+	fmt.Println(grossMap)
+	assignPerformance(grossMap, Navdata, true)
+	fmt.Println(netMap)
+	assignPerformance(netMap, Navdata, false)
+	fmt.Println(Navdata.fundPerformanceData)
 	return nil
+}
+
+func assignPerformance(src map[string]float64, Navdata *WorkPaperData, isGross bool) {
+	fp := &Navdata.fundPerformanceData
+	xmarkers := []string{
+		"january", "february", "march", "first",
+		"april", "may", "june", "second",
+		"july", "august", "september", "third",
+		"october", "november", "december", "fourth",
+		"year",
+	}
+	// iterate in the exact order you defined in xmarkers
+	for _, key := range xmarkers {
+		val, ok := src[key]
+		if !ok || val == 0 { // skip missing / zero
+			continue
+		}
+
+		switch key {
+		// months
+		case "january":
+			if isGross {
+				fp.janGrossPercentage = val
+			} else {
+				fp.janNetPercentage = val
+			}
+		case "february":
+			if isGross {
+				fp.febGrossPercentage = val
+			} else {
+				fp.febNetPercentage = val
+			}
+		case "march":
+			if isGross {
+				fp.marGrossPercentage = val
+			} else {
+				fp.marNetPercentage = val
+			}
+		case "april":
+			if isGross {
+				fp.aprGrossPercentage = val
+			} else {
+				fp.aprNetPercentage = val
+			}
+		case "may":
+			if isGross {
+				fp.mayGrossPercentage = val
+			} else {
+				fp.mayNetPercentage = val
+			}
+		case "june":
+			if isGross {
+				fp.junGrossPercentage = val
+			} else {
+				fp.junNetPercentage = val
+			}
+		case "july":
+			if isGross {
+				fp.julGrossPercentage = val
+			} else {
+				fp.julNetPercentage = val
+			}
+		case "august":
+			if isGross {
+				fp.augGrossPercentage = val
+			} else {
+				fp.augNetPercentage = val
+			}
+		case "september":
+			if isGross {
+				fp.sepGrossPercentage = val
+			} else {
+				fp.sepNetPercentage = val
+			}
+		case "october":
+			if isGross {
+				fp.octGrossPercentage = val
+			} else {
+				fp.octNetPercentage = val
+			}
+		case "november":
+			if isGross {
+				fp.novGrossPercentage = val
+			} else {
+				fp.novNetPercentage = val
+			}
+		case "december":
+			if isGross {
+				fp.decGrossPercentage = val
+			} else {
+				fp.decNetPercentage = val
+			}
+
+		// quarters
+		case "first":
+			if isGross {
+				fp.q1GrossPercentage = val
+			} else {
+				fp.q1NetPercentage = val
+			}
+		case "second":
+			if isGross {
+				fp.q2GrossPercentage = val
+			} else {
+				fp.q2NetPercentage = val
+			}
+		case "third":
+			if isGross {
+				fp.q3GrossPercentage = val
+			} else {
+				fp.q3NetPercentage = val
+			}
+		case "fourth":
+			if isGross {
+				fp.q4GrossPercentage = val
+			} else {
+				fp.q4NetPercentage = val
+			}
+		case "year":
+			if isGross {
+				fp.yearGrossPercentage = val
+			} else {
+				fp.yearNetPercentage = val
+			}
+
+		}
+	}
 }
 
 func FieldPtr(ld *LevelingData, marker string) *float64 {

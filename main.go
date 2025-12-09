@@ -323,7 +323,7 @@ func executeInvServ(filingID string, userID string) {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
 				continue
 			}
-			err := fund.ExtractQ17()
+			err = fund.ExtractQ17()
 			if err != nil {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
 				continue

@@ -1,7 +1,6 @@
 package invesmentservices
 
 import (
-	"fmt"
 	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"reflect"
@@ -50,24 +49,19 @@ func (F *Fund) SetLiquidityData(data *LiquidityData) {
 }
 
 func (F *Fund) SetUnfdCmtsData(data float64) {
-	fmt.Println("inside setter unfd data")
-	fmt.Printf("\nufCmts: %v\n", data)
 	F.workPaperData.unfundedCommitments = data
-	fmt.Printf("\nufCmts post setting: %v\n", F.workPaperData.unfundedCommitments)
 }
 
 // ExportWorkPaperData returns a mapped entityname to value mapper for further push
 func (F *Fund) ExportWorkPaperData() map[string]string {
-
 	entityValueMapper := make(map[string]string)
 	executors.CollectEntities(reflect.ValueOf(F.workPaperData), entityValueMapper)
 	return entityValueMapper
-
 }
 
 type WorkPaperData struct {
 	totalAssets         float64 `entity:"tb_total_assets_bs"`
-	unfundedCommitments float64 `entity:"tb_unfunded_commitments_captial_roll_qtd"`
+	unfundedCommitments float64 `entity:"tb_unfunded_commitments_nav_report"`
 	totalPartnerCaptial float64 `entity:"tb_total_partner_captial_bs"`
 	totalLiabilities    float64 `entity:"tb_total_liabilities_bs"`
 	// equityData          float64             `entity:"equity_otherfunds"`
@@ -121,12 +115,45 @@ type LiquidityData struct {
 }
 
 type FundPerformanceData struct {
-	q1GrossPercentage float64 `entity:"q1_gross_percentage_captial_roll_qtd"`
-	q2GrossPercentage float64 `entity:"q2_gross_percentage_captial_roll_qtd"`
-	q3GrossPercentage float64 `entity:"q3_gross_percentage_captial_roll_qtd"`
-	q1NetPercentage   float64 `entity:"q1_net_percentage_captial_roll_qtd"`
-	q2NetPercentage   float64 `entity:"q2_net_percentage_captial_roll_qtd"`
-	q3NetPercentage   float64 `entity:"q3_net_percentage_captial_roll_qtd"`
+	yearGrossPercentage float64 `entity:"year_gross_percentage_nav_report"`
+	yearNetPercentage   float64 `entity:"year_net_percentage_nav_report"`
+
+	q1GrossPercentage float64 `entity:"q1_gross_percentage_nav_report"`
+	q2GrossPercentage float64 `entity:"q2_gross_percentage_nav_report"`
+	q3GrossPercentage float64 `entity:"q3_gross_percentage_nav_report"`
+	q1NetPercentage   float64 `entity:"q1_net_percentage_nav_report"`
+	q2NetPercentage   float64 `entity:"q2_net_percentage_nav_report"`
+	q3NetPercentage   float64 `entity:"q3_net_percentage_nav_report"`
+	q4GrossPercentage float64 `entity:"q4_gross_percentage_nav_report"`
+	q4NetPercentage   float64 `entity:"q4_net_percentage_nav_report"`
+
+	// --- monthly gross ---
+	janGrossPercentage float64 `entity:"jan_gross_percentage_nav_report"`
+	febGrossPercentage float64 `entity:"feb_gross_percentage_nav_report"`
+	marGrossPercentage float64 `entity:"mar_gross_percentage_nav_report"`
+	aprGrossPercentage float64 `entity:"apr_gross_percentage_nav_report"`
+	mayGrossPercentage float64 `entity:"may_gross_percentage_nav_report"`
+	junGrossPercentage float64 `entity:"jun_gross_percentage_nav_report"`
+	julGrossPercentage float64 `entity:"jul_gross_percentage_nav_report"`
+	augGrossPercentage float64 `entity:"aug_gross_percentage_nav_report"`
+	sepGrossPercentage float64 `entity:"sep_gross_percentage_nav_report"`
+	octGrossPercentage float64 `entity:"oct_gross_percentage_nav_report"`
+	novGrossPercentage float64 `entity:"nov_gross_percentage_nav_report"`
+	decGrossPercentage float64 `entity:"dec_gross_percentage_nav_report"`
+
+	// --- monthly net ---
+	janNetPercentage float64 `entity:"jan_net_percentage_nav_report"`
+	febNetPercentage float64 `entity:"feb_net_percentage_nav_report"`
+	marNetPercentage float64 `entity:"mar_net_percentage_nav_report"`
+	aprNetPercentage float64 `entity:"apr_net_percentage_nav_report"`
+	mayNetPercentage float64 `entity:"may_net_percentage_nav_report"`
+	junNetPercentage float64 `entity:"jun_net_percentage_nav_report"`
+	julNetPercentage float64 `entity:"jul_net_percentage_nav_report"`
+	augNetPercentage float64 `entity:"aug_net_percentage_nav_report"`
+	sepNetPercentage float64 `entity:"sep_net_percentage_nav_report"`
+	octNetPercentage float64 `entity:"oct_net_percentage_nav_report"`
+	novNetPercentage float64 `entity:"nov_net_percentage_nav_report"`
+	decNetPercentage float64 `entity:"dec_net_percentage_nav_report"`
 }
 
 // liquidityDataHolder represents the map that holds the liquidityData for the reference fund
