@@ -81,7 +81,7 @@ func (F *Fund) Compute() *executors.Form1bData {
 	/* ---------- annual ---------- */
 	data.YearGrossValue = pd.yearGrossPercentage
 	data.YearNetValue = pd.yearNetPercentage
-	fmt.Println(pd)
+	fmt.Printf("\npd inside comp:%v\n", pd)
 
 	return data
 

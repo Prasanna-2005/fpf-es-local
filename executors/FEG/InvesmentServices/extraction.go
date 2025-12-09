@@ -465,11 +465,12 @@ func extracNAVRepData(f *excelize.File, Navdata *WorkPaperData) error {
 		}
 
 	}
-	fmt.Println(grossMap)
+	fmt.Println("inside extraction")
+	fmt.Printf("\ngmap:%v\n", grossMap)
 	assignPerformance(grossMap, Navdata, true)
-	fmt.Println(netMap)
+	fmt.Println("\nnetmap:%v\n", netMap)
 	assignPerformance(netMap, Navdata, false)
-	fmt.Println(Navdata.fundPerformanceData)
+	fmt.Printf("\nnavdata:%v\n", Navdata.fundPerformanceData)
 	return nil
 }
 
