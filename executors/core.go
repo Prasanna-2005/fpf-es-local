@@ -200,27 +200,27 @@ type Form1cData struct {
 	USDCounterpartyALegalName       string `fieldNo:"23" formLineNo:"23_(a)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
 	USDCounterpartyAAffiliatedInsti string `fieldNo:"23" formLineNo:"23_(a)_Indicate below if the counterparty is affiliated with a major financial institution"`
 	USDCounterpartyAExposure        string `fieldNo:"23" formLineNo:"23_(a)_Exposure (in U.S. dollars))"`
-	USDAInsticode                   string `fieldNo:"22" formLineNo:"23_(a)_Institution code"`
+	USDAInsticode                   string `fieldNo:"23" formLineNo:"23_(a)_Institution code"`
 	// Row B
 	USDCounterpartyBLegalName       string `fieldNo:"23" formLineNo:"23_(b)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
 	USDCounterpartyBAffiliatedInsti string `fieldNo:"23" formLineNo:"23_(b)_Indicate below if the counterparty is affiliated with a major financial institution"`
 	USDCounterpartyBExposure        string `fieldNo:"23" formLineNo:"23_(b)_Exposure (in U.S. dollars))"`
-	USDBInsticode                   string `fieldNo:"22" formLineNo:"23_(b)_Institution code"`
+	USDBInsticode                   string `fieldNo:"23" formLineNo:"23_(b)_Institution code"`
 	// Row C
 	USDCounterpartyCLegalName       string `fieldNo:"23" formLineNo:"23_(c)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
 	USDCounterpartyCAffiliatedInsti string `fieldNo:"23" formLineNo:"23_(c)_Indicate below if the counterparty is affiliated with a major financial institution"`
 	USDCounterpartyCExposure        string `fieldNo:"23" formLineNo:"23_(c)_Exposure (in U.S. dollars))"`
-	USDCInsticode                   string `fieldNo:"22" formLineNo:"23_(c)_Institution code"`
+	USDCInsticode                   string `fieldNo:"23" formLineNo:"23_(c)_Institution code"`
 	// Row D
 	USDCounterpartyDLegalName       string `fieldNo:"23" formLineNo:"23_(d)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
 	USDCounterpartyDAffiliatedInsti string `fieldNo:"23" formLineNo:"23_(d)_Indicate below if the counterparty is affiliated with a major financial institution"`
 	USDCounterpartyDExposure        string `fieldNo:"23" formLineNo:"23_(d)_Exposure (in U.S. dollars))"`
-	USDDInsticode                   string `fieldNo:"22" formLineNo:"23_(d)_Institution code"`
+	USDDInsticode                   string `fieldNo:"23" formLineNo:"23_(d)_Institution code"`
 	// Row E
 	USDCounterpartyELegalName       string `fieldNo:"23" formLineNo:"23_(e)_Legal name of the counterparty (or, if multiple affiliated entities, counterparties)"`
 	USDCounterpartyEAffiliatedInsti string `fieldNo:"23" formLineNo:"23_(e)_Indicate below if the counterparty is affiliated with a major financial institution"`
 	USDCounterpartyEExposure        string `fieldNo:"23" formLineNo:"23_(e)_Exposure (in U.S. dollars))"`
-	USDEInsticode                   string `fieldNo:"22" formLineNo:"23_(e)_Institution code"`
+	USDEInsticode                   string `fieldNo:"23" formLineNo:"23_(e)_Institution code"`
 
 	SecRegExchange         string `fieldNo:"24" formLineNo:"24_a_i"`
 	SecOTC                 string `fieldNo:"24" formLineNo:"24_a_ii"`
