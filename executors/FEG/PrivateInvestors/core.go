@@ -80,9 +80,9 @@ type LiquidityData struct {
 
 // FundPerformanceData represents the strucure that holds the fund performance on three quarters
 type FundPerformanceData struct {
-	q1GrossPercentage float64 `entity:"q1_gross_percentage_captial_roll_qtd term:"first"  colName:"net""`
-	q2GrossPercentage float64 `entity:"q2_gross_percentage_captial_roll_qtd term:"first"  colName:"net""`
-	q3GrossPercentage float64 `entity:"q3_gross_percentage_captial_roll_qtd term:"first"  colName:"net""`
+	q1GrossPercentage float64 `entity:"q1_gross_percentage_captial_roll_qtd term:"first"  colName:"gross""`
+	q2GrossPercentage float64 `entity:"q2_gross_percentage_captial_roll_qtd term:"first"  colName:"gross""`
+	q3GrossPercentage float64 `entity:"q3_gross_percentage_captial_roll_qtd term:"first"  colName:"gross""`
 	q1NetPercentage   float64 `entity:"q1_net_percentage_captial_roll_qtd term:"first"  colName:"net""`
 	q2NetPercentage   float64 `entity:"q2_net_percentage_captial_roll_qtd term:"first"  colName:"net""`
 	q3NetPercentage   float64 `entity:"q3_net_percentage_captial_roll_qtd term:"first"  colName:"net""`
