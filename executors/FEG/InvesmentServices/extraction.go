@@ -443,7 +443,7 @@ func extracNAVRepData(f *excelize.File, Navdata *WorkPaperData) error {
 		}
 	}
 
-	for term, xcoor := range ordinate {
+	for term, xcoor := range absicca {
 
 		rawValue, err := f.GetCellValue(reportSheet, executors.IndexToExcel(xcoor, ordinate["net of mgmt"]))
 		if err != nil {

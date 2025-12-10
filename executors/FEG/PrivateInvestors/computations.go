@@ -39,12 +39,7 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 	data.Top5Percent = ld.top5OwnedPercentage
 
 	// fund performance data
-	data.Q1GrossValue = pd.q1GrossPercentage
-	data.Q2GrossValue = pd.q2GrossPercentage
-	data.Q3GrossValue = pd.q3GrossPercentage
-	data.Q1NetValue = pd.q1NetPercentage
-	data.Q2NetValue = pd.q2NetPercentage
-	data.Q3NetValue = pd.q3NetPercentage
+	assignFundPerf(data, pd)
 
 	return data
 

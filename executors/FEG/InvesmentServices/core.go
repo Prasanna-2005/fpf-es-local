@@ -115,45 +115,44 @@ type LiquidityData struct {
 }
 
 type FundPerformanceData struct {
-	yearGrossPercentage float64 `entity:"year_gross_percentage_nav_report"`
-	yearNetPercentage   float64 `entity:"year_net_percentage_nav_report"`
+	yearGrossPercentage float64 `entity:"year_gross_percentage_nav_report" term:"year"   colName:"gross"`
+	yearNetPercentage   float64 `entity:"year_net_percentage_nav_report"   term:"year"   colName:"net"`
 
-	q1GrossPercentage float64 `entity:"q1_gross_percentage_nav_report"`
-	q2GrossPercentage float64 `entity:"q2_gross_percentage_nav_report"`
-	q3GrossPercentage float64 `entity:"q3_gross_percentage_nav_report"`
-	q1NetPercentage   float64 `entity:"q1_net_percentage_nav_report"`
-	q2NetPercentage   float64 `entity:"q2_net_percentage_nav_report"`
-	q3NetPercentage   float64 `entity:"q3_net_percentage_nav_report"`
-	q4GrossPercentage float64 `entity:"q4_gross_percentage_nav_report"`
-	q4NetPercentage   float64 `entity:"q4_net_percentage_nav_report"`
+	q1GrossPercentage float64 `entity:"q1_gross_percentage_nav_report" term:"first"  colName:"gross"`
+	q2GrossPercentage float64 `entity:"q2_gross_percentage_nav_report" term:"second" colName:"gross"`
+	q3GrossPercentage float64 `entity:"q3_gross_percentage_nav_report" term:"third"  colName:"gross"`
+	q4GrossPercentage float64 `entity:"q4_gross_percentage_nav_report" term:"fourth" colName:"gross"`
 
-	// --- monthly gross ---
-	janGrossPercentage float64 `entity:"jan_gross_percentage_nav_report"`
-	febGrossPercentage float64 `entity:"feb_gross_percentage_nav_report"`
-	marGrossPercentage float64 `entity:"mar_gross_percentage_nav_report"`
-	aprGrossPercentage float64 `entity:"apr_gross_percentage_nav_report"`
-	mayGrossPercentage float64 `entity:"may_gross_percentage_nav_report"`
-	junGrossPercentage float64 `entity:"jun_gross_percentage_nav_report"`
-	julGrossPercentage float64 `entity:"jul_gross_percentage_nav_report"`
-	augGrossPercentage float64 `entity:"aug_gross_percentage_nav_report"`
-	sepGrossPercentage float64 `entity:"sep_gross_percentage_nav_report"`
-	octGrossPercentage float64 `entity:"oct_gross_percentage_nav_report"`
-	novGrossPercentage float64 `entity:"nov_gross_percentage_nav_report"`
-	decGrossPercentage float64 `entity:"dec_gross_percentage_nav_report"`
+	q1NetPercentage float64 `entity:"q1_net_percentage_nav_report" term:"first"  colName:"net"`
+	q2NetPercentage float64 `entity:"q2_net_percentage_nav_report" term:"second" colName:"net"`
+	q3NetPercentage float64 `entity:"q3_net_percentage_nav_report" term:"third"  colName:"net"`
+	q4NetPercentage float64 `entity:"q4_net_percentage_nav_report" term:"fourth" colName:"net"`
 
-	// --- monthly net ---
-	janNetPercentage float64 `entity:"jan_net_percentage_nav_report"`
-	febNetPercentage float64 `entity:"feb_net_percentage_nav_report"`
-	marNetPercentage float64 `entity:"mar_net_percentage_nav_report"`
-	aprNetPercentage float64 `entity:"apr_net_percentage_nav_report"`
-	mayNetPercentage float64 `entity:"may_net_percentage_nav_report"`
-	junNetPercentage float64 `entity:"jun_net_percentage_nav_report"`
-	julNetPercentage float64 `entity:"jul_net_percentage_nav_report"`
-	augNetPercentage float64 `entity:"aug_net_percentage_nav_report"`
-	sepNetPercentage float64 `entity:"sep_net_percentage_nav_report"`
-	octNetPercentage float64 `entity:"oct_net_percentage_nav_report"`
-	novNetPercentage float64 `entity:"nov_net_percentage_nav_report"`
-	decNetPercentage float64 `entity:"dec_net_percentage_nav_report"`
+	janGrossPercentage float64 `entity:"jan_gross_percentage_nav_report" term:"january"   colName:"gross"`
+	febGrossPercentage float64 `entity:"feb_gross_percentage_nav_report" term:"february"  colName:"gross"`
+	marGrossPercentage float64 `entity:"mar_gross_percentage_nav_report" term:"march"     colName:"gross"`
+	aprGrossPercentage float64 `entity:"apr_gross_percentage_nav_report" term:"april"     colName:"gross"`
+	mayGrossPercentage float64 `entity:"may_gross_percentage_nav_report" term:"may"       colName:"gross"`
+	junGrossPercentage float64 `entity:"jun_gross_percentage_nav_report" term:"june"      colName:"gross"`
+	julGrossPercentage float64 `entity:"jul_gross_percentage_nav_report" term:"july"      colName:"gross"`
+	augGrossPercentage float64 `entity:"aug_gross_percentage_nav_report" term:"august"    colName:"gross"`
+	sepGrossPercentage float64 `entity:"sep_gross_percentage_nav_report" term:"september" colName:"gross"`
+	octGrossPercentage float64 `entity:"oct_gross_percentage_nav_report" term:"october"   colName:"gross"`
+	novGrossPercentage float64 `entity:"nov_gross_percentage_nav_report" term:"november"  colName:"gross"`
+	decGrossPercentage float64 `entity:"dec_gross_percentage_nav_report" term:"december"  colName:"gross"`
+
+	janNetPercentage float64 `entity:"jan_net_percentage_nav_report" term:"january"   colName:"net"`
+	febNetPercentage float64 `entity:"feb_net_percentage_nav_report" term:"february"  colName:"net"`
+	marNetPercentage float64 `entity:"mar_net_percentage_nav_report" term:"march"     colName:"net"`
+	aprNetPercentage float64 `entity:"apr_net_percentage_nav_report" term:"april"     colName:"net"`
+	mayNetPercentage float64 `entity:"may_net_percentage_nav_report" term:"may"       colName:"net"`
+	junNetPercentage float64 `entity:"jun_net_percentage_nav_report" term:"june"      colName:"net"`
+	julNetPercentage float64 `entity:"jul_net_percentage_nav_report" term:"july"      colName:"net"`
+	augNetPercentage float64 `entity:"aug_net_percentage_nav_report" term:"august"    colName:"net"`
+	sepNetPercentage float64 `entity:"sep_net_percentage_nav_report" term:"september" colName:"net"`
+	octNetPercentage float64 `entity:"oct_net_percentage_nav_report" term:"october"   colName:"net"`
+	novNetPercentage float64 `entity:"nov_net_percentage_nav_report" term:"november"  colName:"net"`
+	decNetPercentage float64 `entity:"dec_net_percentage_nav_report" term:"december"  colName:"net"`
 }
 
 // liquidityDataHolder represents the map that holds the liquidityData for the reference fund

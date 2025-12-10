@@ -1,6 +1,7 @@
 package executors
 
 import (
+	"database/sql"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -65,6 +66,7 @@ func CollectEntities(v reflect.Value, store map[string]string) {
 }
 
 // CollectAnswers takes a reflect.Value and a store (referenced) and collect the tags and values of formdata
+
 func CollectAnswers(v reflect.Value, store map[[2]string]string) {
 	t := v.Type()
 
@@ -72,25 +74,42 @@ func CollectAnswers(v reflect.Value, store map[[2]string]string) {
 		field := t.Field(i)
 		value := v.Field(i)
 
-		if value.Kind() == reflect.Struct {
+		// dive into nested structs
+		if value.Kind() == reflect.Struct &&
+			value.Type() != reflect.TypeOf(sql.NullString{}) &&
+			value.Type() != reflect.TypeOf(sql.NullFloat64{}) {
 			CollectAnswers(value, store)
+			continue
 		}
 
 		fieldNo := field.Tag.Get("fieldNo")
 		lineNo := field.Tag.Get("formLineNo")
-
 		l := [2]string{fieldNo, lineNo}
 
-		switch value.Kind() {
-		case reflect.Float64:
-			store[l] = strconv.FormatFloat(value.Float(), 'f', -1, 64)
-		case reflect.String:
+		switch {
+		case value.Type() == reflect.TypeOf(sql.NullString{}):
+			ns := value.Interface().(sql.NullString)
+			if ns.Valid {
+				store[l] = ns.String
+			} // else leave key out (or store "" if you prefer)
+
+		case value.Type() == reflect.TypeOf(sql.NullFloat64{}):
+			nf := value.Interface().(sql.NullFloat64)
+			if nf.Valid {
+				store[l] = strconv.FormatFloat(nf.Float64, 'f', -1, 64)
+			}
+
+		case value.Kind() == reflect.String:
 			store[l] = value.String()
-		case reflect.Bool:
+
+		case value.Kind() == reflect.Float64:
+			store[l] = strconv.FormatFloat(value.Float(), 'f', -1, 64)
+
+		case value.Kind() == reflect.Bool:
 			store[l] = strconv.FormatBool(value.Bool())
+
 		default:
 			continue
 		}
 	}
-
 }

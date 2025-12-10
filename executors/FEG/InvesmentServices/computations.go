@@ -21,7 +21,6 @@ func (F *Fund) Compute() *executors.Form1bData {
 	data.NetAsset = executors.CalculateNetAsset(wd.totalPartnerCaptial, wd.unfundedCommitments)
 	data.EquityInOtherFunds = wd.sumLevelExtData
 	if slices.Contains(NotSame, F.fundID) {
-		fmt.Printf("\nInside\n %v", F.fundID)
 		data.EquityInOtherFunds = 0
 	}
 	data.Level1Asset = wd.l1
@@ -38,50 +37,7 @@ func (F *Fund) Compute() *executors.Form1bData {
 	data.Top5Percent = ld.top5OwnedPercentage
 	data.SovereignPercent = ld.sovereignFundPercentage
 	data.PrivateFundPercent = ld.pvtFundPercentage
-
-	/* ---------- monthly gross ---------- */
-	data.JanGrossValue = pd.janGrossPercentage
-	data.FebGrossValue = pd.febGrossPercentage
-	data.MarGrossValue = pd.marGrossPercentage
-	data.AprGrossValue = pd.aprGrossPercentage
-	data.MayGrossValue = pd.mayGrossPercentage
-	data.JunGrossValue = pd.junGrossPercentage
-	data.JulGrossValue = pd.julGrossPercentage
-	data.AugGrossValue = pd.augGrossPercentage
-	data.SepGrossValue = pd.sepGrossPercentage
-	data.OctGrossValue = pd.octGrossPercentage
-	data.NovGrossValue = pd.novGrossPercentage
-	data.DecGrossValue = pd.decGrossPercentage
-
-	/* ---------- monthly net ---------- */
-	data.JanNetValue = pd.janNetPercentage
-	data.FebNetValue = pd.febNetPercentage
-	data.MarNetValue = pd.marNetPercentage
-	data.AprNetValue = pd.aprNetPercentage
-	data.MayNetValue = pd.mayNetPercentage
-	data.JunNetValue = pd.junNetPercentage
-	data.JulNetValue = pd.julNetPercentage
-	data.AugNetValue = pd.augNetPercentage
-	data.SepNetValue = pd.sepNetPercentage
-	data.OctNetValue = pd.octNetPercentage
-	data.NovNetValue = pd.novNetPercentage
-	data.DecNetValue = pd.decNetPercentage
-
-	/* ---------- quarterly ---------- */
-	data.Q1GrossValue = pd.q1GrossPercentage
-	data.Q2GrossValue = pd.q2GrossPercentage
-	data.Q3GrossValue = pd.q3GrossPercentage
-	data.Q4GrossValue = pd.q4GrossPercentage
-
-	data.Q1NetValue = pd.q1NetPercentage
-	data.Q2NetValue = pd.q2NetPercentage
-	data.Q3NetValue = pd.q3NetPercentage
-	data.Q4NetValue = pd.q4NetPercentage
-
-	/* ---------- annual ---------- */
-	data.YearGrossValue = pd.yearGrossPercentage
-	data.YearNetValue = pd.yearNetPercentage
-	fmt.Printf("\npd inside comp:%v\n", pd)
+	assignFundPerf(data, pd)
 
 	return data
 
