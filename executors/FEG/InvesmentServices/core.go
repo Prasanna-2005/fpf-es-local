@@ -9,6 +9,7 @@ import (
 type Fund struct {
 	fundID        string
 	series        string
+	fundType      string
 	workPaperData WorkPaperData
 	holder        Holder
 }
@@ -41,6 +42,11 @@ func (F *Fund) SetHolder(FileType string, filePath string) {
 // GetFundID returns the fundID used internally
 func (F *Fund) GetFundID() string {
 	return F.fundID
+}
+
+// GetFundType returns the fundID used internally
+func (F *Fund) GetFundType() string {
+	return F.fundType
 }
 
 // SetLiquidityData takes up a reference of LiquidityData and set upon the fund

@@ -13,6 +13,7 @@ import (
 	"quantrium-tech/form_pf_extractor_service/logging"
 	"reflect"
 	"strconv"
+	"strings"
 	"syscall"
 )
 
@@ -23,7 +24,6 @@ func init() {
 
 	config.InitialiseConfig()
 	logging.Info("Config Initialised")
-	fmt.Println(config.Cfg)
 
 	err := db.InitialseDB()
 	if err != nil {
@@ -149,8 +149,31 @@ func setStaticDataPV(data *executors.Form1bData, fundId string) {
 	if info.FundNFA.Valid {
 		data.FundNFA = info.FundNFA.String
 	}
+}
+
+func setStaticDataHedgeFunds(form1cdata *executors.Form1cData, fundId string) {
+	hedgeInfo := db.FundStorer[fundId]
+	form1cdata.FundID = hedgeInfo.FundID
+	form1cdata.FundName = hedgeInfo.FundName
 
 }
+func setQ24val(form1cdata *executors.Form1cData, fundId string) {
+	fmt.Printf("\nfundid:%v\n", fundId)
+	if fundId == "FSSUS" {
+		form1cdata.SecOTC = "0"
+		form1cdata.SecRegExchange = "100"
+	}
+	if fundId == "FSSIE" {
+		form1cdata.SecOTC = "0"
+		form1cdata.SecRegExchange = "100"
+		form1cdata.DerivativesRegExchange = "0"
+		form1cdata.DerivativesOTC = "100"
+		form1cdata.DerivativesCCP = "0"
+		form1cdata.DerivativesBilateraly = "100"
+	}
+
+}
+
 func setStaticFunds(filingID, userID string) error {
 	answersMapper := make(map[[2]string]string)
 	staticFundData, staticFundObj := invesmentservices.StaticFunds()
@@ -240,7 +263,6 @@ func execute(filingID string, userID string) {
 			logging.Info("Computation Completed for the Fund: " + fund.GetFundID())
 
 			setStaticDataPV(formData, fund.GetFundID())
-
 			executors.CollectAnswers(reflect.ValueOf(*formData), answersMapper)
 			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper)
 			if err != nil {
@@ -310,6 +332,7 @@ func executeInvServ(filingID string, userID string) {
 			}
 
 			answersMapper := make(map[[2]string]string)
+			// ansMapper1c:=make(map[[2]string]string)
 
 			if holder, ok := liqudityHolder[fund.GetFundID()]; ok {
 				fund.SetLiquidityData(holder)
@@ -350,8 +373,17 @@ func executeInvServ(filingID string, userID string) {
 
 			setStaticDataPV(formData, fund.GetFundID())
 
+			if strings.ToLower(db.FundStorer[fund.GetFundID()].FundType) == strings.ToLower("HEDGE") {
+				form1cData := executors.NewForm1cData()
+				setStaticDataHedgeFunds(form1cData, fund.GetFundID())
+				setQ24val(form1cData, fund.GetFundID())
+				executors.CollectAnswers(reflect.ValueOf(*form1cData), answersMapper)
+			}
+
 			executors.CollectAnswers(reflect.ValueOf(*formData), answersMapper)
+
 			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper)
+
 			if err != nil {
 				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 			}

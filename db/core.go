@@ -30,6 +30,7 @@ type FundInfo struct {
 	FundID   string         `db:"fegFundId"`
 	FundNFA  sql.NullString `db:"nfaId"`
 	FundLEI  sql.NullString `db:"leiId"`
+	FundType string         `db:"fundType"`
 }
 
 // FormData represents the structure of form_data table that stores the answers/form data from the computations
