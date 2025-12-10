@@ -1,7 +1,6 @@
 package invesmentservices
 
 import (
-	"fmt"
 	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"reflect"
@@ -10,6 +9,7 @@ import (
 type Fund struct {
 	fundID        string
 	series        string
+	fundType      string
 	workPaperData WorkPaperData
 	holder        Holder
 }
@@ -44,16 +44,18 @@ func (F *Fund) GetFundID() string {
 	return F.fundID
 }
 
+// GetFundType returns the fundID used internally
+func (F *Fund) GetFundType() string {
+	return F.fundType
+}
+
 // SetLiquidityData takes up a reference of LiquidityData and set upon the fund
 func (F *Fund) SetLiquidityData(data *LiquidityData) {
 	F.workPaperData.liquidityData = *data
 }
 
 func (F *Fund) SetUnfdCmtsData(data float64) {
-	fmt.Println("inside setter unfd data")
-	fmt.Printf("\nufCmts: %v\n", data)
 	F.workPaperData.unfundedCommitments = data
-	fmt.Printf("\nufCmts post setting: %v\n", F.workPaperData.unfundedCommitments)
 }
 
 // ExportWorkPaperData returns a mapped entityname to value mapper for further push
