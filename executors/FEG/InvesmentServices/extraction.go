@@ -420,7 +420,7 @@ func extracNAVRepData(f *excelize.File, Navdata *WorkPaperData) error {
 		"april", "may", "june", "second",
 		"july", "august", "september", "third",
 		"october", "november", "december", "fourth",
-		"year",
+		"year to",
 	}
 	ymarkers := []string{
 		"net of mgmt", "gross of fees",
@@ -468,7 +468,7 @@ func extracNAVRepData(f *excelize.File, Navdata *WorkPaperData) error {
 	fmt.Println("inside extraction")
 	fmt.Printf("\ngmap:%v\n", grossMap)
 	assignPerformance(grossMap, Navdata, true)
-	fmt.Println("\nnetmap:%v\n", netMap)
+	fmt.Printf("\nnetmap:%v\n", netMap)
 	assignPerformance(netMap, Navdata, false)
 	fmt.Printf("\nnavdata:%v\n", Navdata.fundPerformanceData)
 	return nil
@@ -481,7 +481,7 @@ func assignPerformance(src map[string]float64, Navdata *WorkPaperData, isGross b
 		"april", "may", "june", "second",
 		"july", "august", "september", "third",
 		"october", "november", "december", "fourth",
-		"year",
+		"year to",
 	}
 	// iterate in the exact order you defined in xmarkers
 	for _, key := range xmarkers {
@@ -590,7 +590,7 @@ func assignPerformance(src map[string]float64, Navdata *WorkPaperData, isGross b
 			} else {
 				fp.q4NetPercentage = val
 			}
-		case "year":
+		case "year to":
 			if isGross {
 				fp.yearGrossPercentage = val
 			} else {
