@@ -64,7 +64,7 @@ type WorkPaperData struct {
 	investmentsUnrealisedGainLoss float64             `entity:"q3_investments_unrealised_gain_loss_bs"`
 	cashSweep                     float64             `entity:"q3_cash_sweep_bs"`
 	cashGeneralAccount            float64             `entity:"q3_cash_general_account_bs"`
-	cashChecking                  float64             `entity: "q3_cash_checking_bs"`
+	cashChecking                  float64             `entity:"q3_cash_checking_bs"`
 	liquidityData                 LiquidityData       `entity:"liquidity_data"`
 	fundPerformanceData           FundPerformanceData `entity:"fund_performance_data"`
 }
@@ -80,12 +80,12 @@ type LiquidityData struct {
 
 // FundPerformanceData represents the strucure that holds the fund performance on three quarters
 type FundPerformanceData struct {
-	q1GrossPercentage float64 `entity:"q1_gross_percentage_captial_roll_qtd term:"first"  colName:"gross""`
-	q2GrossPercentage float64 `entity:"q2_gross_percentage_captial_roll_qtd term:"first"  colName:"gross""`
-	q3GrossPercentage float64 `entity:"q3_gross_percentage_captial_roll_qtd term:"first"  colName:"gross""`
-	q1NetPercentage   float64 `entity:"q1_net_percentage_captial_roll_qtd term:"first"  colName:"net""`
-	q2NetPercentage   float64 `entity:"q2_net_percentage_captial_roll_qtd term:"first"  colName:"net""`
-	q3NetPercentage   float64 `entity:"q3_net_percentage_captial_roll_qtd term:"first"  colName:"net""`
+	q1GrossPercentage float64 `entity:"q1_gross_percentage_captial_roll_qtd" term:"first"  colName:"gross"`
+	q2GrossPercentage float64 `entity:"q2_gross_percentage_captial_roll_qtd" term:"second"  colName:"gross"`
+	q3GrossPercentage float64 `entity:"q3_gross_percentage_captial_roll_qtd" term:"third"  colName:"gross"`
+	q1NetPercentage   float64 `entity:"q1_net_percentage_captial_roll_qtd" term:"first"  colName:"net"`
+	q2NetPercentage   float64 `entity:"q2_net_percentage_captial_roll_qtd" term:"second"  colName:"net"`
+	q3NetPercentage   float64 `entity:"q3_net_percentage_captial_roll_qtd" term:"third"  colName:"net"`
 }
 
 // Holder holds the path of the files needed for a extraction of a single Private Fund
