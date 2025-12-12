@@ -1,7 +1,6 @@
 package invesmentservices
 
 import (
-	"fmt"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"slices"
 )
@@ -11,7 +10,7 @@ func (F *Fund) Compute() *executors.Form1bData {
 
 	wd := F.workPaperData
 	ld := F.workPaperData.liquidityData
-	// pd := F.workPaperData.fundPerformanceData
+	pd := F.workPaperData.fundPerformanceData
 
 	data := executors.NewForm1bData()
 
@@ -20,7 +19,6 @@ func (F *Fund) Compute() *executors.Form1bData {
 	data.NetAsset = executors.CalculateNetAsset(wd.totalPartnerCaptial, wd.unfundedCommitments)
 	data.EquityInOtherFunds = wd.sumLevelExtData
 	if slices.Contains(NotSame, F.fundID) {
-		fmt.Printf("\nInside\n %v", F.fundID)
 		data.EquityInOtherFunds = 0
 	}
 	data.Level1Asset = wd.l1
@@ -37,14 +35,7 @@ func (F *Fund) Compute() *executors.Form1bData {
 	data.Top5Percent = ld.top5OwnedPercentage
 	data.SovereignPercent = ld.sovereignFundPercentage
 	data.PrivateFundPercent = ld.pvtFundPercentage
-
-	// // fund performance data
-	// data.Q1GrossValue = pd.q1GrossPercentage
-	// data.Q2GrossValue = pd.q2GrossPercentage
-	// data.Q3GrossValue = pd.q3GrossPercentage
-	// data.Q1NetValue = pd.q1NetPercentage
-	// data.Q2NetValue = pd.q2NetPercentage
-	// data.Q3NetValue = pd.q3NetPercentage
+	assignFundPerf(data, pd)
 
 	return data
 

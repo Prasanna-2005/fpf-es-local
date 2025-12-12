@@ -346,6 +346,11 @@ func executeInvServ(filingID string, userID string) {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
 				continue
 			}
+			err = fund.ExtractQ17()
+			if err != nil {
+				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
+				continue
+			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
 
 			if holder, ok := unfndCmtHolder[fund.GetFundID()]; ok {
