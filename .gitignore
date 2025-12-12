@@ -48,3 +48,10 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Application specific
+local/
+bin/
+Makefile
+.env
+.scannerwork
+*.sql

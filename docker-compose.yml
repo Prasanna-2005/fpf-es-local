@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  extraction-service:
+    build: .
+    image: form-pf-extraction-service
+    container_name: form-pf-extraction-service
+    env_file: .env
+    volumes:
+      - form-pf-shared-storage:${STORAGE_PATH}
+      - ../logs/service:/var/log/form-pf
+    restart: always
+volumes:
+  form-pf-shared-storage:
+    external: true
+
