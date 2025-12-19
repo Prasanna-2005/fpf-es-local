@@ -80,7 +80,7 @@ func main() {
 			case "Investment Services":
 				go executeInvServ(m.FilingID, m.UserID)
 			case "Curio":
-				go executeCurio(m.FilingID, m.UserID)
+				fmt.Println("reached curio") // go executeCurio(m.FilingID, m.UserID)
 			}
 
 		}
