@@ -565,6 +565,8 @@ func executeCurio(filingID string, userID string) {
 				form1cData := executors.NewForm1cData()
 				setStaticDataHedgeFunds(form1cData, fund.GetFundID())
 				setQ24val(form1cData, fund.GetFundID())
+				form1cData.EquityLongBiasStrategy = false
+				form1cData.EquityLongBiasNAV = ""
 				executors.CollectAnswers(reflect.ValueOf(*form1cData), answersMapper)
 			}
 
