@@ -20,6 +20,18 @@ func CreateAllFundSeries(fundCode string) []*Fund {
 	return funds
 }
 
+func StaticFunds() (*executors.Form1bData, *Fund) {
+	fundData := executors.NewForm1bData()
+	fundData.OtherPercent = 100
+	fundObj := NewFund("CURSLP")
+
+	fundObj.fundID = "CURSLP"
+	fundObj.series = "CURSLP"
+
+	return fundData, fundObj
+
+}
+
 // assignFundPerf copies every float64/string from src (FundPerformance) into dst
 // (Form1bData) converting to sql.NullFloat64/sql.NullString when {term,colName} matches.
 func assignFundPerf(dst *executors.Form1bData, src FundPerformanceData) {
