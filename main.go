@@ -79,6 +79,8 @@ func main() {
 				go execute(m.FilingID, m.UserID)
 			case "Investment Services":
 				go executeInvServ(m.FilingID, m.UserID)
+			case "Curio":
+				fmt.Println("reached curio") // go executeCurio(m.FilingID, m.UserID)
 			}
 
 		}
