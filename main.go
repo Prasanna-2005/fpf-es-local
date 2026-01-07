@@ -7,6 +7,7 @@ import (
 	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/db"
 	"quantrium-tech/form_pf_extractor_service/executors"
+	curio "quantrium-tech/form_pf_extractor_service/executors/FEG/Curio"
 	invesmentservices "quantrium-tech/form_pf_extractor_service/executors/FEG/InvesmentServices"
 	privateinvestors "quantrium-tech/form_pf_extractor_service/executors/FEG/PrivateInvestors"
 	"quantrium-tech/form_pf_extractor_service/ipc"
@@ -80,7 +81,7 @@ func main() {
 			case "Investment Services":
 				go executeInvServ(m.FilingID, m.UserID)
 			case "Curio":
-				fmt.Println("reached curio") // go executeCurio(m.FilingID, m.UserID)
+				go executeCurio(m.FilingID, m.UserID)
 			}
 
 		}
@@ -179,6 +180,24 @@ func setQ24val(form1cdata *executors.Form1cData, fundId string) {
 func setStaticFunds(filingID, userID string) error {
 	answersMapper := make(map[[2]string]string)
 	staticFundData, staticFundObj := invesmentservices.StaticFunds()
+	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
+	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
+	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
+	if err != nil {
+		logging.Error("Error in Pushing to Form Data Table: " + err.Error())
+		return err
+	}
+
+	logging.Info("Form Data Entries are Pushed to the DB")
+
+	logging.Info("Execution Completed for the Fund: " + staticFundObj.GetFundID())
+	return nil
+
+}
+
+func setStaticCurioFunds(filingID, userID string) error {
+	answersMapper := make(map[[2]string]string)
+	staticFundData, staticFundObj := curio.StaticFunds()
 	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
 	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
@@ -435,6 +454,175 @@ func prepareFilingInvestmentServices(filingID string) (map[string][]*invesmentse
 		// mapping.FundShortCode = converted
 		if _, ok := fundsMapper[mapping.FundShortCode]; !ok {
 			fundsMapper[mapping.FundShortCode] = invesmentservices.CreateAllFundSeries(mapping.FundShortCode)
+		}
+
+		fundsList := fundsMapper[mapping.FundShortCode]
+
+		for _, fund := range fundsList {
+			fund.SetHolder(mapping.QuarterNo, mapping.FilingPath)
+		}
+
+	}
+
+	return fundsMapper, investorLiquidityPath, unfndCmts, nil
+}
+
+func executeCurio(filingID string, userID string) {
+
+	logging.Info("Execution Started for the filing with ID: " + filingID)
+	mapper, _, _, err := prepareFilingCurio(filingID)
+	if err != nil {
+		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
+		return
+	}
+
+	if len(mapper) == 0 {
+		logging.Error("No Funds Mapped. Execution cannot be Started")
+		return
+	}
+
+	existing, err := db.GetExisitingFunds(filingID)
+	if err != nil {
+		logging.Error("Error in Getting the Existing Funds in Form Data: " + err.Error())
+		return
+	}
+
+	// liqudityHolder := make(curio.LiquidityDataHolder)
+	// unfndCmtHolder := make(curio.UnfundedCommitmentsHolder)
+
+	// if investorLiquidityPath != "" {
+	// 	liqudityHolder, err = invesmentservices.ExtractInvestorLiquidity(investorLiquidityPath)
+	// 	if err != nil {
+	// 		logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+	// 		return
+	// 	}
+	// }
+	// if unfndCmtsPath != "" {
+	// 	unfndCmtHolder, err = invesmentservices.ExtractUnfundedCmts(unfndCmtsPath)
+	// 	if err != nil {
+	// 		logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+	// 		return
+	// 	}
+	// }
+	// for fund, dat := range liqudityHolder {
+	// 	fmt.Printf("\nfund:%v,data:%v\n", fund, *dat)
+	// }
+	// logging.Info("Extraction of Investor Liquidity Completed")
+
+	logging.Info(fmt.Sprintf("Total number of funds mapped: %d", len(mapper)))
+
+	for _, list := range mapper {
+		for _, fund := range list {
+
+			if _, ok := existing[fund.GetFundID()]; ok {
+				logging.Info(fund.GetFundID() + " Already Populated in the Form Data. Skipping")
+				continue
+			}
+
+			answersMapper := make(map[[2]string]string)
+			// ansMapper1c:=make(map[[2]string]string)
+
+			// if holder, ok := liqudityHolder[fund.GetFundID()]; ok {
+			// 	fund.SetLiquidityData(holder)
+			// } else {
+			// 	logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
+			// }
+
+			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
+			err := fund.ExtractTrialBalanceData()
+			if err != nil {
+				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
+				continue
+			}
+			err = fund.ExtractQ17()
+			if err != nil {
+				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
+				continue
+			}
+			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
+
+			// if holder, ok := unfndCmtHolder[fund.GetFundID()]; ok {
+			// 	fund.SetUnfdCmtsData(holder)
+
+			// } else {
+			// 	logging.Warn("Unfunded commitments Data not available for the Fund: " + fund.GetFundID())
+			// }
+			extractionData := fund.ExportWorkPaperData()
+			err = db.PushEntities(filingID, fund.GetFundID(), userID, extractionData)
+			if err != nil {
+				logging.Error("Error in Pushing to Extraction Table: " + err.Error())
+				continue
+			}
+			logging.Info("Entraction Entities are Pushed to the DB")
+
+			logging.Info("Computation Started for the Fund: " + fund.GetFundID())
+			formData := fund.Compute()
+			logging.Info("Computation Completed for the Fund: " + fund.GetFundID())
+
+			setStaticDataPV(formData, fund.GetFundID())
+
+			if strings.ToLower(db.FundStorer[fund.GetFundID()].FundType) == strings.ToLower("HEDGE") {
+				form1cData := executors.NewForm1cData()
+				setStaticDataHedgeFunds(form1cData, fund.GetFundID())
+				setQ24val(form1cData, fund.GetFundID())
+				form1cData.EquityLongBiasStrategy = false
+				form1cData.EquityLongBiasNAV = ""
+				executors.CollectAnswers(reflect.ValueOf(*form1cData), answersMapper)
+			}
+
+			executors.CollectAnswers(reflect.ValueOf(*formData), answersMapper)
+
+			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper)
+
+			if err != nil {
+				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
+			}
+
+			logging.Info("Form Data Entries are Pushed to the DB")
+
+			logging.Info("Execution Completed for the Fund: " + fund.GetFundID())
+
+		}
+	}
+	err = setStaticCurioFunds(filingID, userID)
+	if err != nil {
+		logging.Error(fmt.Sprintf("Static funds setting error:%v", err.Error()))
+	}
+	logging.Info("Succefully set static Funds")
+	logging.Info("Execution Completed for the filing with ID: " + filingID)
+}
+
+func prepareFilingCurio(filingID string) (map[string][]*curio.Fund, string, string, error) {
+
+	fundsMapper := make(map[string][]*curio.Fund)
+	var investorLiquidityPath string
+	var unfndCmts string
+
+	mappings, err := db.PullFiling(filingID)
+	if err != nil {
+		return fundsMapper, investorLiquidityPath, unfndCmts, fmt.Errorf("pulling filing details from DB: " + err.Error())
+	}
+
+	for _, mapping := range *mappings {
+
+		if mapping.FundShortCode == "Q15_Q16" {
+			investorLiquidityPath = os.Getenv("STORAGE_PATH") + mapping.FilingPath
+			continue
+		}
+		if mapping.FundShortCode == "UNFDCMTS" {
+			unfndCmts = os.Getenv("STORAGE_PATH") + mapping.FilingPath
+		}
+
+		// converted := invesmentservices.ShortCodeConvertor[mapping.FundShortCode]
+
+		// if converted == "" {
+		// 	logging.Warn(mapping.FundShortCode + "->" + "Unknown Short Code Encountered. Conversion Failed")
+		// 	continue
+		// }
+
+		// mapping.FundShortCode = converted
+		if _, ok := fundsMapper[mapping.FundShortCode]; !ok {
+			fundsMapper[mapping.FundShortCode] = curio.CreateAllFundSeries(mapping.FundShortCode)
 		}
 
 		fundsList := fundsMapper[mapping.FundShortCode]

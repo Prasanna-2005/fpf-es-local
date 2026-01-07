@@ -142,8 +142,8 @@ type Form1cData struct {
 	// EquityShortBiasNAV      float64 `fieldNo:"20" formLineNo:"20_(c)_%_of_NAV"`
 	// EquityShortBiasCapital  float64 `fieldNo:"20" formLineNo:"20_(c)_%_of_capital"`
 
-	EquityLongBiasStrategy bool    `fieldNo:"20" formLineNo:"20_(d)_Strategy"`
-	EquityLongBiasNAV      float64 `fieldNo:"20" formLineNo:"20_(d)_%_of_NAV"`
+	EquityLongBiasStrategy bool   `fieldNo:"20" formLineNo:"20_(d)_Strategy"`
+	EquityLongBiasNAV      string `fieldNo:"20" formLineNo:"20_(d)_%_of_NAV"`
 	// EquityLongBiasCapital  float64 `fieldNo:"20" formLineNo:"20_(d)_%_of_capital"`
 
 	// Macro
@@ -305,7 +305,7 @@ func NewForm1cData() *Form1cData {
 	return &Form1cData{
 		Strategy:                    "Single primary strategy",
 		EquityLongBiasStrategy:      true,
-		EquityLongBiasNAV:           100,
+		EquityLongBiasNAV:           "100",
 		EquityMarketNeutralStrategy: false,
 		EquityLongShortStrategy:     false,
 		EquityShortBiasStrategy:     false,
