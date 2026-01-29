@@ -213,9 +213,14 @@ func setStaticCurioFunds(filingID, userID string) error {
 
 }
 
+func sectionaData(clientCode string) *executors.RegInvAdv {
+	firm := executors.NewReRegInvAdv(clientCode)
+	firm.Sec1aData()
+	return firm
+}
+
 // execute acts as the core execution and triggering point for both extraction and computation.
 func execute(filingID string, userID string) {
-
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, investorLiquidityPath, err := prepareFilingPrivateInvestors(filingID)
 	if err != nil {
@@ -301,7 +306,7 @@ func execute(filingID string, userID string) {
 }
 
 func executeInvServ(filingID string, userID string) {
-
+	sec1a := sectionaData("FEG")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, investorLiquidityPath, unfndCmtsPath, err := prepareFilingInvestmentServices(filingID)
 	if err != nil {
@@ -408,9 +413,8 @@ func executeInvServ(filingID string, userID string) {
 			if err != nil {
 				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 			}
-
+			sec1a.CalcAUM(fund.GetFundType(), formData.NetAsset, formData.GrossAsset)
 			logging.Info("Form Data Entries are Pushed to the DB")
-
 			logging.Info("Execution Completed for the Fund: " + fund.GetFundID())
 
 		}
@@ -418,6 +422,15 @@ func executeInvServ(filingID string, userID string) {
 	err = setStaticFunds(filingID, userID)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Static funds setting error:%v", err.Error()))
+	}
+	form1aData := sec1a.Compute()
+	mapped1a := make(map[[2]string]string)
+	executors.CollectAnswers(reflect.ValueOf(*form1aData), mapped1a)
+
+	err = db.PushFormData(filingID, "section1a", userID, mapped1a)
+
+	if err != nil {
+		logging.Error("Error in Pushing to Form 1a Data Table: " + err.Error())
 	}
 	logging.Info("Succefully set static Funds")
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
