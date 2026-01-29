@@ -290,6 +290,45 @@ type Form1cData struct {
 	OtherTradePercent float64 `fieldNo:"25" formLineNo:"25"`
 }
 
+type Form1aData struct {
+	LegalName               string
+	CrdNumber               string
+	Sec801Number            string
+	NfaId                   string
+	LargeTraderId           string
+	LargeTraderIdSuffix     string
+	FilingType              string
+	ReportingPeriodType     string
+	ReportingPeriodEndDate  string
+	FirmIndividualName      string
+	FirmIndividualSignature string
+	FirmIndividualTitle     string
+	FirmIndividualEmail     string
+	FirmIndividualPhno      string
+	FirmDependentsRelName   string
+	FirmDependentsName      string
+	FirmDependentsSign      string
+	FirmDependentsTitle     string
+	FirmDependentsEmail     string
+	FirmDependentsPhno      string
+	HedgeFundsGAV           float64
+	HedgeFundsNAV           float64
+	LiquidityGAV            float64
+	LiquidityNAV            float64
+	PrivateGAV              float64
+	PrivateNAV              float64
+	RealEstateGAV           float64
+	RealEstateNAV           float64
+	SecuredAssetsGAV        float64
+	SecuredAssetsNAV        float64
+	VentureCapitalGAV       float64
+	VentureCapitalNAV       float64
+	OtherGAV                float64
+	OtherNAV                float64
+	NOTAGAV                 float64
+	NOTANAV                 float64
+}
+
 func NewForm1bData() *Form1bData {
 	// lastYear := time.Now().Year() - 1
 	return &Form1bData{
@@ -387,4 +426,8 @@ func NewForm1cData() *Form1cData {
 
 		OtherTradePercent: 0,
 	}
+}
+
+func NewForm1aData() *Form1aData {
+	return &Form1aData{}
 }
