@@ -267,7 +267,7 @@ func execute(filingID string, userID string) {
 			err := fund.ExtractWorkPaperData()
 			if err != nil {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
-				
+				continue
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
 
