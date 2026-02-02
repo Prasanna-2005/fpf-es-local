@@ -177,10 +177,10 @@ Out:
 			switch {
 			case netIndex != 0 && grossIndex != 0 && allPartnerIndex != 0:
 				break Out
-			case strings.Contains(cellValue, "Unfunded Commitment") && unfundedIndex != 0:
+			case strings.Contains(cellValue, "Unfunded Commitment") && unfundedIndex == 0:
 				unfundedIndex = j
 				continue
-			case strings.Contains(cellValue, "All Partner") && allPartnerIndex != 0:
+			case strings.Contains(cellValue, "All Partner") && allPartnerIndex == 0:
 				allPartnerIndex = i
 				continue
 			case strings.EqualFold(cellValue, "Net"):
