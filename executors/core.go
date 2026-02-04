@@ -291,42 +291,46 @@ type Form1cData struct {
 }
 
 type Form1aData struct {
-	LegalName               string
-	CrdNumber               string
-	Sec801Number            string
-	NfaId                   string
-	LargeTraderId           string
-	LargeTraderIdSuffix     string
-	FilingType              string
-	ReportingPeriodType     string
-	ReportingPeriodEndDate  string
-	FirmIndividualName      string
-	FirmIndividualSignature string
-	FirmIndividualTitle     string
-	FirmIndividualEmail     string
-	FirmIndividualPhno      string
-	FirmDependentsRelName   string
-	FirmDependentsName      string
-	FirmDependentsSign      string
-	FirmDependentsTitle     string
-	FirmDependentsEmail     string
-	FirmDependentsPhno      string
-	HedgeFundsGAV           float64
-	HedgeFundsNAV           float64
-	LiquidityGAV            float64
-	LiquidityNAV            float64
-	PrivateGAV              float64
-	PrivateNAV              float64
-	RealEstateGAV           float64
-	RealEstateNAV           float64
-	SecuredAssetsGAV        float64
-	SecuredAssetsNAV        float64
-	VentureCapitalGAV       float64
-	VentureCapitalNAV       float64
-	OtherGAV                float64
-	OtherNAV                float64
-	NOTAGAV                 float64
-	NOTANAV                 float64
+	FilingType             string `fieldNo:"0" formLineNo:"0_A_i"`
+	ReportingPeriodType    string `fieldNo:"0" formLineNo:"0_A_ii"`
+	ReportingPeriodEndDate string `fieldNo:"0" formLineNo:"0_A_iii"`
+
+	LegalName           string `fieldNo:"1" formLineNo:"1_a_i"`
+	CrdNumber           string `fieldNo:"1" formLineNo:"1_a_ii"`
+	Sec801Number        string `fieldNo:"1" formLineNo:"1_a_iii"`
+	NfaId               string `fieldNo:"1" formLineNo:"1_a_iv"`
+	LargeTraderId       string `fieldNo:"1" formLineNo:"1_a_v"`
+	LargeTraderIdSuffix string `fieldNo:"1" formLineNo:"1_a_vi"`
+
+	FirmIndividualName      string `fieldNo:"2" formLineNo:"2_a_i"`
+	FirmIndividualSignature string `fieldNo:"2" formLineNo:"2_a_ii"`
+	FirmIndividualTitle     string `fieldNo:"2" formLineNo:"2_a_iii"`
+	FirmIndividualEmail     string `fieldNo:"2" formLineNo:"2_a_iv"`
+	FirmIndividualPhno      string `fieldNo:"2" formLineNo:"2_a_v"`
+
+	FirmDependentsRelName string `fieldNo:"2" formLineNo:"2_b_i"`
+	FirmDependentsName    string `fieldNo:"2" formLineNo:"2_b_ii"`
+	FirmDependentsSign    string `fieldNo:"2" formLineNo:"2_b_iii"`
+	FirmDependentsTitle   string `fieldNo:"2" formLineNo:"2_b_iv"`
+	FirmDependentsEmail   string `fieldNo:"2" formLineNo:"2_b_v"`
+	FirmDependentsPhno    string `fieldNo:"2" formLineNo:"2_b_vi"`
+
+	HedgeFundsGAV     float64 `fieldNo:"3" formLineNo:"3_a_Regulatory_assets_under_management"`
+	HedgeFundsNAV     float64 `fieldNo:"3" formLineNo:"3_a_Net_assets_under_management"`
+	LiquidityGAV      float64 `fieldNo:"3" formLineNo:"3_b_Regulatory_assets_under_management"`
+	LiquidityNAV      float64 `fieldNo:"3" formLineNo:"3_b_Net_assets_under_management"`
+	PrivateGAV        float64 `fieldNo:"3" formLineNo:"3_c_Regulatory_assets_under_management"`
+	PrivateNAV        float64 `fieldNo:"3" formLineNo:"3_c_Net_assets_under_management"`
+	RealEstateGAV     float64 `fieldNo:"3" formLineNo:"3_d_Regulatory_assets_under_management"`
+	RealEstateNAV     float64 `fieldNo:"3" formLineNo:"3_d_Net_assets_under_management"`
+	SecuredAssetsGAV  float64 `fieldNo:"3" formLineNo:"3_e_Regulatory_assets_under_management"`
+	SecuredAssetsNAV  float64 `fieldNo:"3" formLineNo:"3_e_Net_assets_under_management"`
+	VentureCapitalGAV float64 `fieldNo:"3" formLineNo:"3_f_Regulatory_assets_under_management"`
+	VentureCapitalNAV float64 `fieldNo:"3" formLineNo:"3_f_Net_assets_under_management"`
+	OtherGAV          float64 `fieldNo:"3" formLineNo:"3_g_Regulatory_assets_under_management"`
+	OtherNAV          float64 `fieldNo:"3" formLineNo:"3_g_Net_assets_under_management"`
+	NOTAGAV           float64 `fieldNo:"3" formLineNo:"3_h_Regulatory_assets_under_management"`
+	NOTANAV           float64 `fieldNo:"3" formLineNo:"3_h_Net_assets_under_management"`
 }
 
 func NewForm1bData() *Form1bData {

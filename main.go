@@ -427,7 +427,7 @@ func executeInvServ(filingID string, userID string) {
 	mapped1a := make(map[[2]string]string)
 	executors.CollectAnswers(reflect.ValueOf(*form1aData), mapped1a)
 
-	err = db.PushFormData(filingID, "section1a", userID, mapped1a)
+	err = db.PushFormData(filingID, "section-1a", userID, mapped1a)
 
 	if err != nil {
 		logging.Error("Error in Pushing to Form 1a Data Table: " + err.Error())
