@@ -161,7 +161,6 @@ func setStaticDataHedgeFunds(form1cdata *executors.Form1cData, fundId string) {
 
 }
 func setQ24val(form1cdata *executors.Form1cData, fundId string) {
-	fmt.Printf("\nfundid:%v\n", fundId)
 	if fundId == "FSSUS" {
 		form1cdata.SecOTC = "0"
 		form1cdata.SecRegExchange = "100"
@@ -342,9 +341,6 @@ func executeInvServ(filingID string, userID string) {
 			return
 		}
 	}
-	for fund, dat := range liqudityHolder {
-		fmt.Printf("\nfund:%v,data:%v\n", fund, *dat)
-	}
 	logging.Info("Extraction of Investor Liquidity Completed")
 
 	logging.Info(fmt.Sprintf("Total number of funds mapped: %d", len(mapper)))
@@ -413,7 +409,7 @@ func executeInvServ(filingID string, userID string) {
 			if err != nil {
 				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 			}
-			sec1a.CalcAUM(fund.GetFundType(), formData.NetAsset, formData.GrossAsset)
+			sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
 			logging.Info("Form Data Entries are Pushed to the DB")
 			logging.Info("Execution Completed for the Fund: " + fund.GetFundID())
 
