@@ -291,10 +291,6 @@ type Form1cData struct {
 }
 
 type Form1aData struct {
-	FilingType             string `fieldNo:"0" formLineNo:"0_A_i"`
-	ReportingPeriodType    string `fieldNo:"0" formLineNo:"0_A_ii"`
-	ReportingPeriodEndDate string `fieldNo:"0" formLineNo:"0_A_iii"`
-
 	LegalName           string `fieldNo:"1" formLineNo:"1_a_i"`
 	CrdNumber           string `fieldNo:"1" formLineNo:"1_a_ii"`
 	Sec801Number        string `fieldNo:"1" formLineNo:"1_a_iii"`
