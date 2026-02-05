@@ -1,6 +1,8 @@
 package executors
 
-import "strings"
+import (
+	"strings"
+)
 
 type RegInvAdv struct {
 	clientCode string
