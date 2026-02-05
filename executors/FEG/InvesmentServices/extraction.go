@@ -63,8 +63,6 @@ func ExtractUnfundedCmts(filePath string) (UnfundedCommitmentsHolder, error) {
 	}()
 
 	unfdCmtsHolder, err := extUnfndCmts(f)
-	fmt.Println("UF cmmts")
-	fmt.Println(unfdCmtsHolder)
 	if err != nil {
 		return unfdCmtsHolder, fmt.Errorf("extracing unfndcmts: " + err.Error())
 	}
@@ -74,7 +72,6 @@ func ExtractUnfundedCmts(filePath string) (UnfundedCommitmentsHolder, error) {
 
 func extUnfndCmts(f *excelize.File) (map[string]float64, error) {
 	rows, err := f.GetRows(os.Getenv("UNFND_CMTS_SHEET"))
-	fmt.Println(rows)
 	if err != nil {
 		return nil, fmt.Errorf("getting unfunded commitments rows: %w", err)
 	}
@@ -162,7 +159,6 @@ func extractQ15Data(f *excelize.File) (*map[string]float64, error) {
 		fund, _ := f.GetCellValue("Q15, 16", fundCol)
 		fund = ShortCodeConvertor[strings.TrimSpace(fund)]
 		value, _ := f.GetCellValue("Q15, 16", location)
-		fmt.Printf("\nfund:%vhivalue:%vhi\n", fund, value)
 		value = executors.CleanNonNumeric(value)
 
 		percentage, _ := strconv.ParseFloat(value, 64)
@@ -345,7 +341,6 @@ func extLevelingData(ordinate int, f *excelize.File, tbdata *WorkPaperData, F *F
 			*fp = l2
 		}
 
-		fmt.Println("Hi")
 		tbdata.l2 += l2
 		tbdata.sumLevelExtData += l2
 	}
@@ -465,12 +460,8 @@ func extracNAVRepData(f *excelize.File, Navdata *WorkPaperData) error {
 		}
 
 	}
-	fmt.Println("inside extraction")
-	fmt.Printf("\ngmap:%v\n", grossMap)
 	assignPerformance(grossMap, Navdata, true)
-	fmt.Printf("\nnetmap:%v\n", netMap)
 	assignPerformance(netMap, Navdata, false)
-	fmt.Printf("\nnavdata:%v\n", Navdata.fundPerformanceData)
 	return nil
 }
 
