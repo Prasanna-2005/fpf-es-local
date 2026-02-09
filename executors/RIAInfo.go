@@ -125,7 +125,6 @@ func (firm *RegInvAdv) Compute() *Form1aData {
 	form1a.NfaId = firm.itemA.nfaId
 	form1a.LargeTraderId = firm.itemA.largeTraderId
 	form1a.LargeTraderIdSuffix = firm.itemA.largeTraderIdSuffix
-	form1a.FilingType = firm.itemA.reportingType
 	form1a.FirmIndividualName = firm.itemA.firmSign.name
 	form1a.FirmIndividualSignature = firm.itemA.firmSign.sign
 	form1a.FirmIndividualTitle = firm.itemA.firmSign.title
