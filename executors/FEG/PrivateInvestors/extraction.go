@@ -149,14 +149,15 @@ func ExtractInvestorLiquidity(filePath string) (LiquidityDataHolder, error) {
 
 // extractQTD retrieves the required cells (unfunded commitments, gross and net performance)
 // from the QTD Sheet of the Q3 Workpaper
-func extractQTDData(f *excelize.File, series string, sheet string) (float64, float64, float64, error) {
+func extractQTDData(f *excelize.File, series string, sheet string) (float64, float64, float64, QTDval, error) {
 
 	var unfunded, net, gross, begBal, cashDistrib, capCall, netIncome, mgmtFee float64
 	var missing []string
+	var qtdVal QTDval
 
 	qtdRows, err := f.GetRows(sheet)
 	if err != nil {
-		return unfunded, net, gross, fmt.Errorf("getting QTD Rows: " + err.Error())
+		return unfunded, net, gross, qtdVal, fmt.Errorf("getting QTD Rows: " + err.Error())
 	}
 
 	var start, begBalIndex, capCallIndex, cashDistribIndex, netIncomeIndex, mgmtFeeIndex int //rowIndex
@@ -242,6 +243,14 @@ Out:
 	netIncome, _ = strconv.ParseFloat(netIncomeValue, 64)
 	unfunded, _ = strconv.ParseFloat(unfundedValue, 64)
 
+	qtdVal = QTDval{
+		BegBal:      begBal,
+		CashDistrib: cashDistrib,
+		CapCall:     capCall,
+		NetIncome:   netIncome,
+		MgmtFee:     mgmtFee,
+	}
+
 	switch begBal + capCall + cashDistrib {
 	case 0:
 		logging.Warn("Sum of begining balance ,capitalCall ,cashDistribution is zero")
@@ -253,10 +262,8 @@ Out:
 		net = math.Round((netIncome/dr)*10000) / 100
 		gross = math.Round(((netIncome-mgmtFee)/dr)*10000) / 100
 	}
-	fmt.Printf("Series:%v\n", series)
-	fmt.Printf("netincome:%v,mgmtfee:%v,begBal:%v,capCall:%v,cashDistri:%v,\n", netIncome, mgmtFee, begBal, capCall, cashDistrib)
-	fmt.Printf("net:hi%vhi,gross:hi%vhi\n", net, gross)
-	return unfunded, net, gross, nil
+
+	return unfunded, net, gross, qtdVal, nil
 }
 
 // extractBSData extracts the necessary data from the BS Datasheet and updates in-place for the Fund WorkPaperData
@@ -321,6 +328,7 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 // extractOtherQuartersData retrieves the fund performance (gross and net) for other quarters (q1,q2) and updates
 // inplace in the Fund's FundPerformanceData
 func extractOtherQuartersData(fd *FundPerformanceData, f1Path string, f2Path string, series string, sheet string) error {
+	var q1ExtVal, q2ExtVal QTDval
 	f1, err := excelize.OpenFile(f1Path)
 	if err != nil {
 		return fmt.Errorf("opening q1 workpaper: " + err.Error())
@@ -340,14 +348,26 @@ func extractOtherQuartersData(fd *FundPerformanceData, f1Path string, f2Path str
 
 	}()
 
-	_, fd.q1NetPercentage, fd.q1GrossPercentage, err = extractQTDData(f1, series, sheet)
+	_, fd.q1NetPercentage, fd.q1GrossPercentage, q1ExtVal, err = extractQTDData(f1, series, sheet)
 	if err != nil {
 		return fmt.Errorf("extracing QTD Data for quarter 1: " + err.Error())
 	}
-	_, fd.q2NetPercentage, fd.q2GrossPercentage, err = extractQTDData(f2, series, sheet)
+	_, fd.q2NetPercentage, fd.q2GrossPercentage, q2ExtVal, err = extractQTDData(f2, series, sheet)
 	if err != nil {
 		return fmt.Errorf("extracing QTD Data for quarter 2: " + err.Error())
 	}
+
+	fd.begBalq2 = q2ExtVal.BegBal
+	fd.capCallq2 = q2ExtVal.CapCall
+	fd.cashDistribq2 = q2ExtVal.CashDistrib
+	fd.mgmtFeeq2 = q2ExtVal.MgmtFee
+	fd.netIncomeq2 = q2ExtVal.NetIncome
+
+	fd.begBalq1 = q1ExtVal.BegBal
+	fd.capCallq1 = q1ExtVal.CapCall
+	fd.cashDistribq1 = q1ExtVal.CashDistrib
+	fd.mgmtFeeq1 = q1ExtVal.MgmtFee
+	fd.netIncomeq1 = q1ExtVal.NetIncome
 
 	return nil
 }
@@ -379,7 +399,7 @@ func (F *PrivateFund) ExtractWorkPaperData() error {
 		return fmt.Errorf("extracting BS Data: " + err.Error())
 	}
 
-	unfunded, net, gross, err := extractQTDData(f3, F.series, qtdSheet)
+	unfunded, net, gross, qtdExtVal, err := extractQTDData(f3, F.series, qtdSheet)
 	if err != nil {
 		return fmt.Errorf("extracting QTD Sheet: " + err.Error())
 	}
@@ -388,6 +408,11 @@ func (F *PrivateFund) ExtractWorkPaperData() error {
 	if slices.Contains(MaturedFunds, F.fundID) {
 		F.workPaperData.unfundedCommitments = 0
 	}
+	F.workPaperData.fundPerformanceData.begBalq3 = qtdExtVal.BegBal
+	F.workPaperData.fundPerformanceData.capCallq3 = qtdExtVal.CapCall
+	F.workPaperData.fundPerformanceData.cashDistribq3 = qtdExtVal.CashDistrib
+	F.workPaperData.fundPerformanceData.mgmtFeeq3 = qtdExtVal.MgmtFee
+	F.workPaperData.fundPerformanceData.netIncomeq3 = qtdExtVal.NetIncome
 	F.workPaperData.fundPerformanceData.q3GrossPercentage = gross
 	F.workPaperData.fundPerformanceData.q3NetPercentage = net
 
