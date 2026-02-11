@@ -2,6 +2,7 @@ package privateinvestors
 
 import (
 	"fmt"
+	"math"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"quantrium-tech/form_pf_extractor_service/logging"
 	"slices"
@@ -150,14 +151,15 @@ func ExtractInvestorLiquidity(filePath string) (LiquidityDataHolder, error) {
 // from the QTD Sheet of the Q3 Workpaper
 func extractQTDData(f *excelize.File, series string, sheet string) (float64, float64, float64, error) {
 
-	var unfunded, net, gross float64
+	var unfunded, net, gross, begBal, cashDistrib, capCall, netIncome, mgmtFee float64
+	var missing []string
 
 	qtdRows, err := f.GetRows(sheet)
 	if err != nil {
 		return unfunded, net, gross, fmt.Errorf("getting QTD Rows: " + err.Error())
 	}
 
-	var start, rowIndex, netIndex, grossIndex int
+	var start, begBalIndex, capCallIndex, cashDistribIndex, netIncomeIndex, mgmtFeeIndex int //rowIndex
 	var unfundedIndex, allPartnerIndex int
 Outer:
 	for i, row := range qtdRows {
@@ -175,7 +177,7 @@ Out:
 	for i, row := range qtdRows[start+1:] {
 		for j, cellValue := range row {
 			switch {
-			case netIndex != 0 && grossIndex != 0 && allPartnerIndex != 0:
+			case cashDistribIndex != 0 && capCallIndex != 0 && begBalIndex != 0 && allPartnerIndex != 0:
 				break Out
 			case strings.Contains(cellValue, "Unfunded Commitment") && unfundedIndex == 0:
 				unfundedIndex = j
@@ -183,33 +185,77 @@ Out:
 			case strings.Contains(cellValue, "All Partner") && allPartnerIndex == 0:
 				allPartnerIndex = i
 				continue
-			case strings.EqualFold(cellValue, "Net"):
-				netIndex = j
-				rowIndex = i
+			case strings.EqualFold(cellValue, "Beginning Balance") && begBalIndex == 0:
+				begBalIndex = j
+				// rowIndex = i
 				continue
-			case strings.EqualFold(cellValue, "Gross"):
-				grossIndex = j
-				rowIndex = i
+			case strings.EqualFold(cellValue, "Investor - Capital Call") && capCallIndex == 0:
+				capCallIndex = j
+				// rowIndex = i
+				continue
+			case strings.EqualFold(cellValue, "Investor - Cash Distribution") && cashDistribIndex == 0:
+				cashDistribIndex = j
+				// rowIndex = i
+				continue
+			case strings.EqualFold(cellValue, "Net Income") && netIncomeIndex == 0:
+				netIncomeIndex = j
+				// rowIndex = i
+				continue
+			case strings.EqualFold(cellValue, "Management Fee Expense") && mgmtFeeIndex == 0:
+				mgmtFeeIndex = j
+				// rowIndex = i
 				continue
 			}
 		}
 	}
 
-	rowIndex += (start + 1)
+	for name, idx := range map[string]int{"unfundedIndex": unfundedIndex, "allPartnerIndex": allPartnerIndex, "begBalIndex": begBalIndex, "capCallIndex": capCallIndex, "cashDistribIndex": cashDistribIndex, "netIncomeIndex": netIncomeIndex, "mgmtFeeIndex": mgmtFeeIndex} {
+		if idx == 0 {
+			missing = append(missing, name)
+		}
+	}
+	if len(missing) > 0 {
+		logging.Warn(fmt.Sprintf("Missing marker indexes:%v", strings.Join(missing, ", ")))
+	}
+
+	// rowIndex += (start + 1)
 	allPartnerIndex += (start + 1)
 
-	netValue, _ := f.GetCellValue(sheet, executors.IndexToExcel(rowIndex+1, netIndex))
-	grossValue, _ := f.GetCellValue(sheet, executors.IndexToExcel(rowIndex+1, grossIndex))
+	netIncomeValue, _ := f.GetCellValue(sheet, executors.IndexToExcel(allPartnerIndex, netIncomeIndex))
+	mgmtFeeValue, _ := f.GetCellValue(sheet, executors.IndexToExcel(allPartnerIndex, mgmtFeeIndex))
+	begBalValue, _ := f.GetCellValue(sheet, executors.IndexToExcel(allPartnerIndex, begBalIndex))
+	capCallValue, _ := f.GetCellValue(sheet, executors.IndexToExcel(allPartnerIndex, capCallIndex))
+	cashDistribValue, _ := f.GetCellValue(sheet, executors.IndexToExcel(allPartnerIndex, cashDistribIndex))
 	unfundedValue, _ := f.GetCellValue(sheet, executors.IndexToExcel(allPartnerIndex, unfundedIndex))
 
-	netValue = executors.CleanNonNumeric(netValue)
-	grossValue = executors.CleanNonNumeric(grossValue)
+	begBalValue = executors.CleanNonNumeric(begBalValue)
+	capCallValue = executors.CleanNonNumeric(capCallValue)
+	cashDistribValue = executors.CleanNonNumeric(cashDistribValue)
+	netIncomeValue = executors.CleanNonNumeric(netIncomeValue)
+	mgmtFeeValue = executors.CleanNonNumeric(mgmtFeeValue)
 	unfundedValue = executors.CleanNonNumeric(unfundedValue)
 
-	net, _ = strconv.ParseFloat(netValue, 64)
-	gross, _ = strconv.ParseFloat(grossValue, 64)
+	begBal, _ = strconv.ParseFloat(begBalValue, 64)
+	capCall, _ = strconv.ParseFloat(capCallValue, 64)
+	cashDistrib, _ = strconv.ParseFloat(cashDistribValue, 64)
+	mgmtFee, _ = strconv.ParseFloat(mgmtFeeValue, 64)
+	netIncome, _ = strconv.ParseFloat(netIncomeValue, 64)
 	unfunded, _ = strconv.ParseFloat(unfundedValue, 64)
 
+	switch begBal + capCall + cashDistrib {
+	case 0:
+		logging.Warn("Sum of begining balance ,capitalCall ,cashDistribution is zero")
+		net = 0
+		gross = 0
+	default:
+		logging.Info("Sum of begining balance ,capitalCall ,cashDistribution is not equal to zero")
+		dr := begBal + capCall + cashDistrib
+		net = math.Round((netIncome/dr)*10000) / 100
+		gross = math.Round(((netIncome-mgmtFee)/dr)*10000) / 100
+	}
+	fmt.Printf("Series:%v\n", series)
+	fmt.Printf("netincome:%v,mgmtfee:%v,begBal:%v,capCall:%v,cashDistri:%v,\n", netIncome, mgmtFee, begBal, capCall, cashDistrib)
+	fmt.Printf("net:hi%vhi,gross:hi%vhi\n", net, gross)
 	return unfunded, net, gross, nil
 }
 
