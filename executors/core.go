@@ -311,22 +311,22 @@ type Form1aData struct {
 	FirmDependentsEmail   string `fieldNo:"2" formLineNo:"2_b_v"`
 	FirmDependentsPhno    string `fieldNo:"2" formLineNo:"2_b_vi"`
 
-	HedgeFundsGAV     float64 `fieldNo:"3" formLineNo:"3_a_Regulatory_assets_under_management"`
-	HedgeFundsNAV     float64 `fieldNo:"3" formLineNo:"3_a_Net_assets_under_management"`
-	LiquidityGAV      float64 `fieldNo:"3" formLineNo:"3_b_Regulatory_assets_under_management"`
-	LiquidityNAV      float64 `fieldNo:"3" formLineNo:"3_b_Net_assets_under_management"`
-	PrivateGAV        float64 `fieldNo:"3" formLineNo:"3_c_Regulatory_assets_under_management"`
-	PrivateNAV        float64 `fieldNo:"3" formLineNo:"3_c_Net_assets_under_management"`
-	RealEstateGAV     float64 `fieldNo:"3" formLineNo:"3_d_Regulatory_assets_under_management"`
-	RealEstateNAV     float64 `fieldNo:"3" formLineNo:"3_d_Net_assets_under_management"`
-	SecuredAssetsGAV  float64 `fieldNo:"3" formLineNo:"3_e_Regulatory_assets_under_management"`
-	SecuredAssetsNAV  float64 `fieldNo:"3" formLineNo:"3_e_Net_assets_under_management"`
-	VentureCapitalGAV float64 `fieldNo:"3" formLineNo:"3_f_Regulatory_assets_under_management"`
-	VentureCapitalNAV float64 `fieldNo:"3" formLineNo:"3_f_Net_assets_under_management"`
-	OtherGAV          float64 `fieldNo:"3" formLineNo:"3_g_Regulatory_assets_under_management"`
-	OtherNAV          float64 `fieldNo:"3" formLineNo:"3_g_Net_assets_under_management"`
-	NOTAGAV           float64 `fieldNo:"3" formLineNo:"3_h_Regulatory_assets_under_management"`
-	NOTANAV           float64 `fieldNo:"3" formLineNo:"3_h_Net_assets_under_management"`
+	HedgeFundsGAV     float64 `fieldNo:"3" formLineNo:"3_(a)_Regulatory_assets_under_management"`
+	HedgeFundsNAV     float64 `fieldNo:"3" formLineNo:"3_(a)_Net_assets_under_management"`
+	LiquidityGAV      float64 `fieldNo:"3" formLineNo:"3_(b)_Regulatory_assets_under_management"`
+	LiquidityNAV      float64 `fieldNo:"3" formLineNo:"3_(b)_Net_assets_under_management"`
+	PrivateGAV        float64 `fieldNo:"3" formLineNo:"3_(c)_Regulatory_assets_under_management"`
+	PrivateNAV        float64 `fieldNo:"3" formLineNo:"3_(c)_Net_assets_under_management"`
+	RealEstateGAV     float64 `fieldNo:"3" formLineNo:"3_(d)_Regulatory_assets_under_management"`
+	RealEstateNAV     float64 `fieldNo:"3" formLineNo:"3_(d)_Net_assets_under_management"`
+	SecuredAssetsGAV  float64 `fieldNo:"3" formLineNo:"3_(e)_Regulatory_assets_under_management"`
+	SecuredAssetsNAV  float64 `fieldNo:"3" formLineNo:"3_(e)_Net_assets_under_management"`
+	VentureCapitalGAV float64 `fieldNo:"3" formLineNo:"3_(f)_Regulatory_assets_under_management"`
+	VentureCapitalNAV float64 `fieldNo:"3" formLineNo:"3_(f)_Net_assets_under_management"`
+	OtherGAV          float64 `fieldNo:"3" formLineNo:"3_(g)_Regulatory_assets_under_management"`
+	OtherNAV          float64 `fieldNo:"3" formLineNo:"3_(g)_Net_assets_under_management"`
+	NOTAGAV           float64 `fieldNo:"3" formLineNo:"3_(h)_Regulatory_assets_under_management"`
+	NOTANAV           float64 `fieldNo:"3" formLineNo:"3_(h)_Net_assets_under_management"`
 }
 
 func NewForm1bData() *Form1bData {
