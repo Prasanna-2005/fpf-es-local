@@ -6,6 +6,7 @@ import (
 
 type RegInvAdv struct {
 	clientCode string
+	series     string
 	itemA      ItemA
 	itemB      ItemB
 }
@@ -51,8 +52,8 @@ type RIAInfo struct {
 	phno  string
 }
 
-func NewReRegInvAdv(clientCode string) *RegInvAdv {
-	return &RegInvAdv{clientCode: clientCode}
+func NewRegInvAdv(clientCode, series string) *RegInvAdv {
+	return &RegInvAdv{clientCode: clientCode, series: series}
 }
 
 func (firm *RegInvAdv) NewfirmSign() RIAInfo {
@@ -102,12 +103,30 @@ func (firm *RegInvAdv) CalcAUM(fundType string, nav float64, gav float64) {
 }
 
 func (firm *RegInvAdv) Sec1aData() {
-	switch firm.clientCode {
-	case "FEG":
+	switch firm.clientCode + ":" + firm.series {
+	case "FEG:Investment Services":
 		firm.itemA.legalName = "FEG INVESTMENT SERVICES, LLC"
 		firm.itemA.crdNumber = "281516"
 		firm.itemA.sec801Number = "801-108644"
 		firm.itemA.nfaId = "0518605"
+		firm.itemA.largeTraderId = "NA"
+		firm.itemA.largeTraderIdSuffix = "NA"
+		firm.itemA.firmSign = firm.NewfirmSign()
+
+	case "FEG:Curio":
+		firm.itemA.legalName = "FEG CURIO INVESTMENT PARTNERS, LLC"
+		firm.itemA.crdNumber = "323497"
+		firm.itemA.sec801Number = "801-126960"
+		firm.itemA.nfaId = ""
+		firm.itemA.largeTraderId = "NA"
+		firm.itemA.largeTraderIdSuffix = "NA"
+		firm.itemA.firmSign = firm.NewfirmSign()
+
+	case "FEG:Private Investors":
+		firm.itemA.legalName = "FEG PRIVATE INVESTORS, LLC"
+		firm.itemA.crdNumber = "156458"
+		firm.itemA.sec801Number = "801-108644"
+		firm.itemA.nfaId = "0469730"
 		firm.itemA.largeTraderId = "NA"
 		firm.itemA.largeTraderIdSuffix = "NA"
 		firm.itemA.firmSign = firm.NewfirmSign()
