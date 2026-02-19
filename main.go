@@ -212,15 +212,15 @@ func setStaticCurioFunds(filingID, userID string) error {
 
 }
 
-func sectionaData(clientCode string) *executors.RegInvAdv {
-	firm := executors.NewReRegInvAdv(clientCode)
+func section1aData(clientCode, series string) *executors.RegInvAdv {
+	firm := executors.NewRegInvAdv(clientCode, series)
 	firm.Sec1aData()
 	return firm
 }
 
 // execute acts as the core execution and triggering point for both extraction and computation.
 func execute(filingID string, userID string) {
-	sec1a := sectionaData("FEG")
+	sec1a := section1aData("FEG", "Private Investors")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, investorLiquidityPath, err := prepareFilingPrivateInvestors(filingID)
 	if err != nil {
@@ -315,7 +315,7 @@ func execute(filingID string, userID string) {
 }
 
 func executeInvServ(filingID string, userID string) {
-	sec1a := sectionaData("FEG")
+	sec1a := section1aData("FEG", "Investment Services")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, investorLiquidityPath, unfndCmtsPath, err := prepareFilingInvestmentServices(filingID)
 	if err != nil {
@@ -487,7 +487,7 @@ func prepareFilingInvestmentServices(filingID string) (map[string][]*invesmentse
 }
 
 func executeCurio(filingID string, userID string) {
-	sec1a := sectionaData("FEG")
+	sec1a := section1aData("FEG", "Curio")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, _, _, err := prepareFilingCurio(filingID)
 	if err != nil {
