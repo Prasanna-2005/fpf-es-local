@@ -310,6 +310,8 @@ func execute(filingID string, userID string) {
 
 	if err != nil {
 		logging.Error("Error in Pushing to Form 1a Data Table: " + err.Error())
+	} else {
+		logging.Info("Pushed formdata for section 1A")
 	}
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
@@ -437,6 +439,8 @@ func executeInvServ(filingID string, userID string) {
 
 	if err != nil {
 		logging.Error("Error in Pushing to Form 1a Data Table: " + err.Error())
+	} else {
+		logging.Info("Pushed formdata for section 1A")
 	}
 	logging.Info("Succefully set static Funds")
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
@@ -616,6 +620,8 @@ func executeCurio(filingID string, userID string) {
 
 	if err != nil {
 		logging.Error("Error in Pushing to Form 1a Data Table: " + err.Error())
+	} else {
+		logging.Info("Pushed formdata for section 1A")
 	}
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
