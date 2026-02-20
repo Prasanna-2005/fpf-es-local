@@ -161,7 +161,6 @@ func setStaticDataHedgeFunds(form1cdata *executors.Form1cData, fundId string) {
 
 }
 func setQ24val(form1cdata *executors.Form1cData, fundId string) {
-	fmt.Printf("\nfundid:%v\n", fundId)
 	if fundId == "FSSUS" {
 		form1cdata.SecOTC = "0"
 		form1cdata.SecRegExchange = "100"
@@ -398,6 +397,8 @@ func executeInvServ(filingID string, userID string) {
 				form1cData := executors.NewForm1cData()
 				setStaticDataHedgeFunds(form1cData, fund.GetFundID())
 				setQ24val(form1cData, fund.GetFundID())
+				form1cData.InvestmentInOtherFundsStrategy = false
+				form1cData.InvestmentInOtherFundsNAV = ""
 				executors.CollectAnswers(reflect.ValueOf(*form1cData), answersMapper)
 			}
 
@@ -564,9 +565,12 @@ func executeCurio(filingID string, userID string) {
 			if strings.ToLower(db.FundStorer[fund.GetFundID()].FundType) == strings.ToLower("HEDGE") {
 				form1cData := executors.NewForm1cData()
 				setStaticDataHedgeFunds(form1cData, fund.GetFundID())
-				setQ24val(form1cData, fund.GetFundID())
 				form1cData.EquityLongBiasStrategy = false
 				form1cData.EquityLongBiasNAV = ""
+				form1cData.InvestmentInOtherFundsStrategy = true
+				form1cData.InvestmentInOtherFundsNAV = "100"
+				form1cData.OtherTradePercent = 100
+
 				executors.CollectAnswers(reflect.ValueOf(*form1cData), answersMapper)
 			}
 
