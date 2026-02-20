@@ -117,7 +117,7 @@ func (firm *RegInvAdv) Sec1aData() {
 		firm.itemA.legalName = "FEG CURIO INVESTMENT PARTNERS, LLC"
 		firm.itemA.crdNumber = "323497"
 		firm.itemA.sec801Number = "801-126960"
-		firm.itemA.nfaId = ""
+		firm.itemA.nfaId = "056229"
 		firm.itemA.largeTraderId = "NA"
 		firm.itemA.largeTraderIdSuffix = "NA"
 		firm.itemA.firmSign = firm.NewfirmSign()
@@ -125,7 +125,7 @@ func (firm *RegInvAdv) Sec1aData() {
 	case "FEG:Private Investors":
 		firm.itemA.legalName = "FEG PRIVATE INVESTORS, LLC"
 		firm.itemA.crdNumber = "156458"
-		firm.itemA.sec801Number = "801-108644"
+		firm.itemA.sec801Number = "801-72258"
 		firm.itemA.nfaId = "0469730"
 		firm.itemA.largeTraderId = "NA"
 		firm.itemA.largeTraderIdSuffix = "NA"
