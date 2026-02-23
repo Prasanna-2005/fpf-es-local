@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -20,13 +21,14 @@ func CreateAllFundSeries(fundCode string) []*Fund {
 	return funds
 }
 
-func StaticFunds() (*executors.Form1bData, *Fund) {
+func StaticFunds(FundShortCode string) (*executors.Form1bData, *Fund) {
+	FundShortCodeUpper := strings.ToUpper(FundShortCode)
 	fundData := executors.NewForm1bData()
 	fundData.OtherPercent = 100
-	fundObj := NewFund("CURSLP")
+	fundObj := NewFund(FundShortCodeUpper)
 
-	fundObj.fundID = "CURSLP"
-	fundObj.series = "CURSLP"
+	fundObj.fundID = FundShortCodeUpper
+	fundObj.series = FundShortCodeUpper
 
 	return fundData, fundObj
 

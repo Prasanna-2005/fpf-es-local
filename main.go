@@ -196,10 +196,23 @@ func setStaticFunds(filingID, userID string) error {
 
 func setStaticCurioFunds(filingID, userID string) error {
 	answersMapper := make(map[[2]string]string)
-	staticFundData, staticFundObj := curio.StaticFunds()
+	//CURSLP static funds
+	staticFundData, staticFundObj := curio.StaticFunds("CURSLP")
 	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
 	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
+	if err != nil {
+		logging.Error("Error in Pushing to Form Data Table: " + err.Error())
+		return err
+	}
+	logging.Info("Form Data Entries are Pushed to the DB")
+
+	logging.Info("Execution Completed for the Fund: " + staticFundObj.GetFundID())
+	//CNLCP static funds
+	staticFundData, staticFundObj = curio.StaticFunds("CNLCP")
+	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
+	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
+	err = db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
 	if err != nil {
 		logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 		return err
