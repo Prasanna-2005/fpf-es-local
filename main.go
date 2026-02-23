@@ -196,10 +196,23 @@ func setStaticFunds(filingID, userID string) error {
 
 func setStaticCurioFunds(filingID, userID string) error {
 	answersMapper := make(map[[2]string]string)
-	staticFundData, staticFundObj := curio.StaticFunds()
+	//CURSLP static funds
+	staticFundData, staticFundObj := curio.StaticFunds("CURSLP")
 	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
 	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
+	if err != nil {
+		logging.Error("Error in Pushing to Form Data Table: " + err.Error())
+		return err
+	}
+	logging.Info("Form Data Entries are Pushed to the DB")
+
+	logging.Info("Execution Completed for the Fund: " + staticFundObj.GetFundID())
+	//CNLCP static funds
+	staticFundData, staticFundObj = curio.StaticFunds("CNLCP")
+	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
+	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
+	err = db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
 	if err != nil {
 		logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 		return err
@@ -411,6 +424,8 @@ func executeInvServ(filingID string, userID string) {
 				form1cData := executors.NewForm1cData()
 				setStaticDataHedgeFunds(form1cData, fund.GetFundID())
 				setQ24val(form1cData, fund.GetFundID())
+				form1cData.InvestmentInOtherFundsStrategy = false
+				form1cData.InvestmentInOtherFundsNAV = ""
 				executors.CollectAnswers(reflect.ValueOf(*form1cData), answersMapper)
 			}
 
@@ -587,9 +602,12 @@ func executeCurio(filingID string, userID string) {
 			if strings.ToLower(db.FundStorer[fund.GetFundID()].FundType) == strings.ToLower("HEDGE") {
 				form1cData := executors.NewForm1cData()
 				setStaticDataHedgeFunds(form1cData, fund.GetFundID())
-				setQ24val(form1cData, fund.GetFundID())
 				form1cData.EquityLongBiasStrategy = false
 				form1cData.EquityLongBiasNAV = ""
+				form1cData.InvestmentInOtherFundsStrategy = true
+				form1cData.InvestmentInOtherFundsNAV = "100"
+				form1cData.OtherTradePercent = 100
+
 				executors.CollectAnswers(reflect.ValueOf(*form1cData), answersMapper)
 			}
 
