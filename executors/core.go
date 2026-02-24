@@ -216,8 +216,8 @@ type Form1cData struct {
 	// ManagedFuturesQuantitativeCapital  float64 `fieldNo:"20" formLineNo:"20_(t)_%_of_capital"`
 
 	// Other
-	InvestmentInOtherFundsStrategy bool `fieldNo:"20" formLineNo:"20_(u)_Strategy"`
-	// InvestmentInOtherFundsNAV      float64 `fieldNo:"20" formLineNo:"20_(u)_%_of_NAV"`
+	InvestmentInOtherFundsStrategy bool   `fieldNo:"20" formLineNo:"20_(u)_Strategy"`
+	InvestmentInOtherFundsNAV      string `fieldNo:"20" formLineNo:"20_(u)_%_of_NAV"`
 	// InvestmentInOtherFundsCapital  float64 `fieldNo:"20" formLineNo:"20_(u)_%_of_capital"`
 
 	OtherStrategy bool `fieldNo:"20" formLineNo:"20_(v)_Strategy"`
