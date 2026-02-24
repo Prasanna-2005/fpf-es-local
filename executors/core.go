@@ -290,6 +290,45 @@ type Form1cData struct {
 	OtherTradePercent float64 `fieldNo:"25" formLineNo:"25"`
 }
 
+type Form1aData struct {
+	LegalName           string `fieldNo:"1" formLineNo:"1_a_i"`
+	CrdNumber           string `fieldNo:"1" formLineNo:"1_a_ii"`
+	Sec801Number        string `fieldNo:"1" formLineNo:"1_a_iii"`
+	NfaId               string `fieldNo:"1" formLineNo:"1_a_iv"`
+	LargeTraderId       string `fieldNo:"1" formLineNo:"1_a_v"`
+	LargeTraderIdSuffix string `fieldNo:"1" formLineNo:"1_a_vi"`
+
+	FirmIndividualName      string `fieldNo:"2" formLineNo:"2_a_i"`
+	FirmIndividualSignature string `fieldNo:"2" formLineNo:"2_a_ii"`
+	FirmIndividualTitle     string `fieldNo:"2" formLineNo:"2_a_iii"`
+	FirmIndividualEmail     string `fieldNo:"2" formLineNo:"2_a_iv"`
+	FirmIndividualPhno      string `fieldNo:"2" formLineNo:"2_a_v"`
+
+	FirmDependentsRelName string `fieldNo:"2" formLineNo:"2_b_i"`
+	FirmDependentsName    string `fieldNo:"2" formLineNo:"2_b_ii"`
+	FirmDependentsSign    string `fieldNo:"2" formLineNo:"2_b_iii"`
+	FirmDependentsTitle   string `fieldNo:"2" formLineNo:"2_b_iv"`
+	FirmDependentsEmail   string `fieldNo:"2" formLineNo:"2_b_v"`
+	FirmDependentsPhno    string `fieldNo:"2" formLineNo:"2_b_vi"`
+
+	HedgeFundsGAV     float64 `fieldNo:"3" formLineNo:"3_(a)_Regulatory_assets_under_management"`
+	HedgeFundsNAV     float64 `fieldNo:"3" formLineNo:"3_(a)_Net_assets_under_management"`
+	LiquidityGAV      float64 `fieldNo:"3" formLineNo:"3_(b)_Regulatory_assets_under_management"`
+	LiquidityNAV      float64 `fieldNo:"3" formLineNo:"3_(b)_Net_assets_under_management"`
+	PrivateGAV        float64 `fieldNo:"3" formLineNo:"3_(c)_Regulatory_assets_under_management"`
+	PrivateNAV        float64 `fieldNo:"3" formLineNo:"3_(c)_Net_assets_under_management"`
+	RealEstateGAV     float64 `fieldNo:"3" formLineNo:"3_(d)_Regulatory_assets_under_management"`
+	RealEstateNAV     float64 `fieldNo:"3" formLineNo:"3_(d)_Net_assets_under_management"`
+	SecuredAssetsGAV  float64 `fieldNo:"3" formLineNo:"3_(e)_Regulatory_assets_under_management"`
+	SecuredAssetsNAV  float64 `fieldNo:"3" formLineNo:"3_(e)_Net_assets_under_management"`
+	VentureCapitalGAV float64 `fieldNo:"3" formLineNo:"3_(f)_Regulatory_assets_under_management"`
+	VentureCapitalNAV float64 `fieldNo:"3" formLineNo:"3_(f)_Net_assets_under_management"`
+	OtherGAV          float64 `fieldNo:"3" formLineNo:"3_(g)_Regulatory_assets_under_management"`
+	OtherNAV          float64 `fieldNo:"3" formLineNo:"3_(g)_Net_assets_under_management"`
+	NOTAGAV           float64 `fieldNo:"3" formLineNo:"3_(h)_Regulatory_assets_under_management"`
+	NOTANAV           float64 `fieldNo:"3" formLineNo:"3_(h)_Net_assets_under_management"`
+}
+
 func NewForm1bData() *Form1bData {
 	// lastYear := time.Now().Year() - 1
 	return &Form1bData{
@@ -387,4 +426,8 @@ func NewForm1cData() *Form1cData {
 
 		OtherTradePercent: 0,
 	}
+}
+
+func NewForm1aData() *Form1aData {
+	return &Form1aData{}
 }

@@ -72,7 +72,6 @@ func SetFundInfo() error {
 	}
 
 	for _, fund := range funds {
-		fmt.Println(fund.FundType)
 		FundStorer[mapper[fund.FundID]] = fund
 	}
 

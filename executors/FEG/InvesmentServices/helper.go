@@ -99,7 +99,6 @@ func assignFundPerf(dst *executors.Form1bData, src FundPerformanceData) {
 			}))
 
 			// 2. single-shot date assignment
-			fmt.Println(dateIdx)
 			if idx, ok := dateIdx[term]; ok {
 				otherCol := "gross"
 				if col == "gross" {
