@@ -104,7 +104,7 @@ func CollectAnswers(v reflect.Value, store map[[2]string]string) {
 			store[l] = value.String()
 
 		case value.Kind() == reflect.Float64:
-			store[l] = formatCustomApprox(value.Float())
+			store[l] = strconv.FormatFloat(math.Round(value.Float()), 'f', 0, 64)
 
 		case value.Kind() == reflect.Bool:
 			store[l] = strconv.FormatBool(value.Bool())
@@ -113,14 +113,4 @@ func CollectAnswers(v reflect.Value, store map[[2]string]string) {
 			continue
 		}
 	}
-}
-
-func formatCustomApprox(number float64) string {
-	intPart := math.Floor(number)
-
-	if number-intPart >= 0.5 {
-		intPart += 1
-	}
-
-	return strconv.FormatFloat(intPart, 'f', 0, 64)
 }
