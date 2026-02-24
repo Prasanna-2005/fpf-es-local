@@ -53,4 +53,16 @@ var LevelMapper = map[string]map[string][]string{
 	"CURTIM": {
 		"l3": {"private eq @ cost", "private eq u/r g/l"},
 	},
+	"CUPDC": {
+		"l3": {"private eq @ cost", "private eq u/r g/l"},
+	},
+	"CUELT": {
+		"l3": {"private eq @ cost", "private eq u/r g/l"},
+	},
+	"CURHP": {
+		"l3": {"private eq @ cost", "private eq u/r g/l"},
+	},
+	"CUTRV": {
+		"l3": {"private eq @ cost", "private eq u/r g/l"},
+	},
 }
