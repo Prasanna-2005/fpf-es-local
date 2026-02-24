@@ -118,7 +118,7 @@ func CollectAnswers(v reflect.Value, store map[[2]string]string) {
 func formatCustomApprox(number float64) string {
 	intPart := math.Floor(number)
 
-	if number-intPart > 0.5 {
+	if number-intPart >= 0.5 {
 		intPart += 1
 	}
 
