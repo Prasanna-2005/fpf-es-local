@@ -5,12 +5,16 @@ import "database/sql"
 // Form1bData holds the structure of the section 1b in Form PF.
 // It will be dynamically increased based on the needs to answer other questions
 type Form1bData struct {
-	FundName                string `fieldNo:"5" formLineNo:"5_a"`
-	FundID                  string `fieldNo:"5" formLineNo:"5_b"`
-	FundNFA                 string `fieldNo:"5" formLineNo:"5_c"`
-	FundLEI                 string `fieldNo:"5" formLineNo:"5_d"`
-	MasterFund              bool   `fieldNo:"6" formLineNo:"6"`
-	ParallelFundsAggregated bool   `fieldNo:"7" formLineNo:"7_a"`
+	FundName                    string `fieldNo:"5" formLineNo:"5_a"`
+	FundID                      string `fieldNo:"5" formLineNo:"5_b"`
+	FundNFA                     string `fieldNo:"5" formLineNo:"5_c"`
+	FundLEI                     string `fieldNo:"5" formLineNo:"5_d"`
+	MasterFund                  bool   `fieldNo:"6" formLineNo:"6"`
+	ParallelFundsAggregated     bool   `fieldNo:"7" formLineNo:"7_a"`
+	ParallelFundsAggregatedName string `fieldNo:"7" formLineNo:"7_a"`
+	ParallelFundsAggregatedID   string `fieldNo:"7" formLineNo:"7_a"`
+	ParallelFundsAggregatedNFA  string `fieldNo:"7" formLineNo:"7_a"`
+	ParallelFundsAggregatedLEI  string `fieldNo:"7" formLineNo:"7_a"`
 
 	GrossAsset                  float64 `fieldNo:"8" formLineNo:"8"`
 	NetAsset                    float64 `fieldNo:"9" formLineNo:"9"`
@@ -22,7 +26,7 @@ type Form1bData struct {
 	BorrowedUSNonFinInstiAmt    float64 `fieldNo:"12" formLineNo:"12_d"`
 	BorrowedNonUSNonFinInstiAmt float64 `fieldNo:"12" formLineNo:"12_e"`
 	HasDerivativesPositions     bool    `fieldNo:"13" formLineNo:"13_a"`
-	// DerivativesPositionsValue   float64 `fieldNo:"13" formLineNo:"13_b"`
+	DerivativesPositionsValue   float64 `fieldNo:"13" formLineNo:"13_b" default:""`
 
 	Level1Asset        float64 `fieldNo:"14" formLineNo:"14_assets_level1"`
 	Level2Asset        float64 `fieldNo:"14" formLineNo:"14_assets_level2"`

@@ -89,20 +89,25 @@ func CollectAnswers(v reflect.Value, store map[[2]string]string) {
 		switch {
 		case value.Type() == reflect.TypeOf(sql.NullString{}):
 			ns := value.Interface().(sql.NullString)
-			if ns.Valid {
-				store[l] = ns.String
-			} // else leave key out (or store "" if you prefer)
+			// if ns.Valid {
+			store[l] = ns.String
+			// } // else leave key out (or store "" if you prefer)
 
 		case value.Type() == reflect.TypeOf(sql.NullFloat64{}):
 			nf := value.Interface().(sql.NullFloat64)
-			if nf.Valid {
-				store[l] = strconv.FormatFloat(nf.Float64, 'f', -1, 64)
-			}
+			// if nf.Valid {
+			store[l] = strconv.FormatFloat(nf.Float64, 'f', -1, 64)
+			// }
 
 		case value.Kind() == reflect.String:
 			store[l] = value.String()
 
 		case value.Kind() == reflect.Float64:
+			tagValue, ok := field.Tag.Lookup("default")
+			if ok && value.Float() == 0 {
+				store[l] = tagValue
+				continue
+			}
 			store[l] = strconv.FormatFloat(value.Float(), 'f', -1, 64)
 
 		case value.Kind() == reflect.Bool:
