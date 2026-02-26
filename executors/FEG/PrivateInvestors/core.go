@@ -86,6 +86,33 @@ type FundPerformanceData struct {
 	q1NetPercentage   float64 `entity:"q1_net_percentage_captial_roll_qtd" term:"first"  colName:"net"`
 	q2NetPercentage   float64 `entity:"q2_net_percentage_captial_roll_qtd" term:"second"  colName:"net"`
 	q3NetPercentage   float64 `entity:"q3_net_percentage_captial_roll_qtd" term:"third"  colName:"net"`
+
+	netIncomeq3   float64 `entity:"net_income_q3" term:"third"  colName:"netIncome"`
+	mgmtFeeq3     float64 `entity:"mgmt_fee_q3" term:"third"  colName:"mgmtFee"`
+	begBalq3      float64 `entity:"begining_balance_q3" term:"third"  colName:"beginBal"`
+	capCallq3     float64 `entity:"investor_capital_call_q3" term:"third"  colName:"capitalCall"`
+	cashDistribq3 float64 `entity:"cash_distribution_q3" term:"third"  colName:"cashDistibution"`
+
+	netIncomeq2   float64 `entity:"net_income_q2" term:"second"  colName:"netIncome"`
+	mgmtFeeq2     float64 `entity:"mgmt_fee_q2" term:"second"  colName:"mgmtFee"`
+	begBalq2      float64 `entity:"begining_balance_q2" term:"second"  colName:"beginBal"`
+	capCallq2     float64 `entity:"investor_capital_call_q2" term:"second"  colName:"capitalCall"`
+	cashDistribq2 float64 `entity:"cash_distribution_q2" term:"second"  colName:"cashDistibution"`
+
+	netIncomeq1   float64 `entity:"net_income_q1" term:"first"  colName:"netIncome"`
+	mgmtFeeq1     float64 `entity:"mgmt_fee_q1" term:"first"  colName:"mgmtFee"`
+	begBalq1      float64 `entity:"begining_balance_q1" term:"first"  colName:"beginBal"`
+	capCallq1     float64 `entity:"investor_capital_call_q1" term:"first"  colName:"capitalCall"`
+	cashDistribq1 float64 `entity:"cash_distribution_q1" term:"first"  colName:"cashDistibution"`
+}
+type QTDval struct {
+	Net         float64
+	Gross       float64
+	BegBal      float64
+	CashDistrib float64
+	CapCall     float64
+	NetIncome   float64
+	MgmtFee     float64
 }
 
 // Holder holds the path of the files needed for a extraction of a single Private Fund

@@ -3,6 +3,7 @@ package executors
 import (
 	"database/sql"
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -103,7 +104,7 @@ func CollectAnswers(v reflect.Value, store map[[2]string]string) {
 			store[l] = value.String()
 
 		case value.Kind() == reflect.Float64:
-			store[l] = strconv.FormatFloat(value.Float(), 'f', -1, 64)
+			store[l] = strconv.FormatFloat(math.Round(value.Float()), 'f', 0, 64)
 
 		case value.Kind() == reflect.Bool:
 			store[l] = strconv.FormatBool(value.Bool())
