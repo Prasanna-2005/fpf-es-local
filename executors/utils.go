@@ -95,9 +95,11 @@ func CollectAnswers(v reflect.Value, store map[[2]string]string) {
 
 		case value.Type() == reflect.TypeOf(sql.NullFloat64{}):
 			nf := value.Interface().(sql.NullFloat64)
-			// if nf.Valid {
-			store[l] = strconv.FormatFloat(nf.Float64, 'f', -1, 64)
-			// }
+			if nf.Valid {
+				store[l] = strconv.FormatFloat(nf.Float64, 'f', -1, 64)
+			} else {
+				store[l] = ""
+			}
 
 		case value.Kind() == reflect.String:
 			store[l] = value.String()
