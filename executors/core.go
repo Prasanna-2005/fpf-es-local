@@ -431,3 +431,23 @@ func NewForm1cData() *Form1cData {
 func NewForm1aData() *Form1aData {
 	return &Form1aData{}
 }
+
+type LiquidityData struct {
+	top5OwnedPercentage             float64 `entity:"top_5_percentage"`
+	usPersonOwnedPercentage         float64 `entity:"us_person_percentage"`
+	notUsPersonOwnedPercentage      float64 `entity:"not_us_person_percantage"`
+	brokerOwnedPercentage           float64 `entity:"broker_percantage"`
+	insuranceOwnedPercentage        float64 `entity:"insurance_percantage"`
+	riaOwnedPercentage              float64 `entity:"ria_percantage"`
+	pvtFundPercentage               float64 `entity:"private_fund_percentage"`
+	nonProfitOwnedPercentage        float64 `entity:"non_profit_percentage"`
+	pensionPlanOwnedPercentage      float64 `entity:"pension_plan_percentage"`
+	propOwnedPercentage             float64 `entity:"proprietary_percantage"`
+	govtOwnedPercentage             float64 `entity:"govt_percantage"`
+	govtPensionPlansOwnedPercentage float64 `entity:"gov_pension_plans_percantage"`
+	sovereignFundPercentage         float64 `entity:"sovereign_fund_percentage"`
+	unknownInstiOwnedPercentage     float64 `entity:"unknown_Insti_percantage"`
+	otherPlanOwnedPercentage        float64 `entity:"others_plan_percentage"`
+}
+
+type InvLiquidityData map[string]*LiquidityData
