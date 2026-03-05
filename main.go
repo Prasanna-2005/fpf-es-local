@@ -560,12 +560,10 @@ func executeCurio(filingID string, userID string) {
 			err := fund.ExtractTrialBalanceData()
 			if err != nil {
 				logging.Error("Error in extracting Trial Balance sheet for " + fund.GetFundID() + ": " + err.Error())
-				continue
 			}
 			err = fund.ExtractCapReg()
 			if err != nil {
 				logging.Error("Error in extracting capital register sheet for " + fund.GetFundID() + ": " + err.Error())
-				continue
 			}
 
 			err = fund.ExtractQ17()
