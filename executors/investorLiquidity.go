@@ -47,7 +47,7 @@ func cleanExcel(f *excelize.File) ([][]string, error) {
 	if len(rows) < 2 || len(rows[0]) < 2 {
 		return fundLiqData, fmt.Errorf("Excel doesnt have proper number of rows or columns")
 	}
-	cleanHeader := func(s string) string {
+	cleanCell := func(s string) string {
 		s = strings.TrimSpace(s)                // trim spaces
 		s = strings.TrimLeft(s, "\uFEFF")       // trim BOM (common on first cell)
 		s = strings.ReplaceAll(s, "\r", "")     // trim carriage returns
@@ -55,7 +55,7 @@ func cleanExcel(f *excelize.File) ([][]string, error) {
 		return s
 	}
 	colFinder := func(col string) int {
-		return slices.IndexFunc(rows[0], func(s string) bool { return strings.EqualFold(cleanHeader(s), col) })
+		return slices.IndexFunc(rows[0], func(s string) bool { return strings.EqualFold(cleanCell(s), col) })
 	}
 
 	fundCodeIdx := colFinder("FundCode")
@@ -71,7 +71,7 @@ func cleanExcel(f *excelize.File) ([][]string, error) {
 			logging.Warn(fmt.Sprintf("InvestorLiqSheet: %v row doesn't have required number  of columns", i))
 			continue
 		}
-		fundLiqData = append(fundLiqData, []string{strings.ToLower(row[fundCodeIdx]), strings.ToLower(row[invTypeIdx]), row[totMvBaseIdx]})
+		fundLiqData = append(fundLiqData, []string{cleanCell(strings.ToUpper(row[fundCodeIdx])), cleanCell(strings.ToLower(row[invTypeIdx])), row[totMvBaseIdx]})
 		// val, _ := strconv.ParseFloat(CleanNonNumeric(row[totMvBaseIdx]), 64)
 
 	}
@@ -87,10 +87,10 @@ func processFundData(fundData [][]string, ldataHolder *InvLiquidityData) {
 		if len(row) < 3 {
 			continue
 		}
-		fundCode := strings.ToUpper(row[0])
-		invType := strings.ToLower(row[1])
+		fundCode := row[0]
+		invType := row[1]
 		val, _ := strconv.ParseFloat(CleanNonNumeric(row[2]), 64)
-		if conv, ok := ShortCodeConvertor[strings.TrimSpace(fundCode)]; ok {
+		if conv, ok := ShortCodeConvertor[fundCode]; ok {
 			fundCode = conv
 		}
 		if nestedMap[fundCode] == nil {
