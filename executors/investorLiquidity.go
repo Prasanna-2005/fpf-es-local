@@ -47,13 +47,21 @@ func cleanExcel(f *excelize.File) ([][]string, error) {
 	if len(rows) < 2 || len(rows[0]) < 2 {
 		return fundLiqData, fmt.Errorf("Excel doesnt have proper number of rows or columns")
 	}
+	cleanHeader := func(s string) string {
+		s = strings.TrimSpace(s)                // trim spaces
+		s = strings.TrimLeft(s, "\uFEFF")       // trim BOM (common on first cell)
+		s = strings.ReplaceAll(s, "\r", "")     // trim carriage returns
+		s = strings.ReplaceAll(s, "\u00a0", "") // trim non-breaking spaces
+		return s
+	}
 	colFinder := func(col string) int {
-		return slices.IndexFunc(rows[0], func(s string) bool { return strings.EqualFold(s, col) })
+		return slices.IndexFunc(rows[0], func(s string) bool { return strings.EqualFold(cleanHeader(s), col) })
 	}
 
 	fundCodeIdx := colFinder("FundCode")
 	invTypeIdx := colFinder("InvestorType")
 	totMvBaseIdx := colFinder("TotalMVBase")
+	fmt.Println(rows[0])
 	if fundCodeIdx == -1 || invTypeIdx == -1 || totMvBaseIdx == -1 {
 		return fundLiqData, fmt.Errorf("Excel doesnt have required column names")
 	}
@@ -79,10 +87,12 @@ func processFundData(fundData [][]string, ldataHolder *InvLiquidityData) {
 		if len(row) < 3 {
 			continue
 		}
-		fundCode := strings.ToLower(row[0])
+		fundCode := strings.ToUpper(row[0])
 		invType := strings.ToLower(row[1])
-		val, _ := strconv.ParseFloat(row[2], 64)
-
+		val, _ := strconv.ParseFloat(CleanNonNumeric(row[2]), 64)
+		if conv, ok := ShortCodeConvertor[strings.TrimSpace(fundCode)]; ok {
+			fundCode = conv
+		}
 		if nestedMap[fundCode] == nil {
 			nestedMap[fundCode] = make(map[string]float64)
 		}
@@ -106,40 +116,40 @@ func processFundData(fundData [][]string, ldataHolder *InvLiquidityData) {
 		switch {
 		case total != 0:
 			(*ldataHolder)[fundCode] = &LiquidityData{
-				top5OwnedPercentage:             (top5Sum / total) * 100,
-				usPersonOwnedPercentage:         (invMap["uspersons"] / total) * 100,
-				notUsPersonOwnedPercentage:      (invMap["notuspersons"] / total) * 100,
-				brokerOwnedPercentage:           (invMap["broker"] / total) * 100,
-				insuranceOwnedPercentage:        (invMap["insurance"] / total) * 100,
-				riaOwnedPercentage:              (invMap["ria"] / total) * 100,
-				pvtFundPercentage:               ((invMap["private fund"] + invMap["privatefund"]) / total) * 100,
-				nonProfitOwnedPercentage:        (invMap["non-profit"] / total) * 100,
-				pensionPlanOwnedPercentage:      (invMap["pensionplans"] / total) * 100,
-				propOwnedPercentage:             (invMap["proprietary"] / total) * 100,
-				govtOwnedPercentage:             (invMap["government"] / total) * 100,
-				govtPensionPlansOwnedPercentage: (invMap["governmentpensionplans"] / total) * 100,
-				sovereignFundPercentage:         (invMap["sovereignfund"] / total) * 100,
-				unknownInstiOwnedPercentage:     (invMap["unknowninstitution"] / total) * 100,
-				otherPlanOwnedPercentage:        (invMap["other"] / total) * 100,
+				Top5OwnedPercentage:             (top5Sum / total) * 100,
+				UsPersonOwnedPercentage:         (invMap["uspersons"] / total) * 100,
+				NotUsPersonOwnedPercentage:      (invMap["notuspersons"] / total) * 100,
+				BrokerOwnedPercentage:           (invMap["broker"] / total) * 100,
+				InsuranceOwnedPercentage:        (invMap["insurance"] / total) * 100,
+				RiaOwnedPercentage:              (invMap["ria"] / total) * 100,
+				PvtFundPercentage:               ((invMap["private fund"] + invMap["privatefund"]) / total) * 100,
+				NonProfitOwnedPercentage:        (invMap["non-profit"] / total) * 100,
+				PensionPlanOwnedPercentage:      (invMap["pensionplans"] / total) * 100,
+				PropOwnedPercentage:             (invMap["proprietary"] / total) * 100,
+				GovtOwnedPercentage:             (invMap["government"] / total) * 100,
+				GovtPensionPlansOwnedPercentage: (invMap["governmentpensionplans"] / total) * 100,
+				SovereignFundPercentage:         (invMap["sovereignfund"] / total) * 100,
+				UnknownInstiOwnedPercentage:     (invMap["unknowninstitution"] / total) * 100,
+				OtherPlanOwnedPercentage:        (invMap["other"] / total) * 100,
 			}
 		default:
 			logging.Warn(fmt.Sprintf("TotalMVBase sum is zero for fund:%v", fundCode))
 			(*ldataHolder)[fundCode] = &LiquidityData{
-				top5OwnedPercentage:             0,
-				usPersonOwnedPercentage:         0,
-				notUsPersonOwnedPercentage:      0,
-				brokerOwnedPercentage:           0,
-				insuranceOwnedPercentage:        0,
-				riaOwnedPercentage:              0,
-				pvtFundPercentage:               0,
-				nonProfitOwnedPercentage:        0,
-				pensionPlanOwnedPercentage:      0,
-				propOwnedPercentage:             0,
-				govtOwnedPercentage:             0,
-				govtPensionPlansOwnedPercentage: 0,
-				sovereignFundPercentage:         0,
-				unknownInstiOwnedPercentage:     0,
-				otherPlanOwnedPercentage:        0,
+				Top5OwnedPercentage:             0,
+				UsPersonOwnedPercentage:         0,
+				NotUsPersonOwnedPercentage:      0,
+				BrokerOwnedPercentage:           0,
+				InsuranceOwnedPercentage:        0,
+				RiaOwnedPercentage:              0,
+				PvtFundPercentage:               0,
+				NonProfitOwnedPercentage:        0,
+				PensionPlanOwnedPercentage:      0,
+				PropOwnedPercentage:             0,
+				GovtOwnedPercentage:             0,
+				GovtPensionPlansOwnedPercentage: 0,
+				SovereignFundPercentage:         0,
+				UnknownInstiOwnedPercentage:     0,
+				OtherPlanOwnedPercentage:        0,
 			}
 		}
 	}
