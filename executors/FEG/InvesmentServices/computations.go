@@ -28,13 +28,13 @@ func (F *Fund) Compute() *executors.Form1bData {
 	data.CostBasedLiability = wd.totalLiabilities
 
 	// investor liquidity data
-	data.UsPercent = ld.usPersonOwnedPercentage
-	data.OtherPercent = ld.otherPlanOwnedPercentage
-	data.PensionPlanPercent = ld.pensionPlanOwnedPercentage
-	data.NonProfitPercent = ld.nonProfitOwnedPercentage
-	data.Top5Percent = ld.top5OwnedPercentage
-	data.SovereignPercent = ld.sovereignFundPercentage
-	data.PrivateFundPercent = ld.pvtFundPercentage
+	data.UsPercent = ld.UsPersonOwnedPercentage
+	data.OtherPercent = ld.OtherPlanOwnedPercentage
+	data.PensionPlanPercent = ld.PensionPlanOwnedPercentage
+	data.NonProfitPercent = ld.NonProfitOwnedPercentage
+	data.Top5Percent = ld.Top5OwnedPercentage
+	data.SovereignPercent = ld.SovereignFundPercentage
+	data.PrivateFundPercent = ld.PvtFundPercentage
 	assignFundPerf(data, pd)
 
 	return data
