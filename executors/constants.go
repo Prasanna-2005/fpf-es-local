@@ -18,11 +18,29 @@ var ShortCodeConvertor = map[string]string{
 	"FEG_SELDSS":           "FSDS",
 	"FEG_SSCGES":           "FSCGES",
 	"FEG_MPES":             "FEGMP",
-	"FEG_SSCGSP":           "FSCGSP",
+	"FEG_SSCGSP":           "FSCGES",
 	"FEG_SELECTACTIVETCI":  "FSAE",
 	"FEGSAESII":            "FSAE2",
 	"FEG_SELECTPRVCAP":     "FSOPO",
 	"FEG_SELECTPRVEQ":      "FSTGXI", // first occurrence wins
 	"FEGSPESTGXII":         "FSTGX2", // both FSTGXII and FSTGX2 map to same value
 	"FEGSPESTGXIV":         "FSTGX4", // both FSTGXIV and FSTGX4 map to same value
+}
+
+var pluralFixer = map[string]string{
+	"usperson":              "uspersons",
+	"notusperson":           "notuspersons",
+	"brokers":               "broker",
+	"insurances":            "insurance",
+	"rias":                  "ria",
+	"privatefunds":          "privatefund",
+	"nonprofits":            "nonprofit",
+	"pensionplan":           "pensionplans",
+	"proprietaries":         "proprietary",
+	"governments":           "government",
+	"govt":                  "government",
+	"governmentpensionplan": "governmentpensionplans",
+	"sovereignfunds":        "sovereignfund",
+	"unknowninstitutions":   "unknowninstitution",
+	"others":                "other",
 }
