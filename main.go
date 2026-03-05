@@ -535,16 +535,6 @@ func executeCurio(filingID string, userID string) {
 			return
 		}
 	}
-	// if unfndCmtsPath != "" {
-	// 	unfndCmtHolder, err = invesmentservices.ExtractUnfundedCmts(unfndCmtsPath)
-	// 	if err != nil {
-	// 		logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
-	// 		return
-	// 	}
-	// }
-	// for fund, dat := range liqudityHolder {
-	// 	fmt.Printf("\nfund:%v,data:%v\n", fund, *dat)
-	// }
 	logging.Info("Extraction of Investor Liquidity Completed")
 
 	logging.Info(fmt.Sprintf("Total number of funds mapped: %d", len(mapper)))
@@ -569,22 +559,21 @@ func executeCurio(filingID string, userID string) {
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractTrialBalanceData()
 			if err != nil {
-				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
+				logging.Error("Error in extracting Trial Balance sheet for " + fund.GetFundID() + ": " + err.Error())
 				continue
 			}
+			err = fund.ExtractCapReg()
+			if err != nil {
+				logging.Error("Error in extracting capital register sheet for " + fund.GetFundID() + ": " + err.Error())
+				continue
+			}
+
 			err = fund.ExtractQ17()
 			if err != nil {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
 				continue
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
-
-			// if holder, ok := unfndCmtHolder[fund.GetFundID()]; ok {
-			// 	fund.SetUnfdCmtsData(holder)
-
-			// } else {
-			// 	logging.Warn("Unfunded commitments Data not available for the Fund: " + fund.GetFundID())
-			// }
 			extractionData := fund.ExportWorkPaperData()
 			err = db.PushEntities(filingID, fund.GetFundID(), userID, extractionData)
 			if err != nil {
