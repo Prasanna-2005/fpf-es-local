@@ -653,15 +653,6 @@ func prepareFilingCurio(filingID string) (map[string][]*curio.Fund, string, stri
 		if mapping.FundShortCode == "UNFDCMTS" {
 			unfndCmts = os.Getenv("STORAGE_PATH") + mapping.FilingPath
 		}
-
-		// converted := invesmentservices.ShortCodeConvertor[mapping.FundShortCode]
-
-		// if converted == "" {
-		// 	logging.Warn(mapping.FundShortCode + "->" + "Unknown Short Code Encountered. Conversion Failed")
-		// 	continue
-		// }
-
-		// mapping.FundShortCode = converted
 		if _, ok := fundsMapper[mapping.FundShortCode]; !ok {
 			fundsMapper[mapping.FundShortCode] = curio.CreateAllFundSeries(mapping.FundShortCode)
 		}
