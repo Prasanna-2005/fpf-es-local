@@ -252,10 +252,10 @@ func execute(filingID string, userID string) {
 		return
 	}
 
-	liqudityHolder := make(privateinvestors.LiquidityDataHolder)
+	liqudityHolder := make(executors.InvLiquidityData)
 
 	if investorLiquidityPath != "" {
-		liqudityHolder, err = privateinvestors.ExtractInvestorLiquidity(investorLiquidityPath)
+		liqudityHolder, err = executors.ExtractInvestorLiquidity(investorLiquidityPath)
 		if err != nil {
 			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
 			return
@@ -349,11 +349,11 @@ func executeInvServ(filingID string, userID string) {
 		return
 	}
 
-	liqudityHolder := make(invesmentservices.LiquidityDataHolder)
+	liqudityHolder := make(executors.InvLiquidityData)
 	unfndCmtHolder := make(invesmentservices.UnfundedCommitmentsHolder)
 
 	if investorLiquidityPath != "" {
-		liqudityHolder, err = invesmentservices.ExtractInvestorLiquidity(investorLiquidityPath)
+		liqudityHolder, err = executors.ExtractInvestorLiquidity(investorLiquidityPath)
 		if err != nil {
 			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
 			return
@@ -508,7 +508,7 @@ func prepareFilingInvestmentServices(filingID string) (map[string][]*invesmentse
 func executeCurio(filingID string, userID string) {
 	sec1a := section1aData("FEG", "Curio")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
-	mapper, _, _, err := prepareFilingCurio(filingID)
+	mapper, investorLiquidityPath, _, err := prepareFilingCurio(filingID)
 	if err != nil {
 		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
 		return
@@ -525,16 +525,16 @@ func executeCurio(filingID string, userID string) {
 		return
 	}
 
-	// liqudityHolder := make(curio.LiquidityDataHolder)
+	liqudityHolder := make(executors.InvLiquidityData)
 	// unfndCmtHolder := make(curio.UnfundedCommitmentsHolder)
 
-	// if investorLiquidityPath != "" {
-	// 	liqudityHolder, err = invesmentservices.ExtractInvestorLiquidity(investorLiquidityPath)
-	// 	if err != nil {
-	// 		logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
-	// 		return
-	// 	}
-	// }
+	if investorLiquidityPath != "" {
+		liqudityHolder, err = executors.ExtractInvestorLiquidity(investorLiquidityPath)
+		if err != nil {
+			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+			return
+		}
+	}
 	// if unfndCmtsPath != "" {
 	// 	unfndCmtHolder, err = invesmentservices.ExtractUnfundedCmts(unfndCmtsPath)
 	// 	if err != nil {
@@ -545,7 +545,7 @@ func executeCurio(filingID string, userID string) {
 	// for fund, dat := range liqudityHolder {
 	// 	fmt.Printf("\nfund:%v,data:%v\n", fund, *dat)
 	// }
-	// logging.Info("Extraction of Investor Liquidity Completed")
+	logging.Info("Extraction of Investor Liquidity Completed")
 
 	logging.Info(fmt.Sprintf("Total number of funds mapped: %d", len(mapper)))
 
@@ -560,11 +560,11 @@ func executeCurio(filingID string, userID string) {
 			answersMapper := make(map[[2]string]string)
 			// ansMapper1c:=make(map[[2]string]string)
 
-			// if holder, ok := liqudityHolder[fund.GetFundID()]; ok {
-			// 	fund.SetLiquidityData(holder)
-			// } else {
-			// 	logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
-			// }
+			if holder, ok := liqudityHolder[fund.GetFundID()]; ok {
+				fund.SetLiquidityData(holder)
+			} else {
+				logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
+			}
 
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractTrialBalanceData()
