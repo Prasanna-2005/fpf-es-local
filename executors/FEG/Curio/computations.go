@@ -20,7 +20,7 @@ func (F *Fund) Compute() *executors.Form1bData {
 	data.Level1Asset = wd.l1
 	data.Level2Asset = wd.l2
 	data.Level3Asset = wd.l3
-	data.CostBasedAsset = calculateCBAsset(data.GrossAsset, wd.sumLevelExtData)
+	data.CostBasedAsset = calculateCBAsset(data.GrossAsset, wd.sumLevelExtData, wd.unfundedCommitments)
 	data.CostBasedLiability = wd.totalLiabilities
 
 	// investor liquidity data
@@ -37,6 +37,6 @@ func (F *Fund) Compute() *executors.Form1bData {
 
 }
 
-func calculateCBAsset(GrossAsset, LevelingSum float64) float64 {
-	return GrossAsset - LevelingSum
+func calculateCBAsset(GrossAsset, LevelingSum, unfdCmts float64) float64 {
+	return GrossAsset - LevelingSum - unfdCmts
 }
