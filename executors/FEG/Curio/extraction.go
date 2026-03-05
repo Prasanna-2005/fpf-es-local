@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/extrame/xls"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -60,33 +61,33 @@ func (F *Fund) ExtractTrialBalanceData() error {
 }
 
 func (F *Fund) ExtractCapReg() error {
-	capRegSheet, err := excelize.OpenFile(F.holder.capRegisterFilePath)
+	capRegwb, err := xls.Open(F.holder.capRegisterFilePath, "utf-8")
 	if err != nil {
-		return fmt.Errorf("opening  Trial balance: " + err.Error())
+		return fmt.Errorf("opening capital register: %w", err)
 	}
-	defer func() {
-		if err := capRegSheet.Close(); err != nil {
-			logging.Error("Error in closing the file: " + err.Error())
-		}
-
-	}()
-	err = extractUnfundedCmts(capRegSheet, &F.workPaperData, F.fundID)
+	err = extractUnfundedCmts(capRegwb, &F.workPaperData, F.fundID)
 	if err != nil {
 		return fmt.Errorf("extracting TB,Unfunded cmts Data for GA NA: " + err.Error())
 	}
+	return nil
 }
 
-func extractUnfundedCmts(f *excelize.File, tbdata *WorkPaperData, shortcode string) error {
+func extractUnfundedCmts(f *xls.WorkBook, tbdata *WorkPaperData, shortcode string) error {
 	shortcode = strings.ToUpper(shortcode)
-	capRegSheet := "Sheet1"
 	ordinates := make(map[string]int)
 	absicca := make(map[string]int)
-	rows, err := f.GetRows(capRegSheet)
-	if err != nil {
-		return fmt.Errorf("getting cap register Rows: " + err.Error())
+
+	// get first sheet (index 0)
+	sheet := f.GetSheet(0)
+	if sheet == nil {
+		return fmt.Errorf("no sheet found in capital register")
 	}
-	for i, row := range rows {
-		for j, cellVal := range row {
+
+	// find column headers and row index
+	for i := 0; i <= int(sheet.MaxRow); i++ {
+		row := sheet.Row(i)
+		for j := 0; j < row.LastCol(); j++ {
+			cellVal := row.Col(j)
 			switch {
 			case strings.EqualFold("Unfunded commitment", cellVal):
 				ordinates["unfdCmts"] = j
@@ -97,10 +98,17 @@ func extractUnfundedCmts(f *excelize.File, tbdata *WorkPaperData, shortcode stri
 			}
 		}
 	}
-	rawValue, err := f.GetCellValue(capRegSheet, executors.IndexToExcel(absicca[shortcode], ordinates["unfdCmts"]))
-	if err != nil {
-		logging.Error(fmt.Sprintf("extracting unfunded commitments error %v : %v", shortcode, err.Error()))
+
+	// get cell value using row/col index directly
+	targetRow := absicca[shortcode]
+	targetCol := ordinates["unfdCmts"]
+
+	if targetRow == 0 || targetCol == 0 {
+		logging.Error(fmt.Sprintf("could not find row/col for shortcode %v", shortcode))
+		return nil
 	}
+
+	rawValue := sheet.Row(targetRow).Col(targetCol)
 	rawValue = executors.CleanNonNumeric(rawValue)
 	tbdata.unfundedCommitments, _ = strconv.ParseFloat(rawValue, 64)
 	return nil
