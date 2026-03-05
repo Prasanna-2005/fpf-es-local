@@ -68,13 +68,12 @@ func cleanExcel(f *excelize.File) ([][]string, error) {
 	if fundCodeIdx == -1 || invTypeIdx == -1 || totMvBaseIdx == -1 || (invName+bocIdx == -2) {
 		return fundLiqData, fmt.Errorf("Excel doesnt have required column names")
 	}
-
 	for i, row := range rows[1:] {
 		if len(row) < 3 {
 			logging.Warn(fmt.Sprintf("InvestorLiqSheet: %v row doesn't have required number  of columns", i))
 			continue
 		}
-		if bocIdx == -1 {
+		if bocIdx == -1 || strings.TrimSpace(row[bocIdx]) == "" {
 			fundLiqData = append(fundLiqData, []string{cleanCell(strings.ToUpper(row[fundCodeIdx])), cleanCell(strings.ToLower(row[invTypeIdx])), row[totMvBaseIdx], cleanCell(strings.ToLower(row[invName]))})
 		} else {
 			fundLiqData = append(fundLiqData, []string{cleanCell(strings.ToUpper(row[fundCodeIdx])), cleanCell(strings.ToLower(row[invTypeIdx])), row[totMvBaseIdx], cleanCell(strings.ToLower(row[bocIdx]))})
