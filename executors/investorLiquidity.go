@@ -2,6 +2,7 @@ package executors
 
 import (
 	"fmt"
+	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/logging"
 	"slices"
 	"sort"
@@ -148,20 +149,20 @@ func processFundData(fundData [][]string, ldataHolder *InvLiquidityData) {
 		case total != 0:
 			(*ldataHolder)[fundCode] = &LiquidityData{
 				Top5OwnedPercentage:             (top5Sum / total) * 100,
-				UsPersonOwnedPercentage:         (invMap["uspersons"] / total) * 100,
-				NotUsPersonOwnedPercentage:      (invMap["notuspersons"] / total) * 100,
-				BrokerOwnedPercentage:           (invMap["broker"] / total) * 100,
-				InsuranceOwnedPercentage:        (invMap["insurance"] / total) * 100,
-				RiaOwnedPercentage:              (invMap["ria"] / total) * 100,
-				PvtFundPercentage:               (invMap["privatefund"] / total) * 100,
-				NonProfitOwnedPercentage:        (invMap["nonprofit"] / total) * 100,
-				PensionPlanOwnedPercentage:      (invMap["pensionplans"] / total) * 100,
-				PropOwnedPercentage:             (invMap["proprietary"] / total) * 100,
-				GovtOwnedPercentage:             (invMap["government"] / total) * 100,
-				GovtPensionPlansOwnedPercentage: (invMap["governmentpensionplans"] / total) * 100,
-				SovereignFundPercentage:         (invMap["sovereignfund"] / total) * 100,
-				UnknownInstiOwnedPercentage:     (invMap["unknowninstitution"] / total) * 100,
-				OtherPlanOwnedPercentage:        (invMap["other"] / total) * 100,
+				UsPersonOwnedPercentage:         (invMap[config.InvLiqTypeMarker.UsPerson] / total) * 100,
+				NotUsPersonOwnedPercentage:      (invMap[config.InvLiqTypeMarker.NotUsPerson] / total) * 100,
+				BrokerOwnedPercentage:           (invMap[config.InvLiqTypeMarker.Broker] / total) * 100,
+				InsuranceOwnedPercentage:        (invMap[config.InvLiqTypeMarker.Insurance] / total) * 100,
+				RiaOwnedPercentage:              (invMap[config.InvLiqTypeMarker.RIA] / total) * 100,
+				PvtFundPercentage:               (invMap[config.InvLiqTypeMarker.PrivateFund] / total) * 100,
+				NonProfitOwnedPercentage:        (invMap[config.InvLiqTypeMarker.NonProfit] / total) * 100,
+				PensionPlanOwnedPercentage:      (invMap[config.InvLiqTypeMarker.PensionPlans] / total) * 100,
+				PropOwnedPercentage:             (invMap[config.InvLiqTypeMarker.Proprietary] / total) * 100,
+				GovtOwnedPercentage:             (invMap[config.InvLiqTypeMarker.Government] / total) * 100,
+				GovtPensionPlansOwnedPercentage: (invMap[config.InvLiqTypeMarker.GovernmentPensionPlans] / total) * 100,
+				SovereignFundPercentage:         (invMap[config.InvLiqTypeMarker.SovereignFund] / total) * 100,
+				UnknownInstiOwnedPercentage:     (invMap[config.InvLiqTypeMarker.UnknownInstitution] / total) * 100,
+				OtherPlanOwnedPercentage:        (invMap[config.InvLiqTypeMarker.Other] / total) * 100,
 			}
 		default:
 			logging.Warn(fmt.Sprintf("TotalMVBase sum is zero for fund:%v", fundCode))
