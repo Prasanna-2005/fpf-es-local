@@ -7,6 +7,7 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/shakinm/xlsReader v0.9.12
 	github.com/xuri/excelize/v2 v2.9.1
+	gopkg.in/ini.v1 v1.67.1
 )
 
 require (
