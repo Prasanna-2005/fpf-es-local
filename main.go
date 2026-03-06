@@ -194,7 +194,7 @@ func setStaticFunds(filingID, userID string) error {
 
 }
 
-func setStaticCurioFunds(filingID, userID string) error {
+func setStaticCurioFunds(filingID, userID string, liqudityHolder executors.InvLiquidityData) error {
 	answersMapper := make(map[[2]string]string)
 	//CURSLP static funds
 	staticFundData, staticFundObj := curio.StaticFunds("CURSLP")
@@ -211,6 +211,13 @@ func setStaticCurioFunds(filingID, userID string) error {
 	//CNLCP static funds
 	staticFundData, staticFundObj = curio.StaticFunds("CNLCP")
 	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
+	if holder, ok := liqudityHolder["CNLCP"]; ok {
+		staticFundData.OtherPercent = 0
+		staticFundObj.SetLiquidityData(holder)
+	} else {
+		logging.Warn("Liquidity Data not available for the Fund:CNLCP")
+	}
+	staticFundData = staticFundObj.Compute()
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
 	err = db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
 	if err != nil {
@@ -612,7 +619,7 @@ func executeCurio(filingID string, userID string) {
 
 		}
 	}
-	err = setStaticCurioFunds(filingID, userID)
+	err = setStaticCurioFunds(filingID, userID, liqudityHolder)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Static funds setting error:%v", err.Error()))
 	}
