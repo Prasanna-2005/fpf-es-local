@@ -5,12 +5,16 @@ import "database/sql"
 // Form1bData holds the structure of the section 1b in Form PF.
 // It will be dynamically increased based on the needs to answer other questions
 type Form1bData struct {
-	FundName                string `fieldNo:"5" formLineNo:"5_a"`
-	FundID                  string `fieldNo:"5" formLineNo:"5_b"`
-	FundNFA                 string `fieldNo:"5" formLineNo:"5_c"`
-	FundLEI                 string `fieldNo:"5" formLineNo:"5_d"`
-	MasterFund              bool   `fieldNo:"6" formLineNo:"6"`
-	ParallelFundsAggregated bool   `fieldNo:"7" formLineNo:"7_a"`
+	FundName                    string `fieldNo:"5" formLineNo:"5_a"`
+	FundID                      string `fieldNo:"5" formLineNo:"5_b"`
+	FundNFA                     string `fieldNo:"5" formLineNo:"5_c"`
+	FundLEI                     string `fieldNo:"5" formLineNo:"5_d"`
+	MasterFund                  bool   `fieldNo:"6" formLineNo:"6"`
+	ParallelFundsAggregated     bool   `fieldNo:"7" formLineNo:"7_a"`
+	ParallelFundsAggregatedName string `fieldNo:"7" formLineNo:"7_b"`
+	ParallelFundsAggregatedID   string `fieldNo:"7" formLineNo:"7_c"`
+	ParallelFundsAggregatedNFA  string `fieldNo:"7" formLineNo:"7_d"`
+	ParallelFundsAggregatedLEI  string `fieldNo:"7" formLineNo:"7_e"`
 
 	GrossAsset                  float64 `fieldNo:"8" formLineNo:"8"`
 	NetAsset                    float64 `fieldNo:"9" formLineNo:"9"`
@@ -22,7 +26,7 @@ type Form1bData struct {
 	BorrowedUSNonFinInstiAmt    float64 `fieldNo:"12" formLineNo:"12_d"`
 	BorrowedNonUSNonFinInstiAmt float64 `fieldNo:"12" formLineNo:"12_e"`
 	HasDerivativesPositions     bool    `fieldNo:"13" formLineNo:"13_a"`
-	// DerivativesPositionsValue   float64 `fieldNo:"13" formLineNo:"13_b"`
+	DerivativesPositionsValue   float64 `fieldNo:"13" formLineNo:"13_b" default:""`
 
 	Level1Asset        float64 `fieldNo:"14" formLineNo:"14_assets_level1"`
 	Level2Asset        float64 `fieldNo:"14" formLineNo:"14_assets_level2"`
@@ -130,99 +134,99 @@ type Form1cData struct {
 
 	Strategy string `fieldNo:"19" formLineNo:"19"`
 	// Equity
-	EquityMarketNeutralStrategy bool `fieldNo:"20" formLineNo:"20_(a)_Strategy"`
-	// EquityMarketNeutralNAV      float64 `fieldNo:"20" formLineNo:"20_(a)_%_of_NAV"`
-	// EquityMarketNeutralCapital  float64 `fieldNo:"20" formLineNo:"20_(a)_%_of_capital"`
+	EquityMarketNeutralStrategy bool   `fieldNo:"20" formLineNo:"20_(a)_Strategy"`
+	EquityMarketNeutralNAV      string `fieldNo:"20" formLineNo:"20_(a)_%_of_NAV"`
+	EquityMarketNeutralCapital  string `fieldNo:"20" formLineNo:"20_(a)_%_of_capital"`
 
-	EquityLongShortStrategy bool `fieldNo:"20" formLineNo:"20_(b)_Strategy"`
-	// EquityLongShortNAV      float64 `fieldNo:"20" formLineNo:"20_(b)_%_of_NAV"`
-	// EquityLongShortCapital  float64 `fieldNo:"20" formLineNo:"20_(b)_%_of_capital"`
+	EquityLongShortStrategy bool   `fieldNo:"20" formLineNo:"20_(b)_Strategy"`
+	EquityLongShortNAV      string `fieldNo:"20" formLineNo:"20_(b)_%_of_NAV"`
+	EquityLongShortCapital  string `fieldNo:"20" formLineNo:"20_(b)_%_of_capital"`
 
-	EquityShortBiasStrategy bool `fieldNo:"20" formLineNo:"20_(c)_Strategy"`
-	// EquityShortBiasNAV      float64 `fieldNo:"20" formLineNo:"20_(c)_%_of_NAV"`
-	// EquityShortBiasCapital  float64 `fieldNo:"20" formLineNo:"20_(c)_%_of_capital"`
+	EquityShortBiasStrategy bool   `fieldNo:"20" formLineNo:"20_(c)_Strategy"`
+	EquityShortBiasNAV      string `fieldNo:"20" formLineNo:"20_(c)_%_of_NAV"`
+	EquityShortBiasCapital  string `fieldNo:"20" formLineNo:"20_(c)_%_of_capital"`
 
 	EquityLongBiasStrategy bool   `fieldNo:"20" formLineNo:"20_(d)_Strategy"`
 	EquityLongBiasNAV      string `fieldNo:"20" formLineNo:"20_(d)_%_of_NAV"`
-	// EquityLongBiasCapital  float64 `fieldNo:"20" formLineNo:"20_(d)_%_of_capital"`
+	EquityLongBiasCapital  string `fieldNo:"20" formLineNo:"20_(d)_%_of_capital"`
 
 	// Macro
-	MacroActiveTradingStrategy bool `fieldNo:"20" formLineNo:"20_(e)_Strategy"`
-	// MacroActiveTradingNAV      float64 `fieldNo:"20" formLineNo:"20_(e)_%_of_NAV"`
-	// MacroActiveTradingCapital  float64 `fieldNo:"20" formLineNo:"20_(e)_%_of_capital"`
+	MacroActiveTradingStrategy bool   `fieldNo:"20" formLineNo:"20_(e)_Strategy"`
+	MacroActiveTradingNAV      string `fieldNo:"20" formLineNo:"20_(e)_%_of_NAV"`
+	MacroActiveTradingCapital  string `fieldNo:"20" formLineNo:"20_(e)_%_of_capital"`
 
-	MacroCommodityStrategy bool `fieldNo:"20" formLineNo:"20_(f)_Strategy"`
-	// MacroCommodityNAV      float64 `fieldNo:"20" formLineNo:"20_(f)_%_of_NAV"`
-	// MacroCommodityCapital  float64 `fieldNo:"20" formLineNo:"20_(f)_%_of_capital"`
+	MacroCommodityStrategy bool   `fieldNo:"20" formLineNo:"20_(f)_Strategy"`
+	MacroCommodityNAV      string `fieldNo:"20" formLineNo:"20_(f)_%_of_NAV"`
+	MacroCommodityCapital  string `fieldNo:"20" formLineNo:"20_(f)_%_of_capital"`
 
-	MacroCurrencyStrategy bool `fieldNo:"20" formLineNo:"20_(g)_Strategy"`
-	// MacroCurrencyNAV      float64 `fieldNo:"20" formLineNo:"20_(g)_%_of_NAV"`
-	// MacroCurrencyCapital  float64 `fieldNo:"20" formLineNo:"20_(g)_%_of_capital"`
+	MacroCurrencyStrategy bool   `fieldNo:"20" formLineNo:"20_(g)_Strategy"`
+	MacroCurrencyNAV      string `fieldNo:"20" formLineNo:"20_(g)_%_of_NAV"`
+	MacroCurrencyCapital  string `fieldNo:"20" formLineNo:"20_(g)_%_of_capital"`
 
-	MacroGlobalMacroStrategy bool `fieldNo:"20" formLineNo:"20_(h)_Strategy"`
-	// MacroGlobalMacroNAV      float64 `fieldNo:"20" formLineNo:"20_(h)_%_of_NAV"`
-	// MacroGlobalMacroCapital  float64 `fieldNo:"20" formLineNo:"20_(h)_%_of_capital"`
+	MacroGlobalMacroStrategy bool   `fieldNo:"20" formLineNo:"20_(h)_Strategy"`
+	MacroGlobalMacroNAV      string `fieldNo:"20" formLineNo:"20_(h)_%_of_NAV"`
+	MacroGlobalMacroCapital  string `fieldNo:"20" formLineNo:"20_(h)_%_of_capital"`
 
 	// Relative Value
-	RVFixedIncomeAssetBackedStrategy bool `fieldNo:"20" formLineNo:"20_(i)_Strategy"`
-	// RVFixedIncomeAssetBackedNAV      float64 `fieldNo:"20" formLineNo:"20_(i)_%_of_NAV"`
-	// RVFixedIncomeAssetBackedCapital  float64 `fieldNo:"20" formLineNo:"20_(i)_%_of_capital"`
+	RVFixedIncomeAssetBackedStrategy bool   `fieldNo:"20" formLineNo:"20_(i)_Strategy"`
+	RVFixedIncomeAssetBackedNAV      string `fieldNo:"20" formLineNo:"20_(i)_%_of_NAV"`
+	RVFixedIncomeAssetBackedCapital  string `fieldNo:"20" formLineNo:"20_(i)_%_of_capital"`
 
-	RVFixedIncomeConvArbStrategy bool `fieldNo:"20" formLineNo:"20_(j)_Strategy"`
-	// RVFixedIncomeConvArbNAV      float64 `fieldNo:"20" formLineNo:"20_(j)_%_of_NAV"`
-	// RVFixedIncomeConvArbCapital  float64 `fieldNo:"20" formLineNo:"20_(j)_%_of_capital"`
+	RVFixedIncomeConvArbStrategy bool   `fieldNo:"20" formLineNo:"20_(j)_Strategy"`
+	RVFixedIncomeConvArbNAV      string `fieldNo:"20" formLineNo:"20_(j)_%_of_NAV"`
+	RVFixedIncomeConvArbCapital  string `fieldNo:"20" formLineNo:"20_(j)_%_of_capital"`
 
-	RVFixedIncomeCorporateStrategy bool `fieldNo:"20" formLineNo:"20_(k)_Strategy"`
-	// RVFixedIncomeCorporateNAV      float64 `fieldNo:"20" formLineNo:"20_(k)_%_of_NAV"`
-	// RVFixedIncomeCorporateCapital  float64 `fieldNo:"20" formLineNo:"20_(k)_%_of_capital"`
+	RVFixedIncomeCorporateStrategy bool   `fieldNo:"20" formLineNo:"20_(k)_Strategy"`
+	RVFixedIncomeCorporateNAV      string `fieldNo:"20" formLineNo:"20_(k)_%_of_NAV"`
+	RVFixedIncomeCorporateCapital  string `fieldNo:"20" formLineNo:"20_(k)_%_of_capital"`
 
-	RVFixedIncomeSovereignStrategy bool `fieldNo:"20" formLineNo:"20_(l)_Strategy"`
-	// RVFixedIncomeSovereignNAV      float64 `fieldNo:"20" formLineNo:"20_(l)_%_of_NAV"`
-	// RVFixedIncomeSovereignCapital  float64 `fieldNo:"20" formLineNo:"20_(l)_%_of_capital"`
+	RVFixedIncomeSovereignStrategy bool   `fieldNo:"20" formLineNo:"20_(l)_Strategy"`
+	RVFixedIncomeSovereignNAV      string `fieldNo:"20" formLineNo:"20_(l)_%_of_NAV"`
+	RVFixedIncomeSovereignCapital  string `fieldNo:"20" formLineNo:"20_(l)_%_of_capital"`
 
-	RVVolatilityArbStrategy bool `fieldNo:"20" formLineNo:"20_(m)_Strategy"`
-	// RVVolatilityArbNAV      float64 `fieldNo:"20" formLineNo:"20_(m)_%_of_NAV"`
-	// RVVolatilityArbCapital  float64 `fieldNo:"20" formLineNo:"20_(m)_%_of_capital"`
+	RVVolatilityArbStrategy bool   `fieldNo:"20" formLineNo:"20_(m)_Strategy"`
+	RVVolatilityArbNAV      string `fieldNo:"20" formLineNo:"20_(m)_%_of_NAV"`
+	RVVolatilityArbCapital  string `fieldNo:"20" formLineNo:"20_(m)_%_of_capital"`
 
 	// Event Driven
-	EventDrivenDistressedStrategy bool `fieldNo:"20" formLineNo:"20_(n)_Strategy"`
-	// EventDrivenDistressedNAV      float64 `fieldNo:"20" formLineNo:"20_(n)_%_of_NAV"`
-	// EventDrivenDistressedCapital  float64 `fieldNo:"20" formLineNo:"20_(n)_%_of_capital"`
+	EventDrivenDistressedStrategy bool   `fieldNo:"20" formLineNo:"20_(n)_Strategy"`
+	EventDrivenDistressedNAV      string `fieldNo:"20" formLineNo:"20_(n)_%_of_NAV"`
+	EventDrivenDistressedCapital  string `fieldNo:"20" formLineNo:"20_(n)_%_of_capital"`
 
-	EventDrivenRiskArbStrategy bool `fieldNo:"20" formLineNo:"20_(o)_Strategy"`
-	// EventDrivenRiskArbNAV      float64 `fieldNo:"20" formLineNo:"20_(o)_%_of_NAV"`
-	// EventDrivenRiskArbCapital  float64 `fieldNo:"20" formLineNo:"20_(o)_%_of_capital"`
+	EventDrivenRiskArbStrategy bool   `fieldNo:"20" formLineNo:"20_(o)_Strategy"`
+	EventDrivenRiskArbNAV      string `fieldNo:"20" formLineNo:"20_(o)_%_of_NAV"`
+	EventDrivenRiskArbCapital  string `fieldNo:"20" formLineNo:"20_(o)_%_of_capital"`
 
-	EventDrivenEqSpecialSitStrategy bool `fieldNo:"20" formLineNo:"20_(p)_Strategy"`
-	// EventDrivenEqSpecialSitNAV      float64 `fieldNo:"20" formLineNo:"20_(p)_%_of_NAV"`
-	// EventDrivenEqSpecialSitCapital  float64 `fieldNo:"20" formLineNo:"20_(p)_%_of_capital"`
+	EventDrivenEqSpecialSitStrategy bool   `fieldNo:"20" formLineNo:"20_(p)_Strategy"`
+	EventDrivenEqSpecialSitNAV      string `fieldNo:"20" formLineNo:"20_(p)_%_of_NAV"`
+	EventDrivenEqSpecialSitCapital  string `fieldNo:"20" formLineNo:"20_(p)_%_of_capital"`
 
 	// Credit
-	CreditLongShortStrategy bool `fieldNo:"20" formLineNo:"20_(q)_Strategy"`
-	// CreditLongShortNAV      float64 `fieldNo:"20" formLineNo:"20_(q)_%_of_NAV"`
-	// CreditLongShortCapital  float64 `fieldNo:"20" formLineNo:"20_(q)_%_of_capital"`
+	CreditLongShortStrategy bool   `fieldNo:"20" formLineNo:"20_(q)_Strategy"`
+	CreditLongShortNAV      string `fieldNo:"20" formLineNo:"20_(q)_%_of_NAV"`
+	CreditLongShortCapital  string `fieldNo:"20" formLineNo:"20_(q)_%_of_capital"`
 
-	CreditAssetBasedLendingStrategy bool `fieldNo:"20" formLineNo:"20_(r)_Strategy"`
-	// CreditAssetBasedLendingNAV      float64 `fieldNo:"20" formLineNo:"20_(r)_%_of_NAV"`
-	// CreditAssetBasedLendingCapital  float64 `fieldNo:"20" formLineNo:"20_(r)_%_of_capital"`
+	CreditAssetBasedLendingStrategy bool   `fieldNo:"20" formLineNo:"20_(r)_Strategy"`
+	CreditAssetBasedLendingNAV      string `fieldNo:"20" formLineNo:"20_(r)_%_of_NAV"`
+	CreditAssetBasedLendingCapital  string `fieldNo:"20" formLineNo:"20_(r)_%_of_capital"`
 
 	// Managed Futures / CTA
-	ManagedFuturesFundamentalStrategy bool `fieldNo:"20" formLineNo:"20_(s)_Strategy"`
-	// ManagedFuturesFundamentalNAV      float64 `fieldNo:"20" formLineNo:"20_(s)_%_of_NAV"`
-	// ManagedFuturesFundamentalCapital  float64 `fieldNo:"20" formLineNo:"20_(s)_%_of_capital"`
+	ManagedFuturesFundamentalStrategy bool   `fieldNo:"20" formLineNo:"20_(s)_Strategy"`
+	ManagedFuturesFundamentalNAV      string `fieldNo:"20" formLineNo:"20_(s)_%_of_NAV"`
+	ManagedFuturesFundamentalCapital  string `fieldNo:"20" formLineNo:"20_(s)_%_of_capital"`
 
-	ManagedFuturesQuantitativeStrategy bool `fieldNo:"20" formLineNo:"20_(t)_Strategy"`
-	// ManagedFuturesQuantitativeNAV      float64 `fieldNo:"20" formLineNo:"20_(t)_%_of_NAV"`
-	// ManagedFuturesQuantitativeCapital  float64 `fieldNo:"20" formLineNo:"20_(t)_%_of_capital"`
+	ManagedFuturesQuantitativeStrategy bool   `fieldNo:"20" formLineNo:"20_(t)_Strategy"`
+	ManagedFuturesQuantitativeNAV      string `fieldNo:"20" formLineNo:"20_(t)_%_of_NAV"`
+	ManagedFuturesQuantitativeCapital  string `fieldNo:"20" formLineNo:"20_(t)_%_of_capital"`
 
 	// Other
 	InvestmentInOtherFundsStrategy bool   `fieldNo:"20" formLineNo:"20_(u)_Strategy"`
 	InvestmentInOtherFundsNAV      string `fieldNo:"20" formLineNo:"20_(u)_%_of_NAV"`
-	// InvestmentInOtherFundsCapital  float64 `fieldNo:"20" formLineNo:"20_(u)_%_of_capital"`
+	InvestmentInOtherFundsCapital  string `fieldNo:"20" formLineNo:"20_(u)_%_of_capital"`
 
-	OtherStrategy bool `fieldNo:"20" formLineNo:"20_(v)_Strategy"`
-	// OtherNAV      float64 `fieldNo:"20" formLineNo:"20_(v)_%_of_NAV"`
-	// OtherCapital  float64 `fieldNo:"20" formLineNo:"20_(v)_%_of_capital"`
+	OtherStrategy bool   `fieldNo:"20" formLineNo:"20_(v)_Strategy"`
+	OtherNAV      string `fieldNo:"20" formLineNo:"20_(v)_%_of_NAV"`
+	OtherCapital  string `fieldNo:"20" formLineNo:"20_(v)_%_of_capital"`
 
 	HFTPercentage string `fieldNo:"21" formLineNo:"21"`
 	// Row A
