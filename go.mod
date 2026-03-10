@@ -5,11 +5,14 @@ go 1.23.4
 require (
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/jmoiron/sqlx v1.4.0
+	github.com/shakinm/xlsReader v0.9.12
 	github.com/xuri/excelize/v2 v2.9.1
+	gopkg.in/ini.v1 v1.67.1
 )
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/metakeule/fmtdate v1.1.2 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.4 // indirect
 	github.com/tiendc/go-deepcopy v1.6.0 // indirect

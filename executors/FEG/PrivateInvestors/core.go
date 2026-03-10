@@ -41,7 +41,7 @@ func (F *PrivateFund) GetFundID() string {
 }
 
 // SetLiquidityData takes up a reference of LiquidityData and set upon the fund
-func (F *PrivateFund) SetLiquidityData(data *LiquidityData) {
+func (F *PrivateFund) SetLiquidityData(data *executors.LiquidityData) {
 	F.workPaperData.liquidityData = *data
 }
 
@@ -56,17 +56,17 @@ func (F *PrivateFund) ExportWorkPaperData() map[string]string {
 
 // WorkPaperData represents the core structure that holds all the data for a particular Fund-Series combination
 type WorkPaperData struct {
-	totalAssets                   float64             `entity:"q3_total_assets_bs"`
-	unfundedCommitments           float64             `entity:"q3_unfunded_commitments_captial_roll_qtd"`
-	totalPartnerCaptial           float64             `entity:"q3_total_partner_captial_bs"`
-	totalLiabilities              float64             `entity:"q3_total_liabilities_bs"`
-	investments                   float64             `entity:"q3_investments_bs"`
-	investmentsUnrealisedGainLoss float64             `entity:"q3_investments_unrealised_gain_loss_bs"`
-	cashSweep                     float64             `entity:"q3_cash_sweep_bs"`
-	cashGeneralAccount            float64             `entity:"q3_cash_general_account_bs"`
-	cashChecking                  float64             `entity:"q3_cash_checking_bs"`
-	liquidityData                 LiquidityData       `entity:"liquidity_data"`
-	fundPerformanceData           FundPerformanceData `entity:"fund_performance_data"`
+	totalAssets                   float64                 `entity:"q3_total_assets_bs"`
+	unfundedCommitments           float64                 `entity:"q3_unfunded_commitments_captial_roll_qtd"`
+	totalPartnerCaptial           float64                 `entity:"q3_total_partner_captial_bs"`
+	totalLiabilities              float64                 `entity:"q3_total_liabilities_bs"`
+	investments                   float64                 `entity:"q3_investments_bs"`
+	investmentsUnrealisedGainLoss float64                 `entity:"q3_investments_unrealised_gain_loss_bs"`
+	cashSweep                     float64                 `entity:"q3_cash_sweep_bs"`
+	cashGeneralAccount            float64                 `entity:"q3_cash_general_account_bs"`
+	cashChecking                  float64                 `entity:"q3_cash_checking_bs"`
+	liquidityData                 executors.LiquidityData `entity:"liquidity_data"`
+	fundPerformanceData           FundPerformanceData     `entity:"fund_performance_data"`
 }
 
 // LiquidityData represents the structure that holds all the data retrieved from the investorLiquidity File

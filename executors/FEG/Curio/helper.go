@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
+	"unicode"
 )
 
 func CreateAllFundSeries(fundCode string) []*Fund {
@@ -32,6 +34,40 @@ func StaticFunds(FundShortCode string) (*executors.Form1bData, *Fund) {
 
 	return fundData, fundObj
 
+}
+
+// normalizeCell cleans a raw cell string:
+// - strips leading/trailing whitespace
+// - removes all internal whitespace (spaces, tabs, non-breaking spaces, escape sequences)
+// - lowercases everything
+func normalizeCell(s string) string {
+	// Remove escape sequences like \t, \n, \r, \x00, etc.
+	s = strings.Map(func(r rune) rune {
+		if unicode.IsControl(r) {
+			return -1 // drop control characters
+		}
+		return r
+	}, s)
+
+	// Remove ALL whitespace (including mid-word spaces → "Unfunded Commitment" == "UnfundedCommitment")
+	re := regexp.MustCompile(`\s+`)
+	s = re.ReplaceAllString(s, "")
+
+	// Lowercase
+	return strings.ToLower(s)
+}
+
+func singularize(s string) string {
+	if strings.HasSuffix(s, "ies") {
+		return s[:len(s)-3] + "y" // committies → committy
+	}
+	if strings.HasSuffix(s, "es") {
+		return s[:len(s)-2] // branches→ branch
+	}
+	if strings.HasSuffix(s, "s") {
+		return s[:len(s)-1] // commitments → commitment
+	}
+	return s
 }
 
 // assignFundPerf copies every float64/string from src (FundPerformance) into dst
