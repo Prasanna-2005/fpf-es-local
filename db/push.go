@@ -87,7 +87,7 @@ func PushFormData(filingId string, fundCode string, userId string, formdata map[
 		return fmt.Errorf("executing batch update: %w", err)
 	}
 
-	// 2. BATCH INSERT: Using NamedExec for the struct slice
+	//batch insert using NamedExec for the struct slice
 	insertQuery := fmt.Sprintf(`
 		INSERT INTO %s (filingId, fundSeriesId, fieldNo, formLineNo, value, createdAt, createdBy, isCurrentValue) 
 		VALUES (:filingId, :fundSeriesId, :fieldNo, :formLineNo, :value, :createdAt, :createdBy, 1)`,
