@@ -35,13 +35,13 @@ type WorkPaperData struct {
 	totalPartnerCaptial float64 `entity:"tb_total_partner_captial_bs"`
 	totalLiabilities    float64 `entity:"tb_total_liabilities_bs"`
 	// equityData          float64             `entity:"equity_otherfunds"`
-	l1              float64      `entity:"level1"`
-	l2              float64      `entity:"level2"`
-	l3              float64      `entity:"level3"`
-	levelExtData    LevelingData `entity:"level_ext_data"`
-	sumLevelExtData float64      `entity:"equity_otherfunds"`
-	// liquidityData       LiquidityData       `entity:"liquidity_data"`
-	fundPerformanceData FundPerformanceData `entity:"fund_performance_data"`
+	l1                  float64                 `entity:"level1"`
+	l2                  float64                 `entity:"level2"`
+	l3                  float64                 `entity:"level3"`
+	levelExtData        LevelingData            `entity:"level_ext_data"`
+	sumLevelExtData     float64                 `entity:"equity_otherfunds"`
+	liquidityData       executors.LiquidityData `entity:"liquidity_data"`
+	fundPerformanceData FundPerformanceData     `entity:"fund_performance_data"`
 }
 
 func NewFund(fundId string) *Fund {
@@ -94,6 +94,10 @@ type FundPerformanceData struct {
 	octNetPercentage float64 `entity:"oct_net_percentage_nav_report" term:"october"   colName:"net"`
 	novNetPercentage float64 `entity:"nov_net_percentage_nav_report" term:"november"  colName:"net"`
 	decNetPercentage float64 `entity:"dec_net_percentage_nav_report" term:"december"  colName:"net"`
+}
+
+func (F *Fund) SetLiquidityData(data *executors.LiquidityData) {
+	F.workPaperData.liquidityData = *data
 }
 
 // GetFundID returns the fundID used internally

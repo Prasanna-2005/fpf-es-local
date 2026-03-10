@@ -194,7 +194,7 @@ func setStaticFunds(filingID, userID string) error {
 
 }
 
-func setStaticCurioFunds(filingID, userID string) error {
+func setStaticCurioFunds(filingID, userID string, liqudityHolder executors.InvLiquidityData) error {
 	answersMapper := make(map[[2]string]string)
 	//CURSLP static funds
 	staticFundData, staticFundObj := curio.StaticFunds("CURSLP")
@@ -211,6 +211,13 @@ func setStaticCurioFunds(filingID, userID string) error {
 	//CNLCP static funds
 	staticFundData, staticFundObj = curio.StaticFunds("CNLCP")
 	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
+	if holder, ok := liqudityHolder["CNLCP"]; ok {
+		staticFundData.OtherPercent = 0
+		staticFundObj.SetLiquidityData(holder)
+	} else {
+		logging.Warn("Liquidity Data not available for the Fund:CNLCP")
+	}
+	staticFundData = staticFundObj.Compute()
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
 	err = db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
 	if err != nil {
@@ -252,10 +259,10 @@ func execute(filingID string, userID string) {
 		return
 	}
 
-	liqudityHolder := make(privateinvestors.LiquidityDataHolder)
+	liqudityHolder := make(executors.InvLiquidityData)
 
 	if investorLiquidityPath != "" {
-		liqudityHolder, err = privateinvestors.ExtractInvestorLiquidity(investorLiquidityPath)
+		liqudityHolder, err = executors.ExtractInvestorLiquidity(investorLiquidityPath)
 		if err != nil {
 			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
 			return
@@ -349,11 +356,11 @@ func executeInvServ(filingID string, userID string) {
 		return
 	}
 
-	liqudityHolder := make(invesmentservices.LiquidityDataHolder)
+	liqudityHolder := make(executors.InvLiquidityData)
 	unfndCmtHolder := make(invesmentservices.UnfundedCommitmentsHolder)
 
 	if investorLiquidityPath != "" {
-		liqudityHolder, err = invesmentservices.ExtractInvestorLiquidity(investorLiquidityPath)
+		liqudityHolder, err = executors.ExtractInvestorLiquidity(investorLiquidityPath)
 		if err != nil {
 			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
 			return
@@ -508,7 +515,7 @@ func prepareFilingInvestmentServices(filingID string) (map[string][]*invesmentse
 func executeCurio(filingID string, userID string) {
 	sec1a := section1aData("FEG", "Curio")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
-	mapper, _, _, err := prepareFilingCurio(filingID)
+	mapper, investorLiquidityPath, _, err := prepareFilingCurio(filingID)
 	if err != nil {
 		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
 		return
@@ -525,27 +532,17 @@ func executeCurio(filingID string, userID string) {
 		return
 	}
 
-	// liqudityHolder := make(curio.LiquidityDataHolder)
+	liqudityHolder := make(executors.InvLiquidityData)
 	// unfndCmtHolder := make(curio.UnfundedCommitmentsHolder)
 
-	// if investorLiquidityPath != "" {
-	// 	liqudityHolder, err = invesmentservices.ExtractInvestorLiquidity(investorLiquidityPath)
-	// 	if err != nil {
-	// 		logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
-	// 		return
-	// 	}
-	// }
-	// if unfndCmtsPath != "" {
-	// 	unfndCmtHolder, err = invesmentservices.ExtractUnfundedCmts(unfndCmtsPath)
-	// 	if err != nil {
-	// 		logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
-	// 		return
-	// 	}
-	// }
-	// for fund, dat := range liqudityHolder {
-	// 	fmt.Printf("\nfund:%v,data:%v\n", fund, *dat)
-	// }
-	// logging.Info("Extraction of Investor Liquidity Completed")
+	if investorLiquidityPath != "" {
+		liqudityHolder, err = executors.ExtractInvestorLiquidity(investorLiquidityPath)
+		if err != nil {
+			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+			return
+		}
+	}
+	logging.Info("Extraction of Investor Liquidity Completed")
 
 	logging.Info(fmt.Sprintf("Total number of funds mapped: %d", len(mapper)))
 
@@ -560,31 +557,28 @@ func executeCurio(filingID string, userID string) {
 			answersMapper := make(map[[2]string]string)
 			// ansMapper1c:=make(map[[2]string]string)
 
-			// if holder, ok := liqudityHolder[fund.GetFundID()]; ok {
-			// 	fund.SetLiquidityData(holder)
-			// } else {
-			// 	logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
-			// }
+			if holder, ok := liqudityHolder[fund.GetFundID()]; ok {
+				fund.SetLiquidityData(holder)
+			} else {
+				logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
+			}
 
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractTrialBalanceData()
 			if err != nil {
-				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
-				continue
+				logging.Error("Error in extracting Trial Balance sheet for " + fund.GetFundID() + ": " + err.Error())
 			}
+			err = fund.ExtractCapReg()
+			if err != nil {
+				logging.Error("Error in extracting capital register sheet for " + fund.GetFundID() + ": " + err.Error())
+			}
+
 			err = fund.ExtractQ17()
 			if err != nil {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
 				continue
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
-
-			// if holder, ok := unfndCmtHolder[fund.GetFundID()]; ok {
-			// 	fund.SetUnfdCmtsData(holder)
-
-			// } else {
-			// 	logging.Warn("Unfunded commitments Data not available for the Fund: " + fund.GetFundID())
-			// }
 			extractionData := fund.ExportWorkPaperData()
 			err = db.PushEntities(filingID, fund.GetFundID(), userID, extractionData)
 			if err != nil {
@@ -625,7 +619,7 @@ func executeCurio(filingID string, userID string) {
 
 		}
 	}
-	err = setStaticCurioFunds(filingID, userID)
+	err = setStaticCurioFunds(filingID, userID, liqudityHolder)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Static funds setting error:%v", err.Error()))
 	}
@@ -664,15 +658,6 @@ func prepareFilingCurio(filingID string) (map[string][]*curio.Fund, string, stri
 		if mapping.FundShortCode == "UNFDCMTS" {
 			unfndCmts = os.Getenv("STORAGE_PATH") + mapping.FilingPath
 		}
-
-		// converted := invesmentservices.ShortCodeConvertor[mapping.FundShortCode]
-
-		// if converted == "" {
-		// 	logging.Warn(mapping.FundShortCode + "->" + "Unknown Short Code Encountered. Conversion Failed")
-		// 	continue
-		// }
-
-		// mapping.FundShortCode = converted
 		if _, ok := fundsMapper[mapping.FundShortCode]; !ok {
 			fundsMapper[mapping.FundShortCode] = curio.CreateAllFundSeries(mapping.FundShortCode)
 		}

@@ -24,23 +24,23 @@ func (F *Fund) Compute() *executors.Form1bData {
 	data.Level1Asset = wd.l1
 	data.Level2Asset = wd.l2
 	data.Level3Asset = wd.l3
-	data.CostBasedAsset = calculateCBAsset(data.GrossAsset, wd.sumLevelExtData)
+	data.CostBasedAsset = calculateCBAsset(data.GrossAsset, wd.sumLevelExtData, wd.unfundedCommitments)
 	data.CostBasedLiability = wd.totalLiabilities
 
 	// investor liquidity data
-	data.UsPercent = ld.usPersonOwnedPercentage
-	data.OtherPercent = ld.otherPlanOwnedPercentage
-	data.PensionPlanPercent = ld.pensionPlanOwnedPercentage
-	data.NonProfitPercent = ld.nonProfitOwnedPercentage
-	data.Top5Percent = ld.top5OwnedPercentage
-	data.SovereignPercent = ld.sovereignFundPercentage
-	data.PrivateFundPercent = ld.pvtFundPercentage
+	data.UsPercent = ld.UsPersonOwnedPercentage
+	data.OtherPercent = ld.OtherPlanOwnedPercentage
+	data.PensionPlanPercent = ld.PensionPlanOwnedPercentage
+	data.NonProfitPercent = ld.NonProfitOwnedPercentage
+	data.Top5Percent = ld.Top5OwnedPercentage
+	data.SovereignPercent = ld.SovereignFundPercentage
+	data.PrivateFundPercent = ld.PvtFundPercentage
 	assignFundPerf(data, pd)
 
 	return data
 
 }
 
-func calculateCBAsset(GrossAsset, LevelingSum float64) float64 {
-	return GrossAsset - LevelingSum
+func calculateCBAsset(GrossAsset, LevelingSum, unfdCmts float64) float64 {
+	return GrossAsset - LevelingSum - unfdCmts
 }
