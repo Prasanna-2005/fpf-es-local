@@ -101,7 +101,7 @@ func CollectAnswers(v reflect.Value, store map[[2]string]string) {
 			if nf.Valid {
 				store[l] = strconv.FormatFloat(nf.Float64, 'f', -1, 64)
 			} else {
-				store[l] = ""
+				store[l] = "NA"
 			}
 
 		case value.Kind() == reflect.String:
