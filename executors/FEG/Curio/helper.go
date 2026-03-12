@@ -52,7 +52,7 @@ func assignFundPerf(dst *executors.Form1bData, src FundPerformanceData) {
 		}
 	}
 
-	// 1. map  term → index of date field
+	// map  term to index of date field
 	dateIdx := make(map[string]int)
 	for i := 0; i < tDst.NumField(); i++ {
 		f := tDst.Field(i)
@@ -86,8 +86,7 @@ func assignFundPerf(dst *executors.Form1bData, src FundPerformanceData) {
 				Valid:   src.Float() != 0,
 			}))
 
-			// 2. single-shot date assignment
-			// fmt.Println(dateIdx)
+			// single-shot date assignment
 			if idx, ok := dateIdx[term]; ok {
 				otherCol := "gross"
 				if col == "gross" {

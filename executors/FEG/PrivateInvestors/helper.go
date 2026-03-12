@@ -84,7 +84,7 @@ func assignFundPerf(dst *executors.Form1bData, src FundPerformanceData) {
 				Valid:   src.Float() != 0,
 			}))
 
-			// 2. single-shot date assignment
+			// single-shot date assignment
 
 			if idx, ok := dateIdx[term]; ok {
 				otherCol := "gross"
