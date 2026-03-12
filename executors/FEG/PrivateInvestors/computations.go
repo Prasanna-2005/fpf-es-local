@@ -32,11 +32,11 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 	data.CostBasedLiability = wd.totalLiabilities
 
 	// investor liquidity data
-	data.UsPercent = ld.usPersonOwnedPercentage
-	data.OtherPercent = ld.otherPlanOwnedPercentage
-	data.PensionPlanPercent = ld.pensionPlanOwnedPercentage
-	data.NonProfitPercent = ld.nonProfitOwnedPercentage
-	data.Top5Percent = ld.top5OwnedPercentage
+	data.UsPercent = ld.UsPersonOwnedPercentage
+	data.OtherPercent = ld.OtherPlanOwnedPercentage
+	data.PensionPlanPercent = ld.PensionPlanOwnedPercentage
+	data.NonProfitPercent = ld.NonProfitOwnedPercentage
+	data.Top5Percent = ld.Top5OwnedPercentage
 
 	// fund performance data
 	assignFundPerf(data, pd)
