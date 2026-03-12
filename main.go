@@ -323,7 +323,7 @@ func execute(filingID string, userID string) {
 			if err != nil {
 				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 			}
-			sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
+			// sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
 			logging.Info("Form Data Entries are Pushed to the DB")
 
 			logging.Info("Execution Completed for the Fund: " + fund.GetFundID())
@@ -331,17 +331,8 @@ func execute(filingID string, userID string) {
 		}
 
 	}
-	form1aData := sec1a.Compute()
-	mapped1a := make(map[[2]string]string)
-	executors.CollectAnswers(reflect.ValueOf(*form1aData), mapped1a)
-
-	err = db.PushFormData(filingID, "SECTION-1A", userID, mapped1a)
-
-	if err != nil {
-		logging.Error("Error in Pushing to Form 1a Data Table: " + err.Error())
-	} else {
-		logging.Info("Pushed formdata for section 1A")
-	}
+	sec1a.CalcAUM(filingID)
+	sec1a.HandleSection1A(filingID, userID, existing)
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
@@ -395,7 +386,6 @@ func executeInvServ(filingID string, userID string) {
 			}
 
 			answersMapper := make(map[[2]string]string)
-			// ansMapper1c:=make(map[[2]string]string)
 
 			if holder, ok := liqudityHolder[fund.GetFundID()]; ok {
 				fund.SetLiquidityData(holder)
@@ -452,7 +442,7 @@ func executeInvServ(filingID string, userID string) {
 			if err != nil {
 				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 			}
-			sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
+			// sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
 			logging.Info("Form Data Entries are Pushed to the DB")
 			logging.Info("Execution Completed for the Fund: " + fund.GetFundID())
 
@@ -462,18 +452,9 @@ func executeInvServ(filingID string, userID string) {
 	if err != nil {
 		logging.Error(fmt.Sprintf("Static funds setting error:%v", err.Error()))
 	}
-	form1aData := sec1a.Compute()
-	mapped1a := make(map[[2]string]string)
-	executors.CollectAnswers(reflect.ValueOf(*form1aData), mapped1a)
-
-	err = db.PushFormData(filingID, "SECTION-1A", userID, mapped1a)
-
-	if err != nil {
-		logging.Error("Error in Pushing to Form 1a Data Table: " + err.Error())
-	} else {
-		logging.Info("Pushed formdata for section 1A")
-	}
 	logging.Info("Succefully set static Funds")
+	sec1a.CalcAUM(filingID)
+	sec1a.HandleSection1A(filingID, userID, existing)
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
@@ -621,7 +602,7 @@ func executeCurio(filingID string, userID string) {
 			if err != nil {
 				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 			}
-			sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
+			// sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
 			logging.Info("Form Data Entries are Pushed to the DB")
 
 			logging.Info("Execution Completed for the Fund: " + fund.GetFundID())
@@ -633,17 +614,8 @@ func executeCurio(filingID string, userID string) {
 		logging.Error(fmt.Sprintf("Static funds setting error:%v", err.Error()))
 	}
 	logging.Info("Succefully set static Funds")
-	form1aData := sec1a.Compute()
-	mapped1a := make(map[[2]string]string)
-	executors.CollectAnswers(reflect.ValueOf(*form1aData), mapped1a)
-
-	err = db.PushFormData(filingID, "SECTION-1A", userID, mapped1a)
-
-	if err != nil {
-		logging.Error("Error in Pushing to Form 1a Data Table: " + err.Error())
-	} else {
-		logging.Info("Pushed formdata for section 1A")
-	}
+	sec1a.CalcAUM(filingID)
+	sec1a.HandleSection1A(filingID, userID, existing)
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 

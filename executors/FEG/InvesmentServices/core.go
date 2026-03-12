@@ -81,6 +81,9 @@ type WorkPaperData struct {
 }
 
 type LevelingData struct {
+	closedEndFundsCost  float64 `entity:"closed_end_funds_cost"`
+	closedEndFundsURGL  float64 `entity:"closed_end_funds_ur_gl"`
+	future1256URGL      float64 `entity:"future_1256_ur_gl"`
 	adrCost             float64 `entity:"adr_cost"`
 	adrURGL             float64 `entity:"adr_ur_gl"`
 	corpBondsCost       float64 `entity:"corp_bonds_cost"`

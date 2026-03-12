@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"quantrium-tech/form_pf_extractor_service/config"
+	"strings"
 )
 
 // PullFiling pulls all the mappings attached to the filingID and returns the list of reduced FileMapper
@@ -76,4 +77,64 @@ func SetFundInfo() error {
 	}
 
 	return nil
+}
+
+type AUM struct {
+	FundType   string  `db:"fundType"`
+	FieldNo    string  `db:"fieldNo"`
+	FormLineNo string  `db:"formLineNo"`
+	Asset      float64 `db:"assets"` // Matches the 'AS total_value' in SQL
+}
+
+func PullAssets(filingID string) (map[string]map[string]map[string]float64, error) {
+	var rows []AUM
+	// Map structure: [FundType][LineNo][FieldNo]AssetValue
+	finalData := make(map[string]map[string]map[string]float64)
+
+	query := `
+        SELECT 
+            funds.fundType, 
+            legacy.fieldNo,
+            legacy.formLineNo,
+            SUM(legacy.value) AS assets
+        FROM 
+            formpf_stage.form_data_legacy AS legacy
+        LEFT JOIN 
+            formpf_stage.feg_funds AS funds
+            ON legacy.fundSeriesId = funds.fegFundId
+        WHERE 
+            legacy.filingId = ?
+            AND legacy.fieldNo IN ('8', '9') 
+            AND legacy.formLineNo IN ('8', '9')
+        GROUP BY 
+            funds.fundType, 
+            legacy.formLineNo,
+            legacy.fieldNo`
+
+	err := db.Select(&rows, query, filingID)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving detailed fund assets: %w", err)
+	}
+
+	for _, row := range rows {
+		fType := strings.ToLower(row.FundType)
+		if fType == "" {
+			fType = "unknown"
+		}
+
+		// Level 1: Initialize FundType
+		if _, ok := finalData[fType]; !ok {
+			finalData[fType] = make(map[string]map[string]float64)
+		}
+
+		// Level 2: Initialize FormLineNo
+		if _, ok := finalData[fType][row.FormLineNo]; !ok {
+			finalData[fType][row.FormLineNo] = make(map[string]float64)
+		}
+
+		// Level 3: Set Asset value for the FieldNo
+		finalData[fType][row.FormLineNo][row.FieldNo] = row.Asset
+	}
+
+	return finalData, nil
 }
