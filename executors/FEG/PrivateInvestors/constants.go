@@ -42,3 +42,7 @@ var MaturedFunds = []string{
 	"FEGOF_3_C",
 	"FEGOF_3_D",
 }
+
+var CombineFunds = map[string]string{
+	"FEGOF_5_C": "C AIV",
+}
