@@ -35,6 +35,12 @@ func (F *PrivateFund) SetHolder(quarterNo int, filePath string) {
 
 }
 
+func (F *PrivateFund) CopyHolder(partnerFund *PrivateFund) {
+	partnerFund.holder.q1FilePath = F.holder.q1FilePath
+	partnerFund.holder.q2FilePath = F.holder.q2FilePath
+	partnerFund.holder.q3FilePath = F.holder.q3FilePath
+}
+
 // GetFundID returns the fundID used internally
 func (F *PrivateFund) GetFundID() string {
 	return F.fundID
@@ -43,6 +49,18 @@ func (F *PrivateFund) GetFundID() string {
 // SetLiquidityData takes up a reference of LiquidityData and set upon the fund
 func (F *PrivateFund) SetLiquidityData(data *executors.LiquidityData) {
 	F.workPaperData.liquidityData = *data
+}
+
+func (F *PrivateFund) CombineData(partnerFund *PrivateFund) {
+	F.workPaperData.totalAssets += partnerFund.workPaperData.totalAssets
+	F.workPaperData.unfundedCommitments += partnerFund.workPaperData.unfundedCommitments
+	F.workPaperData.totalPartnerCaptial += partnerFund.workPaperData.totalPartnerCaptial
+	F.workPaperData.totalLiabilities += partnerFund.workPaperData.totalLiabilities
+	F.workPaperData.investments += partnerFund.workPaperData.investments
+	F.workPaperData.investmentsUnrealisedGainLoss += partnerFund.workPaperData.investmentsUnrealisedGainLoss
+	F.workPaperData.cashSweep += partnerFund.workPaperData.cashSweep
+	F.workPaperData.cashGeneralAccount += partnerFund.workPaperData.cashGeneralAccount
+	F.workPaperData.cashChecking += partnerFund.workPaperData.cashChecking
 }
 
 // ExportWorkPaperData returns a mapped entityname to value mapper for further push

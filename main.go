@@ -292,9 +292,18 @@ func execute(filingID string, userID string) {
 			err := fund.ExtractWorkPaperData()
 			if err != nil {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
-
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
+			if series, ok := privateinvestors.CombineFunds[fund.GetFundID()]; ok {
+				partnerFund := privateinvestors.NewPrivateFund(fund.GetFundID()+series, series)
+				fund.CopyHolder(partnerFund)
+				err = partnerFund.ExtractWorkPaperData()
+				if err != nil {
+					logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
+				}
+				fund.CombineData(partnerFund)
+
+			}
 
 			extractionData := fund.ExportWorkPaperData()
 			err = db.PushEntities(filingID, fund.GetFundID(), userID, extractionData)
