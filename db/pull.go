@@ -106,6 +106,7 @@ func PullAssets(filingID string) (map[string]map[string]map[string]float64, erro
             legacy.filingId = ?
             AND legacy.fieldNo IN ('8', '9') 
             AND legacy.formLineNo IN ('8', '9')
+			AND isCurrentValue=1
         GROUP BY 
             funds.fundType, 
             legacy.formLineNo,
