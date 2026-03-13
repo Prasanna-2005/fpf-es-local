@@ -594,6 +594,12 @@ func assignPerformance(src map[string]float64, Navdata *WorkPaperData, isGross b
 
 func FieldPtr(ld *LevelingData, marker string) *float64 {
 	switch marker {
+	case "closed end funds u/r g/l":
+		return &ld.closedEndFundsURGL
+	case "closed end funds @ cost":
+		return &ld.closedEndFundsCost
+	case "1256 future u/r g/l":
+		return &ld.future1256URGL
 	case "adr @ cost":
 		return &ld.adrCost
 	case "adr u/r g/l":

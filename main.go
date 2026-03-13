@@ -194,7 +194,7 @@ func setStaticFunds(filingID, userID string) error {
 
 }
 
-func setStaticCurioFunds(filingID, userID string) error {
+func setStaticCurioFunds(filingID, userID string, liqudityHolder executors.InvLiquidityData) error {
 	answersMapper := make(map[[2]string]string)
 	//CURSLP static funds
 	staticFundData, staticFundObj := curio.StaticFunds("CURSLP")
@@ -211,6 +211,13 @@ func setStaticCurioFunds(filingID, userID string) error {
 	//CNLCP static funds
 	staticFundData, staticFundObj = curio.StaticFunds("CNLCP")
 	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
+	if holder, ok := liqudityHolder["CNLCP"]; ok {
+		staticFundData.OtherPercent = 0
+		staticFundObj.SetLiquidityData(holder)
+	} else {
+		logging.Warn("Liquidity Data not available for the Fund:CNLCP")
+	}
+	staticFundData = staticFundObj.Compute()
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
 	err = db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
 	if err != nil {
@@ -252,10 +259,10 @@ func execute(filingID string, userID string) {
 		return
 	}
 
-	liqudityHolder := make(privateinvestors.LiquidityDataHolder)
+	liqudityHolder := make(executors.InvLiquidityData)
 
 	if investorLiquidityPath != "" {
-		liqudityHolder, err = privateinvestors.ExtractInvestorLiquidity(investorLiquidityPath)
+		liqudityHolder, err = executors.ExtractInvestorLiquidity(investorLiquidityPath)
 		if err != nil {
 			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
 			return
@@ -285,9 +292,18 @@ func execute(filingID string, userID string) {
 			err := fund.ExtractWorkPaperData()
 			if err != nil {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
-
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
+			if series, ok := privateinvestors.CombineFunds[fund.GetFundID()]; ok {
+				partnerFund := privateinvestors.NewPrivateFund(fund.GetFundID()+series, series)
+				fund.CopyHolder(partnerFund)
+				err = partnerFund.ExtractWorkPaperData()
+				if err != nil {
+					logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
+				}
+				fund.CombineData(partnerFund)
+
+			}
 
 			extractionData := fund.ExportWorkPaperData()
 			err = db.PushEntities(filingID, fund.GetFundID(), userID, extractionData)
@@ -307,7 +323,7 @@ func execute(filingID string, userID string) {
 			if err != nil {
 				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 			}
-			sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
+			// sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
 			logging.Info("Form Data Entries are Pushed to the DB")
 
 			logging.Info("Execution Completed for the Fund: " + fund.GetFundID())
@@ -315,17 +331,8 @@ func execute(filingID string, userID string) {
 		}
 
 	}
-	form1aData := sec1a.Compute()
-	mapped1a := make(map[[2]string]string)
-	executors.CollectAnswers(reflect.ValueOf(*form1aData), mapped1a)
-
-	err = db.PushFormData(filingID, "SECTION-1A", userID, mapped1a)
-
-	if err != nil {
-		logging.Error("Error in Pushing to Form 1a Data Table: " + err.Error())
-	} else {
-		logging.Info("Pushed formdata for section 1A")
-	}
+	sec1a.CalcAUM(filingID)
+	sec1a.HandleSection1A(filingID, userID, existing)
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
@@ -349,11 +356,11 @@ func executeInvServ(filingID string, userID string) {
 		return
 	}
 
-	liqudityHolder := make(invesmentservices.LiquidityDataHolder)
+	liqudityHolder := make(executors.InvLiquidityData)
 	unfndCmtHolder := make(invesmentservices.UnfundedCommitmentsHolder)
 
 	if investorLiquidityPath != "" {
-		liqudityHolder, err = invesmentservices.ExtractInvestorLiquidity(investorLiquidityPath)
+		liqudityHolder, err = executors.ExtractInvestorLiquidity(investorLiquidityPath)
 		if err != nil {
 			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
 			return
@@ -379,7 +386,6 @@ func executeInvServ(filingID string, userID string) {
 			}
 
 			answersMapper := make(map[[2]string]string)
-			// ansMapper1c:=make(map[[2]string]string)
 
 			if holder, ok := liqudityHolder[fund.GetFundID()]; ok {
 				fund.SetLiquidityData(holder)
@@ -436,7 +442,7 @@ func executeInvServ(filingID string, userID string) {
 			if err != nil {
 				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 			}
-			sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
+			// sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
 			logging.Info("Form Data Entries are Pushed to the DB")
 			logging.Info("Execution Completed for the Fund: " + fund.GetFundID())
 
@@ -446,18 +452,9 @@ func executeInvServ(filingID string, userID string) {
 	if err != nil {
 		logging.Error(fmt.Sprintf("Static funds setting error:%v", err.Error()))
 	}
-	form1aData := sec1a.Compute()
-	mapped1a := make(map[[2]string]string)
-	executors.CollectAnswers(reflect.ValueOf(*form1aData), mapped1a)
-
-	err = db.PushFormData(filingID, "SECTION-1A", userID, mapped1a)
-
-	if err != nil {
-		logging.Error("Error in Pushing to Form 1a Data Table: " + err.Error())
-	} else {
-		logging.Info("Pushed formdata for section 1A")
-	}
 	logging.Info("Succefully set static Funds")
+	sec1a.CalcAUM(filingID)
+	sec1a.HandleSection1A(filingID, userID, existing)
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
@@ -508,7 +505,7 @@ func prepareFilingInvestmentServices(filingID string) (map[string][]*invesmentse
 func executeCurio(filingID string, userID string) {
 	sec1a := section1aData("FEG", "Curio")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
-	mapper, _, _, err := prepareFilingCurio(filingID)
+	mapper, investorLiquidityPath, _, err := prepareFilingCurio(filingID)
 	if err != nil {
 		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
 		return
@@ -525,27 +522,17 @@ func executeCurio(filingID string, userID string) {
 		return
 	}
 
-	// liqudityHolder := make(curio.LiquidityDataHolder)
+	liqudityHolder := make(executors.InvLiquidityData)
 	// unfndCmtHolder := make(curio.UnfundedCommitmentsHolder)
 
-	// if investorLiquidityPath != "" {
-	// 	liqudityHolder, err = invesmentservices.ExtractInvestorLiquidity(investorLiquidityPath)
-	// 	if err != nil {
-	// 		logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
-	// 		return
-	// 	}
-	// }
-	// if unfndCmtsPath != "" {
-	// 	unfndCmtHolder, err = invesmentservices.ExtractUnfundedCmts(unfndCmtsPath)
-	// 	if err != nil {
-	// 		logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
-	// 		return
-	// 	}
-	// }
-	// for fund, dat := range liqudityHolder {
-	// 	fmt.Printf("\nfund:%v,data:%v\n", fund, *dat)
-	// }
-	// logging.Info("Extraction of Investor Liquidity Completed")
+	if investorLiquidityPath != "" {
+		liqudityHolder, err = executors.ExtractInvestorLiquidity(investorLiquidityPath)
+		if err != nil {
+			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+			return
+		}
+	}
+	logging.Info("Extraction of Investor Liquidity Completed")
 
 	logging.Info(fmt.Sprintf("Total number of funds mapped: %d", len(mapper)))
 
@@ -560,31 +547,28 @@ func executeCurio(filingID string, userID string) {
 			answersMapper := make(map[[2]string]string)
 			// ansMapper1c:=make(map[[2]string]string)
 
-			// if holder, ok := liqudityHolder[fund.GetFundID()]; ok {
-			// 	fund.SetLiquidityData(holder)
-			// } else {
-			// 	logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
-			// }
+			if holder, ok := liqudityHolder[fund.GetFundID()]; ok {
+				fund.SetLiquidityData(holder)
+			} else {
+				logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
+			}
 
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractTrialBalanceData()
 			if err != nil {
-				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
-				continue
+				logging.Error("Error in extracting Trial Balance sheet for " + fund.GetFundID() + ": " + err.Error())
 			}
+			err = fund.ExtractCapReg()
+			if err != nil {
+				logging.Error("Error in extracting capital register sheet for " + fund.GetFundID() + ": " + err.Error())
+			}
+
 			err = fund.ExtractQ17()
 			if err != nil {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
 				continue
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
-
-			// if holder, ok := unfndCmtHolder[fund.GetFundID()]; ok {
-			// 	fund.SetUnfdCmtsData(holder)
-
-			// } else {
-			// 	logging.Warn("Unfunded commitments Data not available for the Fund: " + fund.GetFundID())
-			// }
 			extractionData := fund.ExportWorkPaperData()
 			err = db.PushEntities(filingID, fund.GetFundID(), userID, extractionData)
 			if err != nil {
@@ -618,29 +602,20 @@ func executeCurio(filingID string, userID string) {
 			if err != nil {
 				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 			}
-			sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
+			// sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
 			logging.Info("Form Data Entries are Pushed to the DB")
 
 			logging.Info("Execution Completed for the Fund: " + fund.GetFundID())
 
 		}
 	}
-	err = setStaticCurioFunds(filingID, userID)
+	err = setStaticCurioFunds(filingID, userID, liqudityHolder)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Static funds setting error:%v", err.Error()))
 	}
 	logging.Info("Succefully set static Funds")
-	form1aData := sec1a.Compute()
-	mapped1a := make(map[[2]string]string)
-	executors.CollectAnswers(reflect.ValueOf(*form1aData), mapped1a)
-
-	err = db.PushFormData(filingID, "SECTION-1A", userID, mapped1a)
-
-	if err != nil {
-		logging.Error("Error in Pushing to Form 1a Data Table: " + err.Error())
-	} else {
-		logging.Info("Pushed formdata for section 1A")
-	}
+	sec1a.CalcAUM(filingID)
+	sec1a.HandleSection1A(filingID, userID, existing)
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
@@ -664,15 +639,6 @@ func prepareFilingCurio(filingID string) (map[string][]*curio.Fund, string, stri
 		if mapping.FundShortCode == "UNFDCMTS" {
 			unfndCmts = os.Getenv("STORAGE_PATH") + mapping.FilingPath
 		}
-
-		// converted := invesmentservices.ShortCodeConvertor[mapping.FundShortCode]
-
-		// if converted == "" {
-		// 	logging.Warn(mapping.FundShortCode + "->" + "Unknown Short Code Encountered. Conversion Failed")
-		// 	continue
-		// }
-
-		// mapping.FundShortCode = converted
 		if _, ok := fundsMapper[mapping.FundShortCode]; !ok {
 			fundsMapper[mapping.FundShortCode] = curio.CreateAllFundSeries(mapping.FundShortCode)
 		}

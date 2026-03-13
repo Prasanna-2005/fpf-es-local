@@ -35,14 +35,32 @@ func (F *PrivateFund) SetHolder(quarterNo int, filePath string) {
 
 }
 
+func (F *PrivateFund) CopyHolder(partnerFund *PrivateFund) {
+	partnerFund.holder.q1FilePath = F.holder.q1FilePath
+	partnerFund.holder.q2FilePath = F.holder.q2FilePath
+	partnerFund.holder.q3FilePath = F.holder.q3FilePath
+}
+
 // GetFundID returns the fundID used internally
 func (F *PrivateFund) GetFundID() string {
 	return F.fundID
 }
 
 // SetLiquidityData takes up a reference of LiquidityData and set upon the fund
-func (F *PrivateFund) SetLiquidityData(data *LiquidityData) {
+func (F *PrivateFund) SetLiquidityData(data *executors.LiquidityData) {
 	F.workPaperData.liquidityData = *data
+}
+
+func (F *PrivateFund) CombineData(partnerFund *PrivateFund) {
+	F.workPaperData.totalAssets += partnerFund.workPaperData.totalAssets
+	F.workPaperData.unfundedCommitments += partnerFund.workPaperData.unfundedCommitments
+	F.workPaperData.totalPartnerCaptial += partnerFund.workPaperData.totalPartnerCaptial
+	F.workPaperData.totalLiabilities += partnerFund.workPaperData.totalLiabilities
+	F.workPaperData.investments += partnerFund.workPaperData.investments
+	F.workPaperData.investmentsUnrealisedGainLoss += partnerFund.workPaperData.investmentsUnrealisedGainLoss
+	F.workPaperData.cashSweep += partnerFund.workPaperData.cashSweep
+	F.workPaperData.cashGeneralAccount += partnerFund.workPaperData.cashGeneralAccount
+	F.workPaperData.cashChecking += partnerFund.workPaperData.cashChecking
 }
 
 // ExportWorkPaperData returns a mapped entityname to value mapper for further push
@@ -56,17 +74,17 @@ func (F *PrivateFund) ExportWorkPaperData() map[string]string {
 
 // WorkPaperData represents the core structure that holds all the data for a particular Fund-Series combination
 type WorkPaperData struct {
-	totalAssets                   float64             `entity:"q3_total_assets_bs"`
-	unfundedCommitments           float64             `entity:"q3_unfunded_commitments_captial_roll_qtd"`
-	totalPartnerCaptial           float64             `entity:"q3_total_partner_captial_bs"`
-	totalLiabilities              float64             `entity:"q3_total_liabilities_bs"`
-	investments                   float64             `entity:"q3_investments_bs"`
-	investmentsUnrealisedGainLoss float64             `entity:"q3_investments_unrealised_gain_loss_bs"`
-	cashSweep                     float64             `entity:"q3_cash_sweep_bs"`
-	cashGeneralAccount            float64             `entity:"q3_cash_general_account_bs"`
-	cashChecking                  float64             `entity:"q3_cash_checking_bs"`
-	liquidityData                 LiquidityData       `entity:"liquidity_data"`
-	fundPerformanceData           FundPerformanceData `entity:"fund_performance_data"`
+	totalAssets                   float64                 `entity:"q3_total_assets_bs"`
+	unfundedCommitments           float64                 `entity:"q3_unfunded_commitments_captial_roll_qtd"`
+	totalPartnerCaptial           float64                 `entity:"q3_total_partner_captial_bs"`
+	totalLiabilities              float64                 `entity:"q3_total_liabilities_bs"`
+	investments                   float64                 `entity:"q3_investments_bs"`
+	investmentsUnrealisedGainLoss float64                 `entity:"q3_investments_unrealised_gain_loss_bs"`
+	cashSweep                     float64                 `entity:"q3_cash_sweep_bs"`
+	cashGeneralAccount            float64                 `entity:"q3_cash_general_account_bs"`
+	cashChecking                  float64                 `entity:"q3_cash_checking_bs"`
+	liquidityData                 executors.LiquidityData `entity:"liquidity_data"`
+	fundPerformanceData           FundPerformanceData     `entity:"fund_performance_data"`
 }
 
 // LiquidityData represents the structure that holds all the data retrieved from the investorLiquidity File

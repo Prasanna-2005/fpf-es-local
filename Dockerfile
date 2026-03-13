@@ -27,6 +27,7 @@ WORKDIR /app
 
 COPY --from=builder /app/bin /app/bin
 COPY --from=builder /app/entrypoint.sh /app/entrypoint.sh
+COPY config/config.ini /app/config/config.ini
 
 ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
 CMD ["./bin/form-pf-extractor-service 2>&1 | tee -a /var/log/form-pf/service.log"]

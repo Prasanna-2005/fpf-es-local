@@ -1,6 +1,10 @@
 package executors
 
 import (
+	"fmt"
+	"quantrium-tech/form_pf_extractor_service/db"
+	"quantrium-tech/form_pf_extractor_service/logging"
+	"reflect"
 	"strings"
 )
 
@@ -73,35 +77,49 @@ func (firm *RegInvAdv) NewfirmSign() RIAInfo {
 
 }
 
-func (firm *RegInvAdv) CalcAUM(fundType string, nav float64, gav float64) {
-	switch strings.ToLower(fundType) {
-	case "hedge":
-		firm.itemB.Hedge.NetAssest += nav
-		firm.itemB.Hedge.GrossAsset += gav
-	case "liquidity":
-		firm.itemB.Liquidity.NetAssest += nav
-		firm.itemB.Liquidity.GrossAsset += gav
-	case "private":
-		firm.itemB.Private.NetAssest += nav
-		firm.itemB.Private.GrossAsset += gav
-	case "realestate":
-		firm.itemB.RealEstate.NetAssest += nav
-		firm.itemB.RealEstate.GrossAsset += gav
-	case "securedassets":
-		firm.itemB.SecuredAssets.NetAssest += nav
-		firm.itemB.SecuredAssets.GrossAsset += gav
-	case "venturecapital":
-		firm.itemB.VentureCapital.NetAssest += nav
-		firm.itemB.VentureCapital.GrossAsset += gav
-	case "other":
-		firm.itemB.Other.NetAssest += nav
-		firm.itemB.Other.GrossAsset += gav
-	case "nota":
-		firm.itemB.NOTA.NetAssest += nav
-		firm.itemB.NOTA.GrossAsset += gav
+func (firm *RegInvAdv) CalcAUM(filingID string) {
+	// assets is map[string]map[string]map[string]float64
+	// Structure: [fundType][formLineNo][fieldNo]
+	assets, err := db.PullAssets(filingID)
+	if err != nil {
+		logging.Error(fmt.Sprintf("Pulling assets error calc aum failed: %v", err))
+		return
+	}
+
+	for fundType, lines := range assets {
+		// We define nav and gav based on the specific lines and fields
+		// Field 8 on Line 8 is Gross, Field 9 on Line 9 is Net
+		gav := lines["8"]["8"]
+		nav := lines["9"]["9"]
+
+		switch strings.ToLower(fundType) {
+		case "hedge":
+			firm.itemB.Hedge.NetAssest = nav
+			firm.itemB.Hedge.GrossAsset = gav
+		case "liquidity":
+			firm.itemB.Liquidity.NetAssest = nav
+			firm.itemB.Liquidity.GrossAsset = gav
+		case "private":
+			firm.itemB.Private.NetAssest = nav
+			firm.itemB.Private.GrossAsset = gav
+		case "realestate":
+			firm.itemB.RealEstate.NetAssest = nav
+			firm.itemB.RealEstate.GrossAsset = gav
+		case "securedassets":
+			firm.itemB.SecuredAssets.NetAssest = nav
+			firm.itemB.SecuredAssets.GrossAsset = gav
+		case "venturecapital":
+			firm.itemB.VentureCapital.NetAssest = nav
+			firm.itemB.VentureCapital.GrossAsset = gav
+		case "other":
+			firm.itemB.Other.NetAssest = nav
+			firm.itemB.Other.GrossAsset = gav
+		case "nota":
+			firm.itemB.NOTA.NetAssest = nav
+			firm.itemB.NOTA.GrossAsset = gav
+		}
 	}
 }
-
 func (firm *RegInvAdv) Sec1aData() {
 	switch firm.clientCode + ":" + firm.series {
 	case "FEG:Investment Services":
@@ -117,7 +135,7 @@ func (firm *RegInvAdv) Sec1aData() {
 		firm.itemA.legalName = "FEG CURIO INVESTMENT PARTNERS, LLC"
 		firm.itemA.crdNumber = "323497"
 		firm.itemA.sec801Number = "801-126960"
-		firm.itemA.nfaId = "056229"
+		firm.itemA.nfaId = "0562279"
 		firm.itemA.largeTraderId = "NA"
 		firm.itemA.largeTraderIdSuffix = "NA"
 		firm.itemA.firmSign = firm.NewfirmSign()
@@ -183,4 +201,77 @@ func (firm *RegInvAdv) Compute() *Form1aData {
 	form1a.NOTANAV = firm.itemB.NOTA.NetAssest
 
 	return form1a
+}
+
+func (firm *RegInvAdv) UpdateAUM() *Form1aData {
+	form1a := NewForm1aData()
+	// Populate ItemB (AUM Data) - Hedge
+	form1a.HedgeFundsGAV = firm.itemB.Hedge.GrossAsset
+	form1a.HedgeFundsNAV = firm.itemB.Hedge.NetAssest
+
+	// Populate ItemB (AUM Data) - Liquidity
+	form1a.LiquidityGAV = firm.itemB.Liquidity.GrossAsset
+	form1a.LiquidityNAV = firm.itemB.Liquidity.NetAssest
+
+	// Populate ItemB (AUM Data) - Private
+	form1a.PrivateGAV = firm.itemB.Private.GrossAsset
+	form1a.PrivateNAV = firm.itemB.Private.NetAssest
+
+	// Populate ItemB (AUM Data) - Real Estate
+	form1a.RealEstateGAV = firm.itemB.RealEstate.GrossAsset
+	form1a.RealEstateNAV = firm.itemB.RealEstate.NetAssest
+
+	// Populate ItemB (AUM Data) - Secured Assets
+	form1a.SecuredAssetsGAV = firm.itemB.SecuredAssets.GrossAsset
+	form1a.SecuredAssetsNAV = firm.itemB.SecuredAssets.NetAssest
+
+	// Populate ItemB (AUM Data) - Venture Capital
+	form1a.VentureCapitalGAV = firm.itemB.VentureCapital.GrossAsset
+	form1a.VentureCapitalNAV = firm.itemB.VentureCapital.NetAssest
+
+	// Populate ItemB (AUM Data) - Other
+	form1a.OtherGAV = firm.itemB.Other.GrossAsset
+	form1a.OtherNAV = firm.itemB.Other.NetAssest
+
+	// Populate ItemB (AUM Data) - NOTA
+	form1a.NOTAGAV = firm.itemB.NOTA.GrossAsset
+	form1a.NOTANAV = firm.itemB.NOTA.NetAssest
+
+	return form1a
+}
+
+func (sec1a *RegInvAdv) HandleSection1A(filingID string, userID string, existing map[string]struct{}) error {
+	var form1aData *Form1aData
+	//Determine which data computation to run
+	if _, ok := existing["SECTION-1A"]; ok {
+		logging.Info("Updating only AUM for q3 section-1a")
+		form1aData = sec1a.UpdateAUM()
+	} else {
+		form1aData = sec1a.Compute()
+	}
+
+	// Safety check: avoid panic on nil pointers
+	if form1aData == nil {
+		return fmt.Errorf("computation returned nil data for section-1a")
+	}
+
+	// Map the data structure to the database-ready format
+	mapped1a := make(map[[2]string]string)
+	CollectAnswers(reflect.ValueOf(*form1aData), mapped1a)
+	if _, ok := existing["SECTION-1A"]; ok {
+		for key, _ := range mapped1a {
+			if len(key) > 0 && key[0] != "3" {
+				delete(mapped1a, key)
+			}
+		}
+	}
+
+	// Push to database
+	if err := db.PushFormData(filingID, "SECTION-1A", userID, mapped1a); err != nil {
+		logging.Error("Error in Pushing to Form 1a Data Table: " + err.Error())
+		return err
+	}
+
+	logging.Info("Pushed formdata for section 1A")
+	return nil
 }

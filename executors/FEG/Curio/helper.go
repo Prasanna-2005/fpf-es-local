@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
+	"unicode"
 )
 
 func CreateAllFundSeries(fundCode string) []*Fund {
@@ -34,6 +36,40 @@ func StaticFunds(FundShortCode string) (*executors.Form1bData, *Fund) {
 
 }
 
+// normalizeCell cleans a raw cell string:
+// - strips leading/trailing whitespace
+// - removes all internal whitespace (spaces, tabs, non-breaking spaces, escape sequences)
+// - lowercases everything
+func normalizeCell(s string) string {
+	// Remove escape sequences like \t, \n, \r, \x00, etc.
+	s = strings.Map(func(r rune) rune {
+		if unicode.IsControl(r) {
+			return -1 // drop control characters
+		}
+		return r
+	}, s)
+
+	// Remove ALL whitespace (including mid-word spaces → "Unfunded Commitment" == "UnfundedCommitment")
+	re := regexp.MustCompile(`\s+`)
+	s = re.ReplaceAllString(s, "")
+
+	// Lowercase
+	return strings.ToLower(s)
+}
+
+func singularize(s string) string {
+	if strings.HasSuffix(s, "ies") {
+		return s[:len(s)-3] + "y" // committies → committy
+	}
+	if strings.HasSuffix(s, "es") {
+		return s[:len(s)-2] // branches→ branch
+	}
+	if strings.HasSuffix(s, "s") {
+		return s[:len(s)-1] // commitments → commitment
+	}
+	return s
+}
+
 // assignFundPerf copies every float64/string from src (FundPerformance) into dst
 // (Form1bData) converting to sql.NullFloat64/sql.NullString when {term,colName} matches.
 func assignFundPerf(dst *executors.Form1bData, src FundPerformanceData) {
@@ -52,7 +88,7 @@ func assignFundPerf(dst *executors.Form1bData, src FundPerformanceData) {
 		}
 	}
 
-	// 1. map  term → index of date field
+	// map  term to index of date field
 	dateIdx := make(map[string]int)
 	for i := 0; i < tDst.NumField(); i++ {
 		f := tDst.Field(i)
@@ -86,8 +122,7 @@ func assignFundPerf(dst *executors.Form1bData, src FundPerformanceData) {
 				Valid:   src.Float() != 0,
 			}))
 
-			// 2. single-shot date assignment
-			// fmt.Println(dateIdx)
+			// single-shot date assignment
 			if idx, ok := dateIdx[term]; ok {
 				otherCol := "gross"
 				if col == "gross" {
