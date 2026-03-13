@@ -98,9 +98,9 @@ func PullAssets(filingID string) (map[string]map[string]map[string]float64, erro
             legacy.formLineNo,
             SUM(legacy.value) AS assets
         FROM 
-            formpf_stage.form_data_legacy AS legacy
+            form_data_legacy AS legacy
         LEFT JOIN 
-            formpf_stage.feg_funds AS funds
+            feg_funds AS funds
             ON legacy.fundSeriesId = funds.fegFundId
         WHERE 
             legacy.filingId = ?
