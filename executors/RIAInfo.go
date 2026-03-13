@@ -258,6 +258,13 @@ func (sec1a *RegInvAdv) HandleSection1A(filingID string, userID string, existing
 	// Map the data structure to the database-ready format
 	mapped1a := make(map[[2]string]string)
 	CollectAnswers(reflect.ValueOf(*form1aData), mapped1a)
+	if _, ok := existing["SECTION-1A"]; ok {
+		for key, _ := range mapped1a {
+			if len(key) > 0 && key[0] != "3" {
+				delete(mapped1a, key)
+			}
+		}
+	}
 
 	// Push to database
 	if err := db.PushFormData(filingID, "SECTION-1A", userID, mapped1a); err != nil {
