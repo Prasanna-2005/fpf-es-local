@@ -74,6 +74,7 @@ type WorkPaperData struct {
 	l1                  float64                 `entity:"level1"`
 	l2                  float64                 `entity:"level2"`
 	l3                  float64                 `entity:"level3"`
+	liabilityL2         float64                 `entity:liabilities_level2`
 	levelExtData        LevelingData            `entity:"level_ext_data"`
 	sumLevelExtData     float64                 `entity:"equity_otherfunds"`
 	liquidityData       executors.LiquidityData `entity:"liquidity_data"`
@@ -81,6 +82,7 @@ type WorkPaperData struct {
 }
 
 type LevelingData struct {
+	shortFuture1256URGL float64 `entity:"short_future_1256_ur_gl"`
 	closedEndFundsCost  float64 `entity:"closed_end_funds_cost"`
 	closedEndFundsURGL  float64 `entity:"closed_end_funds_ur_gl"`
 	future1256URGL      float64 `entity:"future_1256_ur_gl"`

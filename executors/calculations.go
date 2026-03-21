@@ -20,3 +20,7 @@ func CalculateNetAsset(partnersCapital float64, unfundedCommitments float64) flo
 	return partnersCapital
 
 }
+
+func CalcCBLiabilities(gav float64, nav float64, fairValueLiabilites float64) float64 {
+	return gav - nav - fairValueLiabilites
+}

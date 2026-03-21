@@ -29,7 +29,7 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 	data.EquityInOtherFunds = calculateLevel3Asset(wd.investments, wd.investmentsUnrealisedGainLoss)
 	data.Level3Asset = data.EquityInOtherFunds
 	data.CostBasedAsset = calculateCBAsset(wd.cashChecking, wd.cashSweep, wd.cashGeneralAccount)
-	data.CostBasedLiability = wd.totalLiabilities
+	data.CostBasedLiability = executors.CalcCBLiabilities(data.GrossAsset, data.NetAsset, 0)
 
 	// investor liquidity data
 	data.UsPercent = ld.UsPersonOwnedPercentage
