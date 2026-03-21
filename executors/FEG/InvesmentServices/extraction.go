@@ -398,6 +398,15 @@ func extGrossAndNetAssests(f *excelize.File, tbdata *WorkPaperData) (int, error)
 				if tbdata.totalPartnerCaptial < 0 {
 					tbdata.totalPartnerCaptial *= (-1)
 				}
+
+			case strings.Contains(cellval, "short 1256 future u/r g/l"):
+				rawValue, err := f.GetCellValue(tbSheet, executors.IndexToExcel(i, yEntitytoMarker["ed"]))
+				if err != nil {
+					logging.Error(fmt.Sprintf(EntityErr, cellval, err.Error()))
+				}
+				rawValue = executors.CleanNonNumeric(rawValue)
+				tbdata.liabilityL2, _ = strconv.ParseFloat(rawValue, 64)
+				tbdata.levelExtData.shortFuture1256URGL = tbdata.liabilityL2
 			}
 			tbdata.unfundedCommitments = 0
 		}

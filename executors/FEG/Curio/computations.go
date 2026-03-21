@@ -21,7 +21,7 @@ func (F *Fund) Compute() *executors.Form1bData {
 	data.Level2Asset = wd.l2
 	data.Level3Asset = wd.l3
 	data.CostBasedAsset = calculateCBAsset(data.GrossAsset, wd.sumLevelExtData, wd.unfundedCommitments)
-	data.CostBasedLiability = wd.totalLiabilities
+	data.CostBasedLiability = executors.CalcCBLiabilities(data.GrossAsset, data.NetAsset, 0)
 
 	// investor liquidity data
 	data.UsPercent = ld.UsPersonOwnedPercentage
