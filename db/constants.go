@@ -71,6 +71,6 @@ var FundCodeMapper = map[string]string{
 	"CUTRV":      "805-2524624874",
 	"CUPDC":      "805-7445538196",
 	"CURSLP":     "805-8573927513",
-	"CURHP":      "NA",
+	"CURHP":      "805-9771369848",
 	"SECTION-1A": "SECTION-1A",
 }
