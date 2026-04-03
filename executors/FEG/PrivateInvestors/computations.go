@@ -15,6 +15,7 @@ func calculateLevel3Asset(investment1900 float64, unrealisedGainLoss1910 float64
 // 	return cashChecking1000 + cashSweep1002 + cashGeneral1005
 // }
 
+// This is V2 formula shared for calculating CB assets
 func calculateCBAsset(GAV, UnfundedCommitments, FairValueAssets float64) float64 {
 	return GAV - UnfundedCommitments - FairValueAssets
 }
