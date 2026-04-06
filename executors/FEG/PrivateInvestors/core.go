@@ -83,6 +83,7 @@ type WorkPaperData struct {
 	cashSweep                     float64                 `entity:"q3_cash_sweep_bs"`
 	cashGeneralAccount            float64                 `entity:"q3_cash_general_account_bs"`
 	cashChecking                  float64                 `entity:"q3_cash_checking_bs"`
+	commericaLineOfCreditPayable  float64                 `entity:"q3_commerica_credit_payable"`
 	liquidityData                 executors.LiquidityData `entity:"liquidity_data"`
 	fundPerformanceData           FundPerformanceData     `entity:"fund_performance_data"`
 }

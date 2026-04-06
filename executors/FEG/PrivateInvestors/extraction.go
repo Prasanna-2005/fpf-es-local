@@ -202,7 +202,7 @@ Out:
 				netIncomeIndex = j
 				// rowIndex = i
 				continue
-			case strings.EqualFold(cellValue, "Management Fee Expense") && mgmtFeeIndex == 0:
+			case (strings.EqualFold(cellValue, "Management Fee Expense") || strings.EqualFold(cellValue, "Management Fee Expenses")) && mgmtFeeIndex == 0:
 				mgmtFeeIndex = j
 				// rowIndex = i
 				continue
@@ -284,7 +284,7 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 			switch {
 			case seriesIndex != 0 && j > seriesIndex:
 				break In
-			case strings.Contains(cellValue, "Series "+series):
+			case strings.Contains(cellValue, "Series "+series) && seriesIndex == 0:
 				seriesIndex = j
 			case strings.Contains(cellValue, "1002 - Cash"):
 				entitytoMarker["cash1002"] = i
@@ -302,7 +302,10 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 				entitytoMarker["liabilities"] = i
 			case strings.EqualFold(cellValue, "Total Partner's Capital"):
 				entitytoMarker["partnersCapital"] = i
+			case strings.Contains(strings.ToLower(cellValue), strings.ToLower("Comerica Line of Credit Payable")):
+				entitytoMarker["commericaLineOfCreditPayable"] = i
 			}
+
 		}
 	}
 	for entity, marker := range entitytoMarker {
@@ -321,6 +324,9 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 	wpdata.totalPartnerCaptial = entitytoValue["partnersCapital"]
 	wpdata.investments = entitytoValue["investment1900"]
 	wpdata.investmentsUnrealisedGainLoss = entitytoValue["investment1910"]
+	if val, ok := entitytoValue["commericaLineOfCreditPayable"]; ok {
+		wpdata.commericaLineOfCreditPayable = val
+	}
 
 	return nil
 }
