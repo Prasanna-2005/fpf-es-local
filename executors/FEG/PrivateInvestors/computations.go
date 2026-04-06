@@ -32,6 +32,10 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 	// workpaper data
 	data.GrossAsset = executors.CalculateGrossAssets(wd.totalAssets, wd.unfundedCommitments)
 	data.NetAsset = executors.CalculateNetAsset(wd.totalPartnerCaptial, wd.unfundedCommitments)
+	data.BorrowedTotalAmount = wd.commericaLineOfCreditPayable
+	if data.BorrowedTotalAmount != 0 {
+		data.BorrowedUSFinInstiAmt = 100
+	}
 	data.EquityInOtherFunds = calculateLevel3Asset(wd.investments, wd.investmentsUnrealisedGainLoss)
 	data.Level3Asset = data.EquityInOtherFunds
 	data.CostBasedAsset = calculateCBAsset(data.GrossAsset, wd.unfundedCommitments, data.Level3Asset)
