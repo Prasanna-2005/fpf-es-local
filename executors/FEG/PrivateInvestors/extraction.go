@@ -284,7 +284,7 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 			switch {
 			case seriesIndex != 0 && j > seriesIndex:
 				break In
-			case strings.Contains(cellValue, "Series "+series) && seriesIndex != 0:
+			case strings.Contains(cellValue, "Series "+series) && seriesIndex == 0:
 				seriesIndex = j
 			case strings.Contains(cellValue, "1002 - Cash"):
 				entitytoMarker["cash1002"] = i
