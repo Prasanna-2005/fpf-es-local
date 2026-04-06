@@ -302,7 +302,10 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 				entitytoMarker["liabilities"] = i
 			case strings.EqualFold(cellValue, "Total Partner's Capital"):
 				entitytoMarker["partnersCapital"] = i
+			case strings.Contains(cellValue, strings.ToLower("Comerica Line of Credit Payable")):
+				entitytoMarker["commericaLineOfCreditPayable"] = i
 			}
+
 		}
 	}
 	for entity, marker := range entitytoMarker {
@@ -321,6 +324,9 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 	wpdata.totalPartnerCaptial = entitytoValue["partnersCapital"]
 	wpdata.investments = entitytoValue["investment1900"]
 	wpdata.investmentsUnrealisedGainLoss = entitytoValue["investment1910"]
+	if val, ok := entitytoValue["commericaLineOfCreditPayable"]; ok {
+		wpdata.commericaLineOfCreditPayable = val
+	}
 
 	return nil
 }
