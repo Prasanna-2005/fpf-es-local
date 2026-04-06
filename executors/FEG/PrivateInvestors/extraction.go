@@ -302,7 +302,7 @@ func extractBSData(f *excelize.File, wpdata *WorkPaperData, series string) error
 				entitytoMarker["liabilities"] = i
 			case strings.EqualFold(cellValue, "Total Partner's Capital"):
 				entitytoMarker["partnersCapital"] = i
-			case strings.Contains(cellValue, strings.ToLower("Comerica Line of Credit Payable")):
+			case strings.Contains(strings.ToLower(cellValue), strings.ToLower("Comerica Line of Credit Payable")):
 				entitytoMarker["commericaLineOfCreditPayable"] = i
 			}
 
