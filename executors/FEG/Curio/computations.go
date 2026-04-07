@@ -17,6 +17,10 @@ func (F *Fund) Compute() *executors.Form1bData {
 	data.GrossAsset = executors.CalculateGrossAssets(wd.totalAssets, wd.unfundedCommitments)
 	data.NetAsset = executors.CalculateNetAsset(wd.totalPartnerCaptial, wd.unfundedCommitments)
 	data.EquityInOtherFunds = wd.sumLevelExtData
+	data.BorrowedTotalAmount = wd.commericaLineOfCreditPayable
+	if data.BorrowedTotalAmount != 0 {
+		data.BorrowedUSFinInstiAmt = 100
+	}
 	data.Level1Asset = wd.l1
 	data.Level2Asset = wd.l2
 	data.Level3Asset = wd.l3
