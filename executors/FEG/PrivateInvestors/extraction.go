@@ -202,7 +202,8 @@ Out:
 				netIncomeIndex = j
 				// rowIndex = i
 				continue
-			case (strings.EqualFold(cellValue, "Management Fee Expense") || strings.EqualFold(cellValue, "Management Fee Expenses")) && mgmtFeeIndex == 0:
+			case strings.Contains(strings.ToLower(cellValue), strings.ToLower("Management Fee Expense")) && mgmtFeeIndex == 0:
+				// (strings.EqualFold(cellValue, "Management Fee Expense") || strings.EqualFold(cellValue, "Management Fee Expenses"))
 				mgmtFeeIndex = j
 				// rowIndex = i
 				continue
