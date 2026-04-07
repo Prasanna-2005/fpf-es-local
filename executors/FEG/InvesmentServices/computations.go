@@ -21,6 +21,12 @@ func (F *Fund) Compute() *executors.Form1bData {
 	if slices.Contains(NotSame, F.fundID) {
 		data.EquityInOtherFunds = 0
 	}
+
+	data.BorrowedTotalAmount = wd.commericaLineOfCreditPayable
+	if data.BorrowedTotalAmount != 0 {
+		data.BorrowedUSFinInstiAmt = 100
+	}
+
 	data.Level1Asset = wd.l1
 	data.Level2Asset = wd.l2
 	data.Level3Asset = wd.l3
