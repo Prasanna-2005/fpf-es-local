@@ -30,10 +30,11 @@ func (F *Fund) ExportWorkPaperData() map[string]string {
 }
 
 type WorkPaperData struct {
-	totalAssets         float64 `entity:"tb_total_assets_bs"`
-	unfundedCommitments float64 `entity:"tb_unfunded_commitments_nav_report"`
-	totalPartnerCaptial float64 `entity:"tb_total_partner_captial_bs"`
-	totalLiabilities    float64 `entity:"tb_total_liabilities_bs"`
+	totalAssets                  float64 `entity:"tb_total_assets_bs"`
+	unfundedCommitments          float64 `entity:"tb_unfunded_commitments_nav_report"`
+	totalPartnerCaptial          float64 `entity:"tb_total_partner_captial_bs"`
+	totalLiabilities             float64 `entity:"tb_total_liabilities_bs"`
+	commericaLineOfCreditPayable float64 `entity:"commerica_credit_payable"`
 	// equityData          float64             `entity:"equity_otherfunds"`
 	l1                  float64                 `entity:"level1"`
 	l2                  float64                 `entity:"level2"`

@@ -407,6 +407,14 @@ func extGrossAndNetAssests(f *excelize.File, tbdata *WorkPaperData) (int, error)
 				rawValue = executors.CleanNonNumeric(rawValue)
 				tbdata.liabilityL2, _ = strconv.ParseFloat(rawValue, 64)
 				tbdata.levelExtData.shortFuture1256URGL = tbdata.liabilityL2
+			case strings.Contains(cellval, strings.ToLower("Comerica Line of Credit Payable")):
+				rawValue, err := f.GetCellValue(tbSheet, executors.IndexToExcel(i, yEntitytoMarker["ed"]))
+				if err != nil {
+					logging.Error(fmt.Sprintf(EntityErr, cellval, err.Error()))
+				}
+				rawValue = executors.CleanNonNumeric(rawValue)
+				tbdata.commericaLineOfCreditPayable, _ = strconv.ParseFloat(rawValue, 64)
+
 			}
 			tbdata.unfundedCommitments = 0
 		}
