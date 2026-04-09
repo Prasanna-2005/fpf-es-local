@@ -146,11 +146,14 @@ func setStaticDataPV(data *executors.Form1bData, fundId string) {
 	if info.FundLEI.Valid {
 		data.FundLEI = info.FundLEI.String
 	} else {
-		data.FundLEI = "N"
+		data.FundLEI = ""
 	}
 
 	if info.FundNFA.Valid {
 		data.FundNFA = info.FundNFA.String
+		data.CFTCFund = "true"
+	} else {
+		data.CFTCFund = "false"
 	}
 }
 

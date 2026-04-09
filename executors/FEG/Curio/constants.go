@@ -36,7 +36,7 @@ var LevelMapper = map[string]map[string][]string{
 		"l3": {"private eq @ cost", "private eq u/r g/l"},
 	},
 	"CURCP": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
+		"l3": {"private eq @ cost", "private eq u/r g/l", "invt hedge funds @ cost", "invt in hedge funds u/r", "invt in hedge funds u/r g/l"},
 	},
 	"COPTE": {
 		"l3": {"private eq @ cost", "private eq u/r g/l"},
