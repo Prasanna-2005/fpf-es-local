@@ -50,10 +50,11 @@ func NewFund(fundId string) *Fund {
 }
 
 type LevelingData struct {
-	invtHedgeFundsCost float64 `entity:"invt_hedge_funds_cost"`
-	invtInHedgeFundsUR float64 `entity:"invt_in_hedge_funds_ur"`
-	privateEqCost      float64 `entity:"private_eq_cost"`
-	privateEqURGL      float64 `entity:"private_eq_ur_gl"`
+	invtHedgeFundsCost   float64 `entity:"invt_hedge_funds_cost"`
+	invtInHedgeFundsUR   float64 `entity:"invt_in_hedge_funds_ur"`
+	invtInHedgeFundsURGL float64 `entity:"invt_in_hedge_funds_ur_gl"`
+	privateEqCost        float64 `entity:"private_eq_cost"`
+	privateEqURGL        float64 `entity:"private_eq_ur_gl"`
 }
 
 type FundPerformanceData struct {

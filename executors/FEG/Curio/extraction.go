@@ -449,6 +449,8 @@ func FieldPtr(ld *LevelingData, marker string) *float64 {
 		return &ld.invtHedgeFundsCost
 	case "invt in hedge funds u/r":
 		return &ld.invtInHedgeFundsUR
+	case "invt in hedge funds u/r g/l":
+		return &ld.invtInHedgeFundsURGL
 	case "private eq @ cost":
 		return &ld.privateEqCost
 	case "private eq u/r g/l":
