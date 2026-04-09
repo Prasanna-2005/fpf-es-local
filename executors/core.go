@@ -8,6 +8,7 @@ type Form1bData struct {
 	FundName                    string `fieldNo:"5" formLineNo:"5_a"`
 	FundID                      string `fieldNo:"5" formLineNo:"5_b"`
 	FundNFA                     string `fieldNo:"5" formLineNo:"5_c"`
+	CFTCFund                    string `fieldNo:"5" formLineNo:"5_c_i"`
 	FundLEI                     string `fieldNo:"5" formLineNo:"5_d"`
 	MasterFund                  bool   `fieldNo:"6" formLineNo:"6"`
 	ParallelFundsAggregated     bool   `fieldNo:"7" formLineNo:"7_a"`
