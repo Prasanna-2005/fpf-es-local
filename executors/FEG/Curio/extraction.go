@@ -15,19 +15,24 @@ import (
 
 var EntityErr = "error occured for enity:%v extraction err: %v"
 
-func (F *Fund) ExtractQ17() error {
-	fNAVReport, err := excelize.OpenFile(F.holder.reportFilePath)
-	if err != nil {
-		return fmt.Errorf("opening  NAV reports for q17 data: " + err.Error())
-	}
-	defer func() {
-		if err := fNAVReport.Close(); err != nil {
-			logging.Error("Error in closing the file: " + err.Error())
+var singular = map[string]string{
+	"distributions":   "distribution",
+	"contributions":   "contribution",
+	"management fees": "management fee",
+}
+
+func (F *Fund) ExtractFundPerformance() error {
+	F.workPaperData.irr = make(map[string]*IRR)
+	for period, path := range F.holder.capRegisterFilePath {
+		fNAVReport, err := excelize.OpenFile(path)
+		if err != nil {
+			return fmt.Errorf("opening  NAV reports for capital register data: " + err.Error())
 		}
-	}()
-	err = extracNAVRepData(fNAVReport, &F.workPaperData)
-	if err != nil {
-		return fmt.Errorf("extracting Q17 data: " + err.Error())
+		err = F.extracNAVRepData(fNAVReport, period)
+		fNAVReport.Close()
+		if err != nil {
+			return fmt.Errorf("extracting fund performance data: " + err.Error())
+		}
 	}
 	return nil
 }
@@ -61,7 +66,12 @@ func (F *Fund) ExtractTrialBalanceData() error {
 }
 
 func (F *Fund) ExtractCapReg() error {
-	wb, err := xls.OpenFile(F.holder.capRegisterFilePath)
+	path, ok := F.holder.capRegisterFilePath["september"]
+	if !ok {
+		logging.Error("File not found:September month capital register file not found.")
+		return fmt.Errorf("Capital register not found for september")
+	}
+	wb, err := xls.OpenFile(path)
 	if err != nil {
 		return fmt.Errorf("opening capital register: %w", err)
 	}
@@ -252,22 +262,17 @@ func extGrossAndNetAssests(f *excelize.File, tbdata *WorkPaperData) (int, error)
 	return yEntitytoMarker["ed"], nil
 }
 
-func extracNAVRepData(f *excelize.File, Navdata *WorkPaperData) error {
-	netMap := make(map[string]float64)
-	grossMap := make(map[string]float64)
+func (F *Fund) extracNAVRepData(f *excelize.File, period string) error {
 	absicca := make(map[string]int)
 	ordinate := make(map[string]int)
-	xmarkers := []string{
-		"january", "february", "march", "first",
-		"april", "may", "june", "second",
-		"july", "august", "september", "third",
-		"october", "november", "december", "fourth",
-		"year to",
+	F.workPaperData.irr[period] = &IRR{
+		capReg: make(map[string]float64),
 	}
 	ymarkers := []string{
-		"net of mgmt", "gross of fees",
+		"open net balance", "contributions", "distributions",
+		"grosspnl", "management fee", "management fees", "contribution", "distribution",
 	}
-	reportSheet := "Page 2"
+	reportSheet := "Sheet 1"
 	reportRows, err := f.GetRows(reportSheet)
 	if err != nil {
 		return fmt.Errorf("getting NAV report rows: " + err.Error())
@@ -277,42 +282,44 @@ func extracNAVRepData(f *excelize.File, Navdata *WorkPaperData) error {
 		for j, cellValue := range row {
 			cellval := strings.ToLower(cellValue)
 			switch {
-			case slices.Contains(xmarkers, cellval):
-				absicca[cellval] = i
+			case strings.EqualFold("id", cellval):
+				absicca["id"] = i
+				ordinate["id"] = j
+			case strings.EqualFold(F.fundID, cellval):
+				if ordinate["id"] != j {
+					logging.Warn(fmt.Sprintf("'id' and %s (%s)  extracted are not in same row", cellval, F.fundID))
+				}
+				absicca[F.fundID] = i
 			case slices.Contains(ymarkers, cellval):
-				ordinate[cellval] = j
+				if absicca["id"] != i {
+					logging.Warn(fmt.Sprintf("'id' and %s  extracted are not in same row", cellval))
+				}
+				ordinate[singular[cellval]] = j
 			}
 		}
 	}
 
-	for term, xcoor := range absicca {
-
-		rawValue, err := f.GetCellValue(reportSheet, executors.IndexToExcel(xcoor, ordinate["net of mgmt"]))
+	for marker, ycoor := range ordinate {
+		if marker == "id" {
+			continue
+		}
+		rawValue, err := f.GetCellValue(reportSheet, executors.IndexToExcel(absicca[F.fundID], ycoor))
 		if err != nil {
 			logging.Error(fmt.Sprintf("excel error: %v", err.Error()))
 		}
 		rawValue = executors.CleanNonNumeric(rawValue)
-		netPercent, _ := strconv.ParseFloat(rawValue, 64)
-		if netPercent != 0 {
-			netMap[term] = netPercent
+		if _, ok := F.workPaperData.irr[period].capReg[marker]; !ok {
+			F.workPaperData.irr[period].capReg[marker], _ = strconv.ParseFloat(rawValue, 64)
 		}
-		rawValue, err = f.GetCellValue(reportSheet, executors.IndexToExcel(xcoor, ordinate["gross of fees"]))
-		if err != nil {
-			logging.Error(fmt.Sprintf("excel error: %v", err.Error()))
-		}
-		rawValue = executors.CleanNonNumeric(rawValue)
-		grossPercent, _ := strconv.ParseFloat(rawValue, 64)
-		if grossPercent != 0 {
-			grossMap[term] = grossPercent
-		}
-
 	}
-	fmt.Println("inside extraction")
-	fmt.Printf("\ngmap:%v\n", grossMap)
-	assignPerformance(grossMap, Navdata, true)
-	fmt.Printf("\nnetmap:%v\n", netMap)
-	assignPerformance(netMap, Navdata, false)
-	fmt.Printf("\nnavdata:%v\n", Navdata.fundPerformanceData)
+	dr := F.workPaperData.irr[period].capReg["open net balance"] + F.workPaperData.irr[period].capReg["contributions"] + F.workPaperData.irr[period].capReg["distributions"]
+	if dr == 0 {
+		F.workPaperData.irr[period].grossReturns = 0
+		F.workPaperData.irr[period].netReturns = 0
+	} else {
+		F.workPaperData.irr[period].grossReturns = F.workPaperData.irr[period].capReg["grosspnl"] / dr
+		F.workPaperData.irr[period].netReturns = (F.workPaperData.irr[period].capReg["grosspnl"] - F.workPaperData.irr[period].capReg["management fee"]) / dr
+	}
 	return nil
 }
 
