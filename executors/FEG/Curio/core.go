@@ -19,7 +19,7 @@ type Fund struct {
 type Holder struct {
 	tbFilePath          string
 	reportFilePath      string
-	capRegisterFilePath string
+	capRegisterFilePath map[string]string
 }
 
 // ExportWorkPaperData returns a mapped entityname to value mapper for further push
@@ -43,6 +43,12 @@ type WorkPaperData struct {
 	sumLevelExtData     float64                 `entity:"equity_otherfunds"`
 	liquidityData       executors.LiquidityData `entity:"liquidity_data"`
 	fundPerformanceData FundPerformanceData     `entity:"fund_performance_data"`
+	irr                 map[string]*IRR
+}
+type IRR struct {
+	grossReturns float64
+	netReturns   float64
+	capReg       map[string]float64
 }
 
 func NewFund(fundId string) *Fund {
@@ -112,7 +118,7 @@ func (F *Fund) GetFundType() string {
 	return F.fundType
 }
 
-func (F *Fund) SetHolder(FileType string, filePath string) {
+func (F *Fund) SetHolder(FileType string, filePath string, period string) {
 
 	filePath = config.Cfg.StoragePath + filePath
 
@@ -122,7 +128,7 @@ func (F *Fund) SetHolder(FileType string, filePath string) {
 	case "nav_report":
 		F.holder.reportFilePath = filePath
 	case "capital_register":
-		F.holder.capRegisterFilePath = filePath
+		F.holder.capRegisterFilePath[period] = filePath
 	}
 
 }
