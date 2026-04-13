@@ -649,7 +649,8 @@ func prepareFilingCurio(filingID string) (map[string][]*curio.Fund, string, stri
 		fundsList := fundsMapper[mapping.FundShortCode]
 
 		for _, fund := range fundsList {
-			fund.SetHolder(mapping.QuarterNo, mapping.FilingPath)
+			if mapping.Period==nil
+			fund.SetHolder(mapping.QuarterNo, mapping.FilingPath, mapping.Period)
 		}
 
 	}
