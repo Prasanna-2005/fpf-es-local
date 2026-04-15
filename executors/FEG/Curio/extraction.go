@@ -2,6 +2,7 @@ package curio
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"quantrium-tech/form_pf_extractor_service/logging"
@@ -16,6 +17,7 @@ import (
 var EntityErr = "error occured for enity:%v extraction err: %v"
 
 var singular = map[string]string{
+
 	"distributions":   "distribution",
 	"contributions":   "contribution",
 	"management fees": "management fee",
@@ -24,12 +26,15 @@ var singular = map[string]string{
 func (F *Fund) ExtractFundPerformance() error {
 	F.workPaperData.irr = make(map[string]*IRR)
 	for period, path := range F.holder.capRegisterFilePath {
-		fNAVReport, err := excelize.OpenFile(path)
+		wb, err := xls.OpenFile(path)
 		if err != nil {
-			return fmt.Errorf("opening  NAV reports for capital register data: " + err.Error())
+			return fmt.Errorf("opening  NAV reports for capital register data: %v" + err.Error())
+		}
+		fNAVReport, err := wb.GetSheet(0)
+		if err != nil {
+			return fmt.Errorf("Sheet error in capital register:%v", err.Error())
 		}
 		err = F.extracNAVRepData(fNAVReport, period)
-		fNAVReport.Close()
 		if err != nil {
 			return fmt.Errorf("extracting fund performance data: " + err.Error())
 		}
@@ -133,7 +138,7 @@ func extractUnfundedCmts(wb xls.Workbook, tbdata *WorkPaperData, shortcode strin
 		return nil
 	}
 
-	// GetFloat64() preserves decimals correctly unlike extrame/xls
+	// GetFloat64() preserves decimals correctly
 	tbdata.unfundedCommitments = cell.GetFloat64()
 	return nil
 }
@@ -262,7 +267,7 @@ func extGrossAndNetAssests(f *excelize.File, tbdata *WorkPaperData) (int, error)
 	return yEntitytoMarker["ed"], nil
 }
 
-func (F *Fund) extracNAVRepData(f *excelize.File, period string) error {
+func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 	absicca := make(map[string]int)
 	ordinate := make(map[string]int)
 	F.workPaperData.irr[period] = &IRR{
@@ -272,10 +277,9 @@ func (F *Fund) extracNAVRepData(f *excelize.File, period string) error {
 		"open net balance", "contributions", "distributions",
 		"grosspnl", "management fee", "management fees", "contribution", "distribution",
 	}
-	reportSheet := "Sheet 1"
-	reportRows, err := f.GetRows(reportSheet)
-	if err != nil {
-		return fmt.Errorf("getting NAV report rows: " + err.Error())
+	reportRows := GetRows(f)
+	if len(reportRows) == 0 {
+		return fmt.Errorf("empty capital register found in NAV extraction")
 	}
 
 	for i, row := range reportRows {
@@ -287,38 +291,54 @@ func (F *Fund) extracNAVRepData(f *excelize.File, period string) error {
 				ordinate["id"] = j
 			case strings.EqualFold(F.fundID, cellval):
 				if ordinate["id"] != j {
-					logging.Warn(fmt.Sprintf("'id' and %s (%s)  extracted are not in same row", cellval, F.fundID))
+					logging.Warn(fmt.Sprintf("'id' and %s (%s)  extracted are not in same column", cellval, F.fundID))
+					continue
 				}
 				absicca[F.fundID] = i
 			case slices.Contains(ymarkers, cellval):
 				if absicca["id"] != i {
 					logging.Warn(fmt.Sprintf("'id' and %s  extracted are not in same row", cellval))
+					continue
 				}
-				ordinate[singular[cellval]] = j
+				if m, ok := singular[cellval]; ok {
+					cellval = m
+				}
+				ordinate[cellval] = j
 			}
 		}
 	}
+	fundRowIdx, ok := absicca[F.fundID]
+	if !ok {
+		return fmt.Errorf("fundID %s not found in sheet", F.fundID)
+	}
 
+	fundRow, err := f.GetRow(fundRowIdx)
+	if err != nil {
+		return fmt.Errorf("fund row not found: %v", err)
+	}
 	for marker, ycoor := range ordinate {
 		if marker == "id" {
 			continue
 		}
-		rawValue, err := f.GetCellValue(reportSheet, executors.IndexToExcel(absicca[F.fundID], ycoor))
+		cell, err := fundRow.GetCol(ycoor)
 		if err != nil {
-			logging.Error(fmt.Sprintf("excel error: %v", err.Error()))
+			logging.Error(fmt.Sprintf("cell error at %s: %v", marker, err))
+			continue
 		}
-		rawValue = executors.CleanNonNumeric(rawValue)
 		if _, ok := F.workPaperData.irr[period].capReg[marker]; !ok {
-			F.workPaperData.irr[period].capReg[marker], _ = strconv.ParseFloat(rawValue, 64)
+			F.workPaperData.irr[period].capReg[marker] = cell.GetFloat64()
 		}
 	}
 	dr := F.workPaperData.irr[period].capReg["open net balance"] + F.workPaperData.irr[period].capReg["contributions"] + F.workPaperData.irr[period].capReg["distributions"]
 	if dr == 0 {
+		logging.Warn(fmt.Sprintf("Fund performance denominator is zero for period:%v", period))
 		F.workPaperData.irr[period].grossReturns = 0
 		F.workPaperData.irr[period].netReturns = 0
 	} else {
-		F.workPaperData.irr[period].grossReturns = F.workPaperData.irr[period].capReg["grosspnl"] / dr
-		F.workPaperData.irr[period].netReturns = (F.workPaperData.irr[period].capReg["grosspnl"] - F.workPaperData.irr[period].capReg["management fee"]) / dr
+		grossRet := F.workPaperData.irr[period].capReg["grosspnl"] * 100 / dr
+		netRet := (F.workPaperData.irr[period].capReg["grosspnl"] - F.workPaperData.irr[period].capReg["management fee"]) * 100 / dr
+		F.workPaperData.irr[period].grossReturns = math.Round(grossRet*100) / 100
+		F.workPaperData.irr[period].netReturns = math.Round(netRet*100) / 100
 	}
 	return nil
 }
