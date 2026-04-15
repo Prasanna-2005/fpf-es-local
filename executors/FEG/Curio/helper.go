@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/shakinm/xlsReader/xls"
 )
 
 func CreateAllFundSeries(fundCode string) []*Fund {
@@ -80,11 +82,10 @@ func assignFundPerf(dst *executors.Form1bData, irr map[string]*IRR) {
 		term := field.Tag.Get("term")
 		irrType := field.Tag.Get("colName")
 
-		if term == "" || colName == "" {
+		if term == "" || irrType == "" {
 			continue
 		}
-
-		if fndPerf, ok := irr[term]; !ok {
+		if fndPerf, ok := irr[term]; ok {
 			switch irrType {
 			case "gross":
 				vDst.Field(i).Set(reflect.ValueOf(sql.NullFloat64{
@@ -157,4 +158,32 @@ func lastDayOfTerm(term string, year int) string {
 	default:
 		return "" // safeguard
 	}
+}
+
+func GetRows(sheet *xls.Sheet) [][]string {
+	if sheet == nil {
+		return nil
+	}
+
+	var rows [][]string
+	rowCount := int(sheet.GetNumberRows())
+
+	for i := 0; i < rowCount; i++ {
+		row, err := sheet.GetRow(i)
+		if err != nil {
+			continue
+		}
+
+		var cells []string
+		// Try up to 1000 columns (adjust as needed)
+		for j := 0; j < 1000; j++ {
+			cell, err := row.GetCol(j)
+			if err != nil {
+				break
+			}
+			cells = append(cells, cell.GetString())
+		}
+		rows = append(rows, cells)
+	}
+	return rows
 }
