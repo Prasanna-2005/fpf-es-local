@@ -52,7 +52,13 @@ type IRR struct {
 }
 
 func NewFund(fundId string) *Fund {
-	return &Fund{fundID: fundId, series: "Curio"}
+	return &Fund{
+		fundID: fundId,
+		series: "Curio",
+		holder: Holder{
+			capRegisterFilePath: make(map[string]string), // Initialize the map here
+		},
+	}
 }
 
 type LevelingData struct {
@@ -118,7 +124,7 @@ func (F *Fund) GetFundType() string {
 	return F.fundType
 }
 
-func (F *Fund) SetHolder(FileType string, filePath string, period string) {
+func (F *Fund) SetHolder(FileType string, filePath string, period *string) {
 
 	filePath = config.Cfg.StoragePath + filePath
 
@@ -128,7 +134,9 @@ func (F *Fund) SetHolder(FileType string, filePath string, period string) {
 	case "nav_report":
 		F.holder.reportFilePath = filePath
 	case "capital_register":
-		F.holder.capRegisterFilePath[period] = filePath
+		if period != nil {
+			F.holder.capRegisterFilePath[*period] = filePath
+		}
 	}
 
 }
