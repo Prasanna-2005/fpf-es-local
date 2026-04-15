@@ -566,7 +566,7 @@ func executeCurio(filingID string, userID string) {
 				logging.Error("Error in extracting capital register sheet for " + fund.GetFundID() + ": " + err.Error())
 			}
 
-			err = fund.ExtractQ17()
+			err = fund.ExtractFundPerformance()
 			if err != nil {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
 				continue
@@ -649,8 +649,11 @@ func prepareFilingCurio(filingID string) (map[string][]*curio.Fund, string, stri
 		fundsList := fundsMapper[mapping.FundShortCode]
 
 		for _, fund := range fundsList {
-			if mapping.Period==nil
 			fund.SetHolder(mapping.QuarterNo, mapping.FilingPath, mapping.Period)
+			if mapping.QuarterNo == "capital_register" && mapping.Period == nil {
+				logging.Error(fmt.Sprintf("No period present for capital register:%v", mapping.Filename))
+				logging.Error(fmt.Sprintf("Above capital register's filing path:%v", mapping.FilingPath))
+			}
 		}
 
 	}
