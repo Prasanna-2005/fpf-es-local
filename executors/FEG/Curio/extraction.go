@@ -332,7 +332,7 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 		}
 		if _, ok := F.workPaperData.irr[period].capReg[marker]; !ok {
 			if strings.Contains(marker, "capital call") {
-				totalCapCall += cell.GetFloat64()
+				totalCapCall += math.Abs(cell.GetFloat64())
 			}
 			F.workPaperData.irr[period].capReg[marker] = cell.GetFloat64()
 		}
@@ -344,7 +344,7 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 		F.workPaperData.irr[period].netReturns = 0
 	} else {
 		grossRet := F.workPaperData.irr[period].capReg["grosspnl"] * 100 / dr
-		netRet := (F.workPaperData.irr[period].capReg["grosspnl"] - F.workPaperData.irr[period].capReg["management fee"]) * 100 / dr
+		netRet := (F.workPaperData.irr[period].capReg["grosspnl"] - math.Abs(F.workPaperData.irr[period].capReg["management fee"])) * 100 / dr
 		F.workPaperData.irr[period].grossReturns = math.Round(grossRet*100) / 100
 		F.workPaperData.irr[period].netReturns = math.Round(netRet*100) / 100
 	}
