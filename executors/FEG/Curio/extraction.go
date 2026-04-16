@@ -73,9 +73,14 @@ func (F *Fund) ExtractTrialBalanceData() error {
 func (F *Fund) ExtractCapReg() error {
 	path, ok := F.holder.capRegisterFilePath["september"]
 	if !ok {
-		logging.Error("File not found:September month capital register file not found.")
+		path, ok = F.holder.capRegisterFilePath["third"]
+	}
+
+	if !ok {
+		logging.Error("File not found: September month capital register file not found.")
 		return fmt.Errorf("Capital register not found for september")
 	}
+
 	wb, err := xls.OpenFile(path)
 	if err != nil {
 		return fmt.Errorf("opening capital register: %w", err)
