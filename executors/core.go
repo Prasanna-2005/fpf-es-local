@@ -294,7 +294,6 @@ type Form1cData struct {
 
 	OtherTradePercent float64 `fieldNo:"25" formLineNo:"25"`
 }
-
 type Form1aData struct {
 	LegalName           string `fieldNo:"1" formLineNo:"1_a_i"`
 	CrdNumber           string `fieldNo:"1" formLineNo:"1_a_ii"`

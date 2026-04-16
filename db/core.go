@@ -7,9 +7,11 @@ import (
 
 // FileMapper represents the reduced mapper with respect to DB that only holds the neccessary information for execution
 type FileMapper struct {
-	FilingPath    string `db:"filingPath"`
-	FundShortCode string `db:"fundShortCode"`
-	QuarterNo     string `db:"quarterNo"`
+	Filename      string  `db:"fileName"`
+	FilingPath    string  `db:"filingPath"`
+	FundShortCode string  `db:"fundShortCode"`
+	QuarterNo     string  `db:"quarterNo"`
+	Period        *string `db:"period"`
 }
 
 // ExtractionEntity represents the structure of extraction table that stores the extracted Entity

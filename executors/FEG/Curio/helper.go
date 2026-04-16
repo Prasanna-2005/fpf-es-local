@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/shakinm/xlsReader/xls"
 )
 
 func CreateAllFundSeries(fundCode string) []*Fund {
@@ -72,67 +74,33 @@ func singularize(s string) string {
 
 // assignFundPerf copies every float64/string from src (FundPerformance) into dst
 // (Form1bData) converting to sql.NullFloat64/sql.NullString when {term,colName} matches.
-func assignFundPerf(dst *executors.Form1bData, src FundPerformanceData) {
+func assignFundPerf(dst *executors.Form1bData, irr map[string]*IRR) {
+	t := reflect.TypeOf(executors.Form1bData{})
 	vDst := reflect.ValueOf(dst).Elem()
-	tDst := vDst.Type()
-	vSrc := reflect.ValueOf(src)
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		term := field.Tag.Get("term")
+		irrType := field.Tag.Get("colName")
 
-	type keyT [2]string
-	srcMap := make(map[keyT]reflect.Value)
-	for i := 0; i < vSrc.NumField(); i++ {
-		f := vSrc.Type().Field(i)
-		term := f.Tag.Get("term")
-		col := f.Tag.Get("colName")
-		if term != "" && col != "" {
-			srcMap[keyT{term, col}] = vSrc.Field(i)
-		}
-	}
-
-	// map  term to index of date field
-	dateIdx := make(map[string]int)
-	for i := 0; i < tDst.NumField(); i++ {
-		f := tDst.Field(i)
-		if f.Tag.Get("colName") == "date" {
-			dateIdx[f.Tag.Get("term")] = i
-		}
-	}
-
-	nonZero := func(v reflect.Value) bool {
-		return v.IsValid() && v.Kind() == reflect.Float64 && v.Float() != 0
-	}
-
-	for i := 0; i < tDst.NumField(); i++ {
-		f := tDst.Field(i)
-		term := f.Tag.Get("term")
-		col := f.Tag.Get("colName")
-		if term == "" || col == "" {
+		if term == "" || irrType == "" {
 			continue
 		}
-
-		dstFld := vDst.Field(i)
-
-		switch dstFld.Type() {
-		case reflect.TypeOf(sql.NullFloat64{}):
-			src, ok := srcMap[keyT{term, col}]
-			if !ok {
-				continue
-			}
-			dstFld.Set(reflect.ValueOf(sql.NullFloat64{
-				Float64: src.Float(),
-				Valid:   src.Float() != 0,
-			}))
-
-			// single-shot date assignment
-			if idx, ok := dateIdx[term]; ok {
-				otherCol := "gross"
-				if col == "gross" {
-					otherCol = "net"
-				}
-				other, _ := srcMap[keyT{term, otherCol}]
-				if nonZero(src) || nonZero(other) {
-					date := lastDayOfTerm(term, time.Now().Year()-1)
-					vDst.Field(idx).Set(reflect.ValueOf(sql.NullString{
-						String: date,
+		if fndPerf, ok := irr[term]; ok {
+			switch irrType {
+			case "gross":
+				vDst.Field(i).Set(reflect.ValueOf(sql.NullFloat64{
+					Float64: fndPerf.grossReturns,
+					Valid:   true,
+				}))
+			case "net":
+				vDst.Field(i).Set(reflect.ValueOf(sql.NullFloat64{
+					Float64: fndPerf.netReturns,
+					Valid:   true,
+				}))
+			case "date":
+				if fndPerf.grossReturns != 0 || fndPerf.netReturns != 0 {
+					vDst.Field(i).Set(reflect.ValueOf(sql.NullString{
+						String: lastDayOfTerm(term, time.Now().Year()-1),
 						Valid:  true,
 					}))
 				}
@@ -189,5 +157,44 @@ func lastDayOfTerm(term string, year int) string {
 
 	default:
 		return "" // safeguard
+	}
+}
+
+func GetRows(sheet *xls.Sheet) [][]string {
+	if sheet == nil {
+		return nil
+	}
+
+	var rows [][]string
+	rowCount := int(sheet.GetNumberRows())
+
+	for i := 0; i < rowCount; i++ {
+		row, err := sheet.GetRow(i)
+		if err != nil {
+			continue
+		}
+
+		var cells []string
+		// Try up to 1000 columns (adjust as needed)
+		for j := 0; j < 1000; j++ {
+			cell, err := row.GetCol(j)
+			if err != nil {
+				break
+			}
+			cells = append(cells, cell.GetString())
+		}
+		rows = append(rows, cells)
+	}
+	return rows
+}
+
+func containsKey[K comparable, V any](m map[K]V, key K) bool {
+	_, ok := m[key]
+	return ok
+}
+
+func collectMap(period string, capReg map[string]float64, store map[string]string) {
+	for k, v := range capReg {
+		store[period+"_"+k] = fmt.Sprintf("%f", v)
 	}
 }

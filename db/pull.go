@@ -10,7 +10,7 @@ import (
 func PullFiling(filingID string) (*[]FileMapper, error) {
 
 	var mappings []FileMapper
-	query := fmt.Sprintf("SELECT filingPath, fundShortCode, quarterNo from %s WHERE filingId= ?", config.TableCfg.MappingTable)
+	query := fmt.Sprintf("SELECT fileName,filingPath, fundShortCode, quarterNo,period from %s WHERE filingId= ?", config.TableCfg.MappingTable)
 
 	err := db.Select(&mappings, query, filingID)
 	if err != nil {
