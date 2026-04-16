@@ -26,6 +26,9 @@ type Holder struct {
 func (F *Fund) ExportWorkPaperData() map[string]string {
 	entityValueMapper := make(map[string]string)
 	executors.CollectEntities(reflect.ValueOf(F.workPaperData), entityValueMapper)
+	for period, irr := range F.workPaperData.irr {
+		collectMap(period, irr.capReg, entityValueMapper)
+	}
 	return entityValueMapper
 }
 
@@ -48,7 +51,7 @@ type WorkPaperData struct {
 type IRR struct {
 	grossReturns float64
 	netReturns   float64
-	capReg       map[string]float64
+	capReg       map[string]float64 `entity:"capital_register"`
 }
 
 func NewFund(fundId string) *Fund {
