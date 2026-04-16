@@ -192,3 +192,9 @@ func containsKey[K comparable, V any](m map[K]V, key K) bool {
 	_, ok := m[key]
 	return ok
 }
+
+func collectMap(period string, capReg map[string]float64, store map[string]string) {
+	for k, v := range capReg {
+		store[period+"_"+k] = fmt.Sprintf("%f", v)
+	}
+}
