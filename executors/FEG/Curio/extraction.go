@@ -268,6 +268,7 @@ func extGrossAndNetAssests(f *excelize.File, tbdata *WorkPaperData) (int, error)
 }
 
 func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
+	var totalCapCall float64
 	absicca := make(map[string]int)
 	ordinate := make(map[string]int)
 	F.workPaperData.irr[period] = &IRR{
@@ -304,6 +305,10 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 					cellval = m
 				}
 				ordinate[cellval] = j
+			case strings.Contains(cellval, "capital call"):
+				if F.fundID == "CURHP" && !containsKey(ordinate, cellval) {
+					ordinate[cellval] = j
+				}
 			}
 		}
 	}
@@ -326,10 +331,13 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 			continue
 		}
 		if _, ok := F.workPaperData.irr[period].capReg[marker]; !ok {
+			if strings.Contains(marker, "capital call") {
+				totalCapCall += cell.GetFloat64()
+			}
 			F.workPaperData.irr[period].capReg[marker] = cell.GetFloat64()
 		}
 	}
-	dr := F.workPaperData.irr[period].capReg["open net balance"] + F.workPaperData.irr[period].capReg["contributions"] + F.workPaperData.irr[period].capReg["distributions"]
+	dr := F.workPaperData.irr[period].capReg["open net balance"] + F.workPaperData.irr[period].capReg["contributions"] + F.workPaperData.irr[period].capReg["distributions"] + totalCapCall
 	if dr == 0 {
 		logging.Warn(fmt.Sprintf("Fund performance denominator is zero for period:%v", period))
 		F.workPaperData.irr[period].grossReturns = 0
