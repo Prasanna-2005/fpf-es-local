@@ -292,13 +292,13 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 				ordinate["id"] = j
 			case strings.EqualFold(F.fundID, cellval):
 				if ordinate["id"] != j {
-					logging.Warn(fmt.Sprintf("'id' and %s (%s)  extracted are not in same column", cellval, F.fundID))
+					// logging.Warn(fmt.Sprintf("'id' and %s (%s)  extracted are not in same column", cellval, F.fundID))
 					continue
 				}
 				absicca[F.fundID] = i
 			case slices.Contains(ymarkers, cellval):
 				if absicca["id"] != i {
-					logging.Warn(fmt.Sprintf("'id' and %s  extracted are not in same row", cellval))
+					// logging.Warn(fmt.Sprintf("'id' and %s  extracted are not in same row", cellval))
 					continue
 				}
 				if m, ok := singular[cellval]; ok {
@@ -306,7 +306,7 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 				}
 				ordinate[cellval] = j
 			case strings.Contains(cellval, "capital call"):
-				if F.fundID == "CURHP" && !containsKey(ordinate, cellval) {
+				if F.fundID == "CURHP" && !containsKey(ordinate, cellval) && absicca["id"] == i {
 					ordinate[cellval] = j
 				}
 			}
