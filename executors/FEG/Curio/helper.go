@@ -187,3 +187,8 @@ func GetRows(sheet *xls.Sheet) [][]string {
 	}
 	return rows
 }
+
+func containsKey[K comparable, V any](m map[K]V, key K) bool {
+	_, ok := m[key]
+	return ok
+}
