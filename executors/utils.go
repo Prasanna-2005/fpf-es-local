@@ -2,12 +2,16 @@ package executors
 
 import (
 	"database/sql"
+	"encoding/binary"
 	"fmt"
 	"math"
 	"reflect"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/shakinm/xlsReader/xls/record"
+	"github.com/shakinm/xlsReader/xls/structure"
 )
 
 // IndexToExcel converts (x,y) coordinate to a excel cell reference
@@ -122,4 +126,29 @@ func CollectAnswers(v reflect.Value, store map[[2]string]string) {
 			continue
 		}
 	}
+}
+
+func RKType3Value(cell structure.CellData) (*string, bool) {
+	// Get the RK value to check type
+	var ans string
+	rkCell := cell.(*record.Rk)
+
+	// Access the rk field to get RK type
+	v := reflect.ValueOf(rkCell).Elem()
+	rkField := v.FieldByName("rk")
+
+	if rkField.IsValid() {
+		rkBytes := rkField.Bytes()
+		rk := binary.LittleEndian.Uint32(rkBytes[:])
+		rkType := rk & 3 // Get last 2 bits
+
+		if rkType == 3 {
+			// This is RK Type 3 - needs your fix!
+			signed := int32(rk) >> 2
+			correctValue := float64(signed) / 100
+			ans = fmt.Sprintf("%f", correctValue)
+			return &ans, true
+		}
+	}
+	return nil, false
 }
