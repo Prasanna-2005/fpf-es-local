@@ -176,12 +176,21 @@ func GetRows(sheet *xls.Sheet) [][]string {
 
 		var cells []string
 		// Try up to 1000 columns (adjust as needed)
-		for j := 0; j < 1000; j++ {
+		for j := 0; j < sheet.GetNumberRows(); j++ {
 			cell, err := row.GetCol(j)
 			if err != nil {
 				break
 			}
-			cells = append(cells, cell.GetString())
+			cellVal := cell.GetString()
+			if reflect.TypeOf(cell).String() == "*record.Rk" {
+				if tmp, ok := executors.RKType3Value(cell); ok {
+					if !(strings.Contains(cellVal, *tmp) || strings.Contains(*tmp, cellVal)) {
+						cellVal = *tmp
+					}
+				}
+
+			}
+			cells = append(cells, cellVal)
 		}
 		rows = append(rows, cells)
 	}
