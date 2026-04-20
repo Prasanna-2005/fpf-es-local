@@ -102,7 +102,7 @@ func extractUnfundedCmts(wb xls.Workbook, tbdata *WorkPaperData, shortcode strin
 		return fmt.Errorf("no sheet found in capital register: %w", err)
 	}
 
-	for i := 0; i <= sheet.GetNumberRows(); i++ {
+	for i := 0; i < sheet.GetNumberRows(); i++ {
 		row, err := sheet.GetRow(i)
 		if err != nil {
 			continue
