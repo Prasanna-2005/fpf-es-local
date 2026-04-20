@@ -131,20 +131,12 @@ func extractUnfundedCmts(wb xls.Workbook, tbdata *WorkPaperData, shortcode strin
 		return nil
 	}
 
-	row, err := sheet.GetRow(targetRow)
-	if err != nil {
-		logging.Error(fmt.Sprintf("getting row %d for shortcode %v: %v", targetRow, shortcode, err))
-		return nil
-	}
+	reportRows := GetRows(sheet)
 
-	cell, err := row.GetCol(targetCol)
-	if err != nil {
-		logging.Error(fmt.Sprintf("getting col %d for shortcode %v: %v", targetCol, shortcode, err))
-		return nil
-	}
-
+	cell := reportRows[targetRow][targetCol]
+	cell = executors.CleanNonNumeric(cell)
 	// GetFloat64() preserves decimals correctly
-	tbdata.unfundedCommitments = cell.GetFloat64()
+	tbdata.unfundedCommitments, _ = strconv.ParseFloat(cell, 64)
 	return nil
 }
 
@@ -321,25 +313,17 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 	if !ok {
 		return fmt.Errorf("fundID %s not found in sheet", F.fundID)
 	}
-
-	fundRow, err := f.GetRow(fundRowIdx)
-	if err != nil {
-		return fmt.Errorf("fund row not found: %v", err)
-	}
 	for marker, ycoor := range ordinate {
 		if marker == "id" {
 			continue
 		}
-		cell, err := fundRow.GetCol(ycoor)
-		if err != nil {
-			logging.Error(fmt.Sprintf("cell error at %s: %v", marker, err))
-			continue
-		}
+		cellVal := executors.CleanNonNumeric(reportRows[fundRowIdx][ycoor])
+		cell, _ := strconv.ParseFloat(cellVal, 64)
 		if _, ok := F.workPaperData.irr[period].capReg[marker]; !ok {
 			if strings.Contains(marker, "capital call") {
-				totalCapCall += math.Abs(cell.GetFloat64())
+				totalCapCall += math.Abs(cell)
 			}
-			F.workPaperData.irr[period].capReg[marker] = cell.GetFloat64()
+			F.workPaperData.irr[period].capReg[marker] = cell
 		}
 	}
 	dr := F.workPaperData.irr[period].capReg["open net balance"] + F.workPaperData.irr[period].capReg["contributions"] + F.workPaperData.irr[period].capReg["distributions"] + totalCapCall
