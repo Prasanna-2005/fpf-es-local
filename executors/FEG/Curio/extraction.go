@@ -265,7 +265,7 @@ func extGrossAndNetAssests(f *excelize.File, tbdata *WorkPaperData) (int, error)
 }
 
 func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
-	var totalCapCall float64
+	var totalCapCall, mgmtFee, distribution float64
 	absicca := make(map[string]int)
 	ordinate := make(map[string]int)
 	F.workPaperData.irr[period] = &IRR{
@@ -303,7 +303,11 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 				}
 				ordinate[cellval] = j
 			case strings.Contains(cellval, "capital call"):
-				if F.fundID == "CURHP" && !containsKey(ordinate, cellval) && absicca["id"] == i {
+				if !containsKey(ordinate, cellval) && absicca["id"] == i {
+					ordinate[cellval] = j
+				}
+			case strings.Contains(cellval, "management fee"):
+				if !containsKey(ordinate, cellval) && absicca["id"] == i {
 					ordinate[cellval] = j
 				}
 			}
@@ -323,17 +327,23 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 			if strings.Contains(marker, "capital call") {
 				totalCapCall += math.Abs(cell)
 			}
+			if strings.Contains(marker, "management fee") {
+				mgmtFee += math.Abs(cell)
+			}
+			if strings.Contains(marker, "distribution") {
+				distribution += cell
+			}
 			F.workPaperData.irr[period].capReg[marker] = cell
 		}
 	}
-	dr := F.workPaperData.irr[period].capReg["open net balance"] + F.workPaperData.irr[period].capReg["contributions"] + F.workPaperData.irr[period].capReg["distributions"] + totalCapCall
+	dr := F.workPaperData.irr[period].capReg["open net balance"] + F.workPaperData.irr[period].capReg["contributions"] + distribution + totalCapCall
 	if dr == 0 {
 		logging.Warn(fmt.Sprintf("Fund performance denominator is zero for period:%v", period))
 		F.workPaperData.irr[period].grossReturns = 0
 		F.workPaperData.irr[period].netReturns = 0
 	} else {
 		grossRet := F.workPaperData.irr[period].capReg["grosspnl"] * 100 / dr
-		netRet := (F.workPaperData.irr[period].capReg["grosspnl"] - math.Abs(F.workPaperData.irr[period].capReg["management fee"])) * 100 / dr
+		netRet := (F.workPaperData.irr[period].capReg["grosspnl"] - math.Abs(mgmtFee)) * 100 / dr
 		F.workPaperData.irr[period].grossReturns = math.Round(grossRet*100) / 100
 		F.workPaperData.irr[period].netReturns = math.Round(netRet*100) / 100
 	}
