@@ -175,8 +175,7 @@ func GetRows(sheet *xls.Sheet) [][]string {
 		}
 
 		var cells []string
-		// Try up to 1000 columns (adjust as needed)
-		for j := 0; j < sheet.GetNumberRows(); j++ {
+		for j := 0; j < len(row.GetCols()); j++ {
 			cell, err := row.GetCol(j)
 			if err != nil {
 				break
