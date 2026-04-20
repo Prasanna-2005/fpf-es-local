@@ -127,7 +127,7 @@ func extractUnfundedCmts(wb xls.Workbook, tbdata *WorkPaperData, shortcode strin
 	targetRow, rowFound := absicca[shortcode]
 	targetCol, colFound := ordinates["unfdCmts"]
 	if !rowFound || !colFound {
-		logging.Error(fmt.Sprintf("could not find (row,col)(%v,%v) for shortcode:%v", shortcode, rowFound, colFound))
+		logging.Error(fmt.Sprintf("could not find (row,col)(%v,%v) for shortcode:%v", rowFound, colFound, shortcode))
 		return nil
 	}
 
