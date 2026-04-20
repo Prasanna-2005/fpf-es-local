@@ -116,9 +116,9 @@ func extractUnfundedCmts(wb xls.Workbook, tbdata *WorkPaperData, shortcode strin
 			switch {
 			case strings.EqualFold("Unfunded commitment", cellVal):
 				ordinates["unfdCmts"] = j
-			case strings.EqualFold("Fund", cellVal):
-				ordinates["fund"] = j
-			case strings.EqualFold(shortcode, cellVal) && j == ordinates["fund"]:
+			case strings.EqualFold("id", cellVal):
+				ordinates["id"] = j
+			case strings.EqualFold(shortcode, cellVal) && j == ordinates["id"]:
 				absicca[shortcode] = i
 			}
 		}
@@ -127,7 +127,7 @@ func extractUnfundedCmts(wb xls.Workbook, tbdata *WorkPaperData, shortcode strin
 	targetRow, rowFound := absicca[shortcode]
 	targetCol, colFound := ordinates["unfdCmts"]
 	if !rowFound || !colFound {
-		logging.Error(fmt.Sprintf("could not find row/col for shortcode %v", shortcode))
+		logging.Error(fmt.Sprintf("could not find (row,col)(%v,%v) for shortcode:%v", shortcode, rowFound, colFound))
 		return nil
 	}
 
