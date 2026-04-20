@@ -73,9 +73,14 @@ func (F *Fund) ExtractTrialBalanceData() error {
 func (F *Fund) ExtractCapReg() error {
 	path, ok := F.holder.capRegisterFilePath["september"]
 	if !ok {
-		logging.Error("File not found:September month capital register file not found.")
+		path, ok = F.holder.capRegisterFilePath["third"]
+	}
+
+	if !ok {
+		logging.Error("File not found: September month capital register file not found.")
 		return fmt.Errorf("Capital register not found for september")
 	}
+
 	wb, err := xls.OpenFile(path)
 	if err != nil {
 		return fmt.Errorf("opening capital register: %w", err)
@@ -316,7 +321,7 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 		cell, _ := strconv.ParseFloat(cellVal, 64)
 		if _, ok := F.workPaperData.irr[period].capReg[marker]; !ok {
 			if strings.Contains(marker, "capital call") {
-				totalCapCall += cell
+				totalCapCall += math.Abs(cell)
 			}
 			F.workPaperData.irr[period].capReg[marker] = cell
 		}
@@ -328,7 +333,7 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 		F.workPaperData.irr[period].netReturns = 0
 	} else {
 		grossRet := F.workPaperData.irr[period].capReg["grosspnl"] * 100 / dr
-		netRet := (F.workPaperData.irr[period].capReg["grosspnl"] - F.workPaperData.irr[period].capReg["management fee"]) * 100 / dr
+		netRet := (F.workPaperData.irr[period].capReg["grosspnl"] - math.Abs(F.workPaperData.irr[period].capReg["management fee"])) * 100 / dr
 		F.workPaperData.irr[period].grossReturns = math.Round(grossRet*100) / 100
 		F.workPaperData.irr[period].netReturns = math.Round(netRet*100) / 100
 	}
