@@ -9,7 +9,7 @@ func (F *Fund) Compute() *executors.Form1bData {
 
 	wd := F.workPaperData
 	ld := F.workPaperData.liquidityData
-	pd := F.workPaperData.fundPerformanceData
+	pd := F.workPaperData.irr
 
 	data := executors.NewForm1bData()
 
