@@ -336,7 +336,7 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 			F.workPaperData.irr[period].capReg[marker] = cell
 		}
 	}
-	dr := F.workPaperData.irr[period].capReg["open net balance"] + F.workPaperData.irr[period].capReg["contributions"] + distribution + totalCapCall
+	dr := F.workPaperData.irr[period].capReg["open net balance"] + F.workPaperData.irr[period].capReg["contribution"] + distribution + totalCapCall
 	if dr == 0 {
 		logging.Warn(fmt.Sprintf("Fund performance denominator is zero for period:%v", period))
 		F.workPaperData.irr[period].grossReturns = 0
