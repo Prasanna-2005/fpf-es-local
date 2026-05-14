@@ -139,7 +139,6 @@ func prepareFilingPrivateInvestors(filingID string) (map[string][]*privateinvest
 // setStaticDataPV sets the static information to the form1bData
 func setStaticDataPV(data *executors.Form1bData, fundId string) {
 	info := db.FundStorer[fundId]
-
 	data.FundID = info.FundID
 	data.FundName = info.FundName
 
@@ -213,7 +212,6 @@ func setStaticCurioFunds(filingID, userID string, liqudityHolder executors.InvLi
 	logging.Info("Execution Completed for the Fund: " + staticFundObj.GetFundID())
 	//CNLCP static funds
 	staticFundData, staticFundObj = curio.StaticFunds("CNLCP")
-	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
 	if holder, ok := liqudityHolder["CNLCP"]; ok {
 		staticFundData.OtherPercent = 0
 		staticFundObj.SetLiquidityData(holder)
@@ -221,6 +219,7 @@ func setStaticCurioFunds(filingID, userID string, liqudityHolder executors.InvLi
 		logging.Warn("Liquidity Data not available for the Fund:CNLCP")
 	}
 	staticFundData = staticFundObj.Compute()
+	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
 	err = db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
 	if err != nil {
