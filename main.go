@@ -148,12 +148,9 @@ func setStaticDataPV(data *executors.Form1bData, fundId string) {
 		data.FundLEI = ""
 	}
 
-	if info.FundNFA.Valid {
-		data.FundNFA = info.FundNFA.String
-		data.CFTCFund = "true"
-	} else {
-		data.CFTCFund = "false"
-	}
+	data.FundNFA = info.FundNFA.String
+	data.CFTCFund = "false"
+
 }
 
 func setStaticDataHedgeFunds(form1cdata *executors.Form1cData, fundId string) {
