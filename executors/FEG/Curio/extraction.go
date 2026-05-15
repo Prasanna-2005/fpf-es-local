@@ -265,7 +265,7 @@ func extGrossAndNetAssests(f *excelize.File, tbdata *WorkPaperData) (int, error)
 }
 
 func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
-	var totalCapCall, mgmtFee, distribution float64
+	var totalCapCall, mgmtFee, distribution, perf float64
 	absicca := make(map[string]int)
 	ordinate := make(map[string]int)
 	F.workPaperData.irr[period] = &IRR{
@@ -273,7 +273,7 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 	}
 	ymarkers := []string{
 		"open net balance", "contributions", "distributions",
-		"grosspnl", "management fee", "management fees", "contribution", "distribution",
+		"grosspnl", "contribution", "distribution",
 	}
 	reportRows := GetRows(f)
 	if len(reportRows) == 0 {
@@ -310,6 +310,10 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 				if !containsKey(ordinate, cellval) && absicca["id"] == i {
 					ordinate[cellval] = j
 				}
+			case strings.Contains(cellval, "performance fee"):
+				if !containsKey(ordinate, cellval) && absicca["id"] == i {
+					ordinate[cellval] = j
+				}
 			}
 		}
 	}
@@ -333,6 +337,9 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 			if strings.Contains(marker, "distribution") {
 				distribution += cell
 			}
+			if strings.Contains(marker, "performance fee") {
+				perf += math.Abs(cell)
+			}
 			F.workPaperData.irr[period].capReg[marker] = cell
 		}
 	}
@@ -343,7 +350,7 @@ func (F *Fund) extracNAVRepData(f *xls.Sheet, period string) error {
 		F.workPaperData.irr[period].netReturns = 0
 	} else {
 		grossRet := F.workPaperData.irr[period].capReg["grosspnl"] * 100 / dr
-		netRet := (F.workPaperData.irr[period].capReg["grosspnl"] - math.Abs(mgmtFee)) * 100 / dr
+		netRet := (F.workPaperData.irr[period].capReg["grosspnl"] - math.Abs(mgmtFee) - math.Abs(perf)) * 100 / dr
 		F.workPaperData.irr[period].grossReturns = math.Round(grossRet*100) / 100
 		F.workPaperData.irr[period].netReturns = math.Round(netRet*100) / 100
 	}
