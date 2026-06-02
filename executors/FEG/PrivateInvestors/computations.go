@@ -1,6 +1,9 @@
 package privateinvestors
 
-import "quantrium-tech/form_pf_extractor_service/executors"
+import (
+	"math"
+	"quantrium-tech/form_pf_extractor_service/executors"
+)
 
 // POF Specific Formulae
 
@@ -47,10 +50,34 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 	data.PensionPlanPercent = ld.PensionPlanOwnedPercentage
 	data.NonProfitPercent = ld.NonProfitOwnedPercentage
 	data.Top5Percent = ld.Top5OwnedPercentage
-
+	F.calculateFundPerformance()
 	// fund performance data
 	assignFundPerf(data, pd)
 
 	return data
 
+}
+
+func calculateQuarterPerformance(begBal, capCall, cashDistrib, netIncome, mgmtFee float64) (net, gross float64) {
+	if begBal+capCall+cashDistrib != 0 {
+		dr := begBal + capCall + cashDistrib
+		net = math.Round(((netIncome-mgmtFee)/dr)*10000) / 100
+		gross = math.Round((netIncome/dr)*10000) / 100
+	}
+	// net and gross default to 0 if condition is false
+	return
+}
+
+func (F *PrivateFund) calculateFundPerformance() {
+	pd := F.workPaperData.fundPerformanceData
+
+	pd.q1NetPercentage, pd.q1GrossPercentage = calculateQuarterPerformance(
+		pd.begBalq1, pd.capCallq1, pd.cashDistribq1, pd.netIncomeq1, pd.mgmtFeeq1,
+	)
+	pd.q2NetPercentage, pd.q2GrossPercentage = calculateQuarterPerformance(
+		pd.begBalq2, pd.capCallq2, pd.cashDistribq2, pd.netIncomeq2, pd.mgmtFeeq2,
+	)
+	pd.q3NetPercentage, pd.q3GrossPercentage = calculateQuarterPerformance(
+		pd.begBalq3, pd.capCallq3, pd.cashDistribq3, pd.netIncomeq3, pd.mgmtFeeq3,
+	)
 }
