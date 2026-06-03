@@ -28,7 +28,6 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 
 	wd := F.workPaperData
 	ld := F.workPaperData.liquidityData
-	pd := F.workPaperData.fundPerformanceData
 
 	data := executors.NewForm1bData()
 
@@ -50,10 +49,11 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 	data.PensionPlanPercent = ld.PensionPlanOwnedPercentage
 	data.NonProfitPercent = ld.NonProfitOwnedPercentage
 	data.Top5Percent = ld.Top5OwnedPercentage
+
 	F.calculateFundPerformance()
+	pd := F.workPaperData.fundPerformanceData
 	// fund performance data
 	assignFundPerf(data, pd)
-
 	return data
 
 }
@@ -80,4 +80,5 @@ func (F *PrivateFund) calculateFundPerformance() {
 	pd.q3NetPercentage, pd.q3GrossPercentage = calculateQuarterPerformance(
 		pd.begBalq3, pd.capCallq3, pd.cashDistribq3, pd.netIncomeq3, pd.mgmtFeeq3,
 	)
+	F.workPaperData.fundPerformanceData = pd
 }
