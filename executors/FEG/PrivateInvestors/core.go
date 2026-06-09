@@ -89,8 +89,7 @@ func (F *PrivateFund) CombineFundPerformance(partnerFund *PrivateFund) {
 	pd.capCallq3 += ppd.capCallq3
 	pd.cashDistribq3 += ppd.cashDistribq3
 
-	// Recalculate percentages from combined values
-	F.calculateFundPerformance()
+	F.workPaperData.fundPerformanceData = pd
 }
 
 // ExportWorkPaperData returns a mapped entityname to value mapper for further push
