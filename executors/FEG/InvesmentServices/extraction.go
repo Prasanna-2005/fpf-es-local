@@ -437,7 +437,7 @@ func extracNAVRepData(f *excelize.File, Navdata *WorkPaperData) error {
 	ymarkers := []string{
 		"net of mgmt", "gross of fees",
 	}
-	reportSheet := "Page 1"
+	reportSheet := "Performance_Summary"
 	reportRows, err := f.GetRows(reportSheet)
 	if err != nil {
 		return fmt.Errorf("getting NAV report rows: " + err.Error())
