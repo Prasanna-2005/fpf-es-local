@@ -61,6 +61,35 @@ func (F *PrivateFund) CombineData(partnerFund *PrivateFund) {
 	F.workPaperData.cashSweep += partnerFund.workPaperData.cashSweep
 	F.workPaperData.cashGeneralAccount += partnerFund.workPaperData.cashGeneralAccount
 	F.workPaperData.cashChecking += partnerFund.workPaperData.cashChecking
+	F.CombineFundPerformance(partnerFund)
+}
+
+func (F *PrivateFund) CombineFundPerformance(partnerFund *PrivateFund) {
+	pd := F.workPaperData.fundPerformanceData
+	ppd := partnerFund.workPaperData.fundPerformanceData
+
+	// Q1
+	pd.netIncomeq1 += ppd.netIncomeq1
+	pd.mgmtFeeq1 += ppd.mgmtFeeq1
+	pd.begBalq1 += ppd.begBalq1
+	pd.capCallq1 += ppd.capCallq1
+	pd.cashDistribq1 += ppd.cashDistribq1
+
+	// Q2
+	pd.netIncomeq2 += ppd.netIncomeq2
+	pd.mgmtFeeq2 += ppd.mgmtFeeq2
+	pd.begBalq2 += ppd.begBalq2
+	pd.capCallq2 += ppd.capCallq2
+	pd.cashDistribq2 += ppd.cashDistribq2
+
+	// Q3
+	pd.netIncomeq3 += ppd.netIncomeq3
+	pd.mgmtFeeq3 += ppd.mgmtFeeq3
+	pd.begBalq3 += ppd.begBalq3
+	pd.capCallq3 += ppd.capCallq3
+	pd.cashDistribq3 += ppd.cashDistribq3
+
+	F.workPaperData.fundPerformanceData = pd
 }
 
 // ExportWorkPaperData returns a mapped entityname to value mapper for further push
@@ -125,13 +154,13 @@ type FundPerformanceData struct {
 	cashDistribq1 float64 `entity:"cash_distribution_q1" term:"first"  colName:"cashDistibution"`
 }
 type QTDval struct {
-	Net         float64
-	Gross       float64
-	BegBal      float64
-	CashDistrib float64
-	CapCall     float64
-	NetIncome   float64
-	MgmtFee     float64
+	Net         float64 `entity:"net_percent"`
+	Gross       float64 `entity:"gross_percent"`
+	BegBal      float64 `entity:"beginning_balance"`
+	CashDistrib float64 `entity:"cash_distribution"`
+	CapCall     float64 `entity:"capital_call"`
+	NetIncome   float64 `entity:"net_income"`
+	MgmtFee     float64 `entity:"management_fee"`
 }
 
 // Holder holds the path of the files needed for a extraction of a single Private Fund
