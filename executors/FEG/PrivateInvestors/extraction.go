@@ -2,7 +2,6 @@ package privateinvestors
 
 import (
 	"fmt"
-	"math"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"quantrium-tech/form_pf_extractor_service/logging"
 	"slices"
@@ -149,15 +148,15 @@ func ExtractInvestorLiquidity(filePath string) (LiquidityDataHolder, error) {
 
 // extractQTD retrieves the required cells (unfunded commitments, gross and net performance)
 // from the QTD Sheet of the Q3 Workpaper
-func extractQTDData(f *excelize.File, series string, sheet string) (float64, float64, float64, QTDval, error) {
+func extractQTDData(f *excelize.File, series string, sheet string) (float64, QTDval, error) {
 
-	var unfunded, net, gross, begBal, cashDistrib, capCall, netIncome, mgmtFee float64
+	var unfunded, begBal, cashDistrib, capCall, netIncome, mgmtFee float64
 	var missing []string
 	var qtdVal QTDval
 
 	qtdRows, err := f.GetRows(sheet)
 	if err != nil {
-		return unfunded, net, gross, qtdVal, fmt.Errorf("getting QTD Rows: " + err.Error())
+		return unfunded, qtdVal, fmt.Errorf("getting QTD Rows: " + err.Error())
 	}
 
 	var start, begBalIndex, capCallIndex, cashDistribIndex, netIncomeIndex, mgmtFeeIndex int //rowIndex
@@ -202,7 +201,7 @@ Out:
 				netIncomeIndex = j
 				// rowIndex = i
 				continue
-			case strings.Contains(strings.ToLower(cellValue), strings.ToLower("Management Fee Expense")) && mgmtFeeIndex == 0:
+			case strings.Contains(strings.ToLower(cellValue), strings.ToLower("Management Fee")) && mgmtFeeIndex == 0:
 				// (strings.EqualFold(cellValue, "Management Fee Expense") || strings.EqualFold(cellValue, "Management Fee Expenses"))
 				mgmtFeeIndex = j
 				// rowIndex = i
@@ -252,19 +251,7 @@ Out:
 		MgmtFee:     mgmtFee,
 	}
 
-	switch begBal + capCall + cashDistrib {
-	case 0:
-		logging.Warn("Sum of begining balance ,capitalCall ,cashDistribution is zero")
-		net = 0
-		gross = 0
-	default:
-		logging.Info("Sum of begining balance ,capitalCall ,cashDistribution is not equal to zero")
-		dr := begBal + capCall + cashDistrib
-		net = math.Round((netIncome/dr)*10000) / 100
-		gross = math.Round(((netIncome-mgmtFee)/dr)*10000) / 100
-	}
-
-	return unfunded, net, gross, qtdVal, nil
+	return unfunded, qtdVal, nil
 }
 
 // extractBSData extracts the necessary data from the BS Datasheet and updates in-place for the Fund WorkPaperData
@@ -355,11 +342,11 @@ func extractOtherQuartersData(fd *FundPerformanceData, f1Path string, f2Path str
 
 	}()
 
-	_, fd.q1NetPercentage, fd.q1GrossPercentage, q1ExtVal, err = extractQTDData(f1, series, sheet)
+	_, q1ExtVal, err = extractQTDData(f1, series, sheet)
 	if err != nil {
 		return fmt.Errorf("extracing QTD Data for quarter 1: " + err.Error())
 	}
-	_, fd.q2NetPercentage, fd.q2GrossPercentage, q2ExtVal, err = extractQTDData(f2, series, sheet)
+	_, q2ExtVal, err = extractQTDData(f2, series, sheet)
 	if err != nil {
 		return fmt.Errorf("extracing QTD Data for quarter 2: " + err.Error())
 	}
@@ -452,7 +439,7 @@ func (F *PrivateFund) ExtractWorkPaperData() error {
 		return fmt.Errorf("extracting BS Data: " + err.Error())
 	}
 
-	unfunded, net, gross, qtdExtVal, err := extractQTDData(f3, F.series, qtdSheet)
+	unfunded, qtdExtVal, err := extractQTDData(f3, F.series, qtdSheet)
 	if err != nil {
 		return fmt.Errorf("extracting QTD Sheet: " + err.Error())
 	}
@@ -467,8 +454,6 @@ func (F *PrivateFund) ExtractWorkPaperData() error {
 	F.workPaperData.fundPerformanceData.cashDistribq3 = qtdExtVal.CashDistrib
 	F.workPaperData.fundPerformanceData.mgmtFeeq3 = qtdExtVal.MgmtFee
 	F.workPaperData.fundPerformanceData.netIncomeq3 = qtdExtVal.NetIncome
-	F.workPaperData.fundPerformanceData.q3GrossPercentage = gross
-	F.workPaperData.fundPerformanceData.q3NetPercentage = net
 
 	err = extractOtherQuartersData(&F.workPaperData.fundPerformanceData, F.holder.q1FilePath, F.holder.q2FilePath, F.series, qtdSheet)
 	if err != nil {
