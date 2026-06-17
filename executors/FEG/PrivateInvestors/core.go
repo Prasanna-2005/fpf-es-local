@@ -8,16 +8,21 @@ import (
 
 // PrivateFund represents a single fund in private investment series. This act as the parent for underlying structures.
 type PrivateFund struct {
-	fundID        string
-	series        string
-	fundName      string //original fundname
-	workPaperData WorkPaperData
-	holder        Holder
+	fundID         string // feeder fund short code
+	series         string // feeder fundname
+	fundName       string // original feeder fundname
+	masterFundName string // master or parent fundname
+	workPaperData  WorkPaperData
+	holder         Holder
 }
 
 // NewPrivateFund creates a new PrivateFund with the given fundId and series
 func NewPrivateFund(fundId string, series string, fundname string) *PrivateFund {
 	return &PrivateFund{fundID: fundId, series: series, fundName: fundname, workPaperData: WorkPaperData{fundPerformanceData: FundPerformanceData{}}}
+}
+
+func (F *PrivateFund) GetMasterName() string {
+	return F.masterFundName
 }
 
 // SetHolder takes up a quarterNo and filePath and sets them in the file holder of the fund
