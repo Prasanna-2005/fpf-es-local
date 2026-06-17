@@ -379,6 +379,52 @@ func extractOtherQuartersData(fd *FundPerformanceData, f1Path string, f2Path str
 	return nil
 }
 
+func extractMasterUnfundedCmts(f *excelize.File, F *PrivateFund, sheet string) { //(float64, float64, float64, QTDval, error)
+
+	var start, unfundedIndex, allPartnerIndex int
+	qtdRows, err := f.GetRows(sheet)
+	if err != nil {
+		logging.Error(fmt.Sprintf("getting QTD Rows: %v", err.Error()))
+	}
+Outer:
+	for parent, fund := range FundNumSeries {
+		if slices.Contains(fund, F) {
+			for i, row := range qtdRows {
+				if len(row) >= 2 {
+					for j, cellValue := range row {
+						if strings.Contains(cellValue, parent) && strings.Contains(row[j-1], "Entity") {
+							start = i
+							break Outer
+						}
+					}
+				}
+
+			}
+		}
+	}
+Out:
+	for i, row := range qtdRows[start+1:] {
+		for j, cellValue := range row {
+			cellValue = strings.ToLower(cellValue)
+			switch {
+			case unfundedIndex != 0 && allPartnerIndex != 0:
+				break Out
+			case strings.Contains(cellValue, "unfunded commitment") && unfundedIndex == 0:
+				unfundedIndex = j
+				continue
+			case strings.Contains(cellValue, "series "+strings.ToLower(F.series)) && allPartnerIndex == 0:
+				allPartnerIndex = i
+				continue
+			}
+		}
+	}
+	allPartnerIndex += (start + 1) //rowIndex += (start + 1)
+	unfundedValue, _ := f.GetCellValue(sheet, executors.IndexToExcel(allPartnerIndex, unfundedIndex))
+	unfundedValue = executors.CleanNonNumeric(unfundedValue)
+	F.workPaperData.unfundedCommitments, _ = strconv.ParseFloat(unfundedValue, 64)
+
+}
+
 // ExtractWorkPaperData extracts the necessary data from the Workpapers of three quarters and store them in the
 // WorkPaperData allocated to that particular fund
 func (F *PrivateFund) ExtractWorkPaperData() error {
@@ -412,6 +458,7 @@ func (F *PrivateFund) ExtractWorkPaperData() error {
 	}
 
 	F.workPaperData.unfundedCommitments = unfunded
+	extractMasterUnfundedCmts(f3, F, qtdSheet)
 	if slices.Contains(MaturedFunds, F.fundID) {
 		F.workPaperData.unfundedCommitments = 0
 	}
