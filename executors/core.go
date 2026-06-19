@@ -454,4 +454,4 @@ type LiquidityData struct {
 	OtherPlanOwnedPercentage        float64 `entity:"others_plan_percentage"`
 }
 
-type InvLiquidityData map[string]*LiquidityData
+type InvLiquidityData map[string]*LiquidityData //Fundcode:Investor concentration percentage
