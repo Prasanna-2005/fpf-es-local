@@ -33,7 +33,7 @@ func ExtractInvestorLiquidity(filePath string) (InvLiquidityData, error) {
 		logging.Error(fmt.Sprintf("excel cleaning Error: %v", err.Error()))
 	}
 
-	processFundData(data, &ldataHolder)
+	processFundData(data, ldataHolder)
 
 	return ldataHolder, nil
 }
@@ -100,7 +100,7 @@ func normalizeInvType(s string) string {
 	return res
 }
 
-func processFundData(fundData [][]string, ldataHolder *InvLiquidityData) {
+func processFundData(fundData [][]string, ldataHolder InvLiquidityData) {
 	grouped := make(map[string][]float64)
 	invNameGrped := make(map[string]map[string]float64)
 	nestedMap := make(map[string]map[string]float64)
@@ -148,7 +148,7 @@ func processFundData(fundData [][]string, ldataHolder *InvLiquidityData) {
 			logging.Warn(fmt.Sprintf("TotalMVBase sum is zero for fund:%v", fundCode))
 		}
 
-		(*ldataHolder)[fundCode] = &LiquidityData{
+		ldataHolder[fundCode] = &LiquidityData{
 			Top5OwnedPercentage:             calcRatio(top5Sum, total),
 			UsPersonOwnedPercentage:         calcRatio(invMap[config.InvLiqTypeMarker.UsPerson], total),
 			NotUsPersonOwnedPercentage:      calcRatio(invMap[config.InvLiqTypeMarker.NotUsPerson], total),
@@ -165,7 +165,9 @@ func processFundData(fundData [][]string, ldataHolder *InvLiquidityData) {
 			UnknownInstiOwnedPercentage:     calcRatio(invMap[config.InvLiqTypeMarker.UnknownInstitution], total),
 			OtherPlanOwnedPercentage:        calcRatio(invMap[config.InvLiqTypeMarker.Other], total),
 		}
-
+		if totalPercent := calcInvestorConcSum(ldataHolder[fundCode]); totalPercent != 100 {
+			ldataHolder[fundCode].calcOtherInvConc(totalPercent)
+		}
 	}
 }
 
@@ -174,4 +176,26 @@ func calcRatio(nr, dr float64) float64 {
 		return 0
 	}
 	return (nr / dr) * 100
+}
+
+func (ld *LiquidityData) calcOtherInvConc(totalPercent float64) {
+	ld.OtherPlanOwnedPercentage = 100 - totalPercent - ld.OtherPlanOwnedPercentage
+}
+
+func calcInvestorConcSum(ld *LiquidityData) float64 {
+	total := ld.UsPersonOwnedPercentage + // 16a) owned by US persons
+		ld.NotUsPersonOwnedPercentage + // 16b) owned by non-US persons
+		ld.BrokerOwnedPercentage + // 16c) owned by broker-dealers
+		ld.InsuranceOwnedPercentage + // 16d) owned by insurance companies
+		ld.RiaOwnedPercentage + // 16e) owned by investment companies/RIAs
+		ld.PvtFundPercentage + // 16f) owned by private funds
+		ld.NonProfitOwnedPercentage + // 16g) owned by non-profit organizations
+		ld.PensionPlanOwnedPercentage + // 16h) owned by pension plans
+		ld.PropOwnedPercentage + // 16i) owned by banking institutions
+		ld.GovtOwnedPercentage + // 16j) owned by government entities
+		ld.GovtPensionPlansOwnedPercentage + // 16k) owned by government pension plans
+		ld.SovereignFundPercentage + // 16l) owned by sovereign wealth funds
+		ld.UnknownInstiOwnedPercentage + // 16m) owned by non-US intermediaries
+		ld.OtherPlanOwnedPercentage
+	return total
 }
