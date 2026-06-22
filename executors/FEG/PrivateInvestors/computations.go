@@ -70,7 +70,7 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 
 func calculateQuarterPerformance(begBal, capCall, cashDistrib, netIncome, mgmtFee float64) (net, gross float64) {
 	if begBal+capCall+cashDistrib != 0 {
-		dr := begBal + capCall + cashDistrib
+		dr := math.Abs(begBal + capCall + cashDistrib)
 		gross = math.Round(((netIncome-mgmtFee)/dr)*10000) / 100
 		net = math.Round((netIncome/dr)*10000) / 100
 	}
