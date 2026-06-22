@@ -165,7 +165,7 @@ func processFundData(fundData [][]string, ldataHolder InvLiquidityData) {
 			UnknownInstiOwnedPercentage:     calcRatio(invMap[config.InvLiqTypeMarker.UnknownInstitution], total),
 			OtherPlanOwnedPercentage:        calcRatio(invMap[config.InvLiqTypeMarker.Other], total),
 		}
-		if totalPercent := calcInvestorConcSum(ldataHolder[fundCode]); totalPercent != 100 {
+		if totalPercent := calcInvestorConcSum(ldataHolder[fundCode]); totalPercent < 100 {
 			ldataHolder[fundCode].calcOtherInvConc(totalPercent)
 		}
 	}
@@ -179,7 +179,7 @@ func calcRatio(nr, dr float64) float64 {
 }
 
 func (ld *LiquidityData) calcOtherInvConc(totalPercent float64) {
-	ld.OtherPlanOwnedPercentage = 100 - totalPercent - ld.OtherPlanOwnedPercentage
+	ld.OtherPlanOwnedPercentage = 100 - totalPercent + ld.OtherPlanOwnedPercentage
 }
 
 func calcInvestorConcSum(ld *LiquidityData) float64 {
