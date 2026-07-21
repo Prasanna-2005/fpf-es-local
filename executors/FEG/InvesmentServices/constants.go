@@ -28,109 +28,109 @@ var ShortCodeConvertor = map[string]string{
 	"FEGSPESTGXIV":         "FSTGX4", // both FSTGXIV and FSTGX4 map to same value
 }
 
-var LevelMapper = map[string]map[string][]string{
-	"FSCPB": {
-		"l2": {
-			"1256 future u/r g/l",
-			"corp bonds @ cost",
-			"corp bonds u/r g/l",
-			"govt bonds @ cost",
-			"govt bonds u/r g/l",
-			"treasuries @ cost",
-			"treasuries u/r g/l",
-			"mortgage & cmo @ cost",
-			"mortgage & cmo u/r g/l",
-		},
-		"l1": {
-			"closed end funds @ cost",
-			"closed end funds u/r g/l",
-		},
-	},
-	"FEGMP": {
-		"l3": {"invt. in master fund"},
-	},
-	"FSAEM": {
-		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
-	},
-	"FSAEM2": {
-		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
-	},
-	"FSAE": {
-		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
-	},
-	"FSAE2": {
-		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
-	},
-	"FSAGE": {
-		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
-	},
-	"FSAGE2": {
-		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r", "direct holding @ cost", "direct holding u/r g/l"},
-	},
-	"FSCGES": {
-		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r", "direct holding @ cost", "direct holding u/r g/l"},
-	},
-	"FSAIE": {
-		"l1": {"equities @ cost", "equities u/r g/l", "equities u/r fx g/l", "adr @ cost", "adr u/r g/l", "gdr @ cost", "gdr u/r g/l"},
-	},
-	"FSSEM": {
-		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
-	},
-	"FSDS": {
-		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
-	},
-	"FSCFI": {
-		"l2": {
-			"corp bonds @ cost",
-			"corp bonds u/r g/l",
-			"govt bonds @ cost",
-			"govt bonds u/r g/l",
-			"treasuries @ cost",
-			"treasuries u/r g/l",
-			"mortgage & cmo @ cost",
-			"mortgage & cmo u/r g/l",
-		},
-	},
-	"FSBIO": {
-		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
-	},
-	"FSOPO": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"FSTGXI": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"FSTGX2": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"FSTGX4": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"FSSUS": {
-		"l1": {
-			"equities @ cost",
-			"equities u/r g/l",
-			"equities u/r fx g/l",
-			"adr @ cost",
-			"adr u/r g/l",
-			"reit @ cost",
-			"reit u/r g/l",
-			"reit u/r fx g/l",
-		},
-	},
-	"FSSIE": {
-		"l1": {
-			"equities @ cost",
-			"equities u/r g/l",
-			"equities u/r fx g/l",
-			"adr @ cost",
-			"adr u/r g/l",
-			"reit @ cost",
-			"reit u/r g/l",
-			"reit u/r fx g/l",
-		},
-	},
-}
+// var LevelMapper = map[string]map[string][]string{
+// 	"FSCPB": {
+// 		"l2": {
+// 			"1256 future u/r g/l",
+// 			"corp bonds @ cost",
+// 			"corp bonds u/r g/l",
+// 			"govt bonds @ cost",
+// 			"govt bonds u/r g/l",
+// 			"treasuries @ cost",
+// 			"treasuries u/r g/l",
+// 			"mortgage & cmo @ cost",
+// 			"mortgage & cmo u/r g/l",
+// 		},
+// 		"l1": {
+// 			"closed end funds @ cost",
+// 			"closed end funds u/r g/l",
+// 		},
+// 	},
+// 	"FEGMP": {
+// 		"l3": {"invt. in master fund"},
+// 	},
+// 	"FSAEM": {
+// 		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
+// 	},
+// 	"FSAEM2": {
+// 		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
+// 	},
+// 	"FSAE": {
+// 		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
+// 	},
+// 	"FSAE2": {
+// 		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
+// 	},
+// 	"FSAGE": {
+// 		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
+// 	},
+// 	"FSAGE2": {
+// 		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r", "direct holding @ cost", "direct holding u/r g/l"},
+// 	},
+// 	"FSCGES": {
+// 		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r", "direct holding @ cost", "direct holding u/r g/l"},
+// 	},
+// 	"FSAIE": {
+// 		"l1": {"equities @ cost", "equities u/r g/l", "equities u/r fx g/l", "adr @ cost", "adr u/r g/l", "gdr @ cost", "gdr u/r g/l"},
+// 	},
+// 	"FSSEM": {
+// 		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
+// 	},
+// 	"FSDS": {
+// 		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
+// 	},
+// 	"FSCFI": {
+// 		"l2": {
+// 			"corp bonds @ cost",
+// 			"corp bonds u/r g/l",
+// 			"govt bonds @ cost",
+// 			"govt bonds u/r g/l",
+// 			"treasuries @ cost",
+// 			"treasuries u/r g/l",
+// 			"mortgage & cmo @ cost",
+// 			"mortgage & cmo u/r g/l",
+// 		},
+// 	},
+// 	"FSBIO": {
+// 		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
+// 	},
+// 	"FSOPO": {
+// 		"l3": {"private eq @ cost", "private eq u/r g/l"},
+// 	},
+// 	"FSTGXI": {
+// 		"l3": {"private eq @ cost", "private eq u/r g/l"},
+// 	},
+// 	"FSTGX2": {
+// 		"l3": {"private eq @ cost", "private eq u/r g/l"},
+// 	},
+// 	"FSTGX4": {
+// 		"l3": {"private eq @ cost", "private eq u/r g/l"},
+// 	},
+// 	"FSSUS": {
+// 		"l1": {
+// 			"equities @ cost",
+// 			"equities u/r g/l",
+// 			"equities u/r fx g/l",
+// 			"adr @ cost",
+// 			"adr u/r g/l",
+// 			"reit @ cost",
+// 			"reit u/r g/l",
+// 			"reit u/r fx g/l",
+// 		},
+// 	},
+// 	"FSSIE": {
+// 		"l1": {
+// 			"equities @ cost",
+// 			"equities u/r g/l",
+// 			"equities u/r fx g/l",
+// 			"adr @ cost",
+// 			"adr u/r g/l",
+// 			"reit @ cost",
+// 			"reit u/r g/l",
+// 			"reit u/r fx g/l",
+// 		},
+// 	},
+// }
 
 var NotSame = []string{
 	"FSSIE",
@@ -148,6 +148,8 @@ var LevelingEntityMapper = map[string]string{
 	"corp bonds u/r g/l":       "corpBondsURGL",
 	"direct holding @ cost":    "directHoldingCost",
 	"direct holding u/r g/l":   "directHoldingURGL",
+	"etf @ cost":               "etfCost",
+	"etf u/r g/l":              "etfURGL",
 	"equities @ cost":          "equitiesCost",
 	"equities dividend rec":    "equitiesDividendRec",
 	"equities ft w/h payable":  "equitiesFtWhPayable",
@@ -170,3 +172,67 @@ var LevelingEntityMapper = map[string]string{
 	"treasuries @ cost":        "treasuriesCost",
 	"treasuries u/r g/l":       "treasuriesURGL",
 }
+
+// Map 1: level -> deduplicated union of all components seen under that level
+var ComponentsByLevel = map[string][]string{
+	"l1": {
+		"closed end funds @ cost",
+		"closed end funds u/r g/l",
+		"equities @ cost",
+		"equities u/r g/l",
+		"equities u/r fx g/l",
+		"adr @ cost",
+		"adr u/r g/l",
+		"gdr @ cost",
+		"gdr u/r g/l",
+		"reit @ cost",
+		"reit u/r g/l",
+		"reit u/r fx g/l",
+		"etf @ cost",
+		"etf u/r g/l",
+	},
+	"l2": {
+		"1256 future u/r g/l",
+		"corp bonds @ cost",
+		"corp bonds u/r g/l",
+		"govt bonds @ cost",
+		"govt bonds u/r g/l",
+		"treasuries @ cost",
+		"treasuries u/r g/l",
+		"mortgage & cmo @ cost",
+		"mortgage & cmo u/r g/l",
+	},
+	"l3": {
+		"invt. in master fund",
+		"invt hedge funds @ cost",
+		"invt in hedge funds u/r",
+		"direct holding @ cost",
+		"direct holding u/r g/l",
+		"private eq @ cost",
+		"private eq u/r g/l",
+	},
+}
+
+// Map 2: fund -> which levels it has
+// var FundLevels = map[string][]string{
+// 	"FSCPB":  {"l1", "l2"},
+// 	"FEGMP":  {"l1", "l3"},
+// 	"FSAEM":  {"l3"},
+// 	"FSAEM2": {"l3"},
+// 	"FSAE":   {"l3"},
+// 	"FSAE2":  {"l3"},
+// 	"FSAGE":  {"l3"},
+// 	"FSAGE2": {"l3"},
+// 	"FSCGES": {"l3"},
+// 	"FSAIE":  {"l1"},
+// 	"FSSEM":  {"l3"},
+// 	"FSDS":   {"l3"},
+// 	"FSCFI":  {"l2"},
+// 	"FSBIO":  {"l3"},
+// 	"FSOPO":  {"l3"},
+// 	"FSTGXI": {"l3"},
+// 	"FSTGX2": {"l3"},
+// 	"FSTGX4": {"l3"},
+// 	"FSSUS":  {"l1"},
+// 	"FSSIE":  {"l1"},
+// }
