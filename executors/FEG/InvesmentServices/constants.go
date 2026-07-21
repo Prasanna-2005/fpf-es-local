@@ -206,6 +206,7 @@ var ComponentsByLevel = map[string][]string{
 		"invt. in master fund",
 		"invt hedge funds @ cost",
 		"invt in hedge funds u/r",
+		"invt in hedge funds u/r g/l",
 		"direct holding @ cost",
 		"direct holding u/r g/l",
 		"private eq @ cost",
