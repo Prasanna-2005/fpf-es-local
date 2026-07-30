@@ -1,68 +1,77 @@
 package curio
 
 var LevelingEntityMapper = map[string]string{
-	"invt hedge funds @ cost": "invtHedgeFundsCost",
-	"invt in hedge funds u/r": "invtInHedgeFundsUR",
-	"private eq @ cost":       "privateEqCost",
-	"private eq u/r g/l":      "privateEqURGL",
+	"closed end funds @ cost":  "closedEndFundsCost",
+	"closed end funds u/r g/l": "closedEndFundsURGL",
+	"1256 future u/r g/l":      "Future1256URGL",
+	"adr @ cost":               "adrCost",
+	"adr u/r g/l":              "adrURGL",
+	"corp bonds @ cost":        "corpBondsCost",
+	"corp bonds u/r g/l":       "corpBondsURGL",
+	"direct holding @ cost":    "directHoldingCost",
+	"direct holding u/r g/l":   "directHoldingURGL",
+	"etf @ cost":               "etfCost",
+	"etf u/r g/l":              "etfURGL",
+	"equities @ cost":          "equitiesCost",
+	"equities dividend rec":    "equitiesDividendRec",
+	"equities ft w/h payable":  "equitiesFtWhPayable",
+	"equities u/r fx g/l":      "equitiesURFXGL",
+	"equities u/r g/l":         "equitiesURGL",
+	"gdr @ cost":               "gdrCost",
+	"gdr u/r g/l":              "gdrURGL",
+	"govt bonds @ cost":        "govtBondsCost",
+	"govt bonds u/r g/l":       "govtBondsURGL",
+	"invt hedge funds @ cost":  "invtHedgeFundsCost",
+	"invt in hedge funds u/r":  "invtInHedgeFundsUR",
+	"mortgage & cmo @ cost":    "mortgageCmoCost",
+	"mortgage & cmo u/r g/l":   "mortgageCmoURGL",
+	"private eq @ cost":        "privateEqCost",
+	"private eq u/r g/l":       "privateEqURGL",
+	"reit @ cost":              "reitCost",
+	"reit u/r g/l":             "reitURGL",
+	"reit u/r fx g/l":          "reitURFXGL",
+	"invt. in master fund":     "invtInMasterFund",
+	"treasuries @ cost":        "treasuriesCost",
+	"treasuries u/r g/l":       "treasuriesURGL",
 }
 
 // this l3 will be included accordingly into sec1b abscissa
-var LevelMapper = map[string]map[string][]string{
-
-	"CCPTE": {
-		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
+var ComponentsByLevel = map[string][]string{
+	"l1": {
+		"closed end funds @ cost",
+		"closed end funds u/r g/l",
+		"equities @ cost",
+		"equities u/r g/l",
+		"equities u/r fx g/l",
+		"adr @ cost",
+		"adr u/r g/l",
+		"gdr @ cost",
+		"gdr u/r g/l",
+		"reit @ cost",
+		"reit u/r g/l",
+		"reit u/r fx g/l",
+		"etf @ cost",
+		"etf u/r g/l",
 	},
-	"CADTE": {
-		"l3": {"invt hedge funds @ cost", "invt in hedge funds u/r"},
+	"l2": {
+		"1256 future u/r g/l",
+		"corp bonds @ cost",
+		"corp bonds u/r g/l",
+		"govt bonds @ cost",
+		"govt bonds u/r g/l",
+		"treasuries @ cost",
+		"treasuries u/r g/l",
+		"mortgage & cmo @ cost",
+		"mortgage & cmo u/r g/l",
 	},
-
-	"CURIV": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CURTE": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CUADX": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CURCCT": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CURCCO": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CUKBX": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CURCP": {
-		"l3": {"private eq @ cost", "private eq u/r g/l", "invt hedge funds @ cost", "invt in hedge funds u/r", "invt in hedge funds u/r g/l"},
-	},
-	"COPTE": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CUROP": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CURTC": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CURTB": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CURTIM": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CUPDC": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CUELT": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CURHP": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
-	},
-	"CUTRV": {
-		"l3": {"private eq @ cost", "private eq u/r g/l"},
+	"l3": {
+		"invt. in master fund",
+		"invt hedge funds @ cost",
+		"invt in hedge funds u/r",
+		"invt in hedge funds u/r g/l",
+		"direct holding @ cost",
+		"direct holding u/r g/l",
+		"private eq @ cost",
+		"private eq u/r g/l",
 	},
 }

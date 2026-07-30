@@ -33,7 +33,7 @@ func ExtractInvestorLiquidity(filePath string) (InvLiquidityData, error) {
 		logging.Error(fmt.Sprintf("excel cleaning Error: %v", err.Error()))
 	}
 
-	processFundData(data, &ldataHolder)
+	processFundData(data, ldataHolder)
 
 	return ldataHolder, nil
 }
@@ -100,7 +100,7 @@ func normalizeInvType(s string) string {
 	return res
 }
 
-func processFundData(fundData [][]string, ldataHolder *InvLiquidityData) {
+func processFundData(fundData [][]string, ldataHolder InvLiquidityData) {
 	grouped := make(map[string][]float64)
 	invNameGrped := make(map[string]map[string]float64)
 	nestedMap := make(map[string]map[string]float64)
@@ -144,45 +144,58 @@ func processFundData(fundData [][]string, ldataHolder *InvLiquidityData) {
 		}
 
 		invMap := nestedMap[fundCode]
-
-		switch {
-		case total != 0:
-			(*ldataHolder)[fundCode] = &LiquidityData{
-				Top5OwnedPercentage:             (top5Sum / total) * 100,
-				UsPersonOwnedPercentage:         (invMap[config.InvLiqTypeMarker.UsPerson] / total) * 100,
-				NotUsPersonOwnedPercentage:      (invMap[config.InvLiqTypeMarker.NotUsPerson] / total) * 100,
-				BrokerOwnedPercentage:           (invMap[config.InvLiqTypeMarker.Broker] / total) * 100,
-				InsuranceOwnedPercentage:        (invMap[config.InvLiqTypeMarker.Insurance] / total) * 100,
-				RiaOwnedPercentage:              (invMap[config.InvLiqTypeMarker.RIA] / total) * 100,
-				PvtFundPercentage:               (invMap[config.InvLiqTypeMarker.PrivateFund] / total) * 100,
-				NonProfitOwnedPercentage:        (invMap[config.InvLiqTypeMarker.NonProfit] / total) * 100,
-				PensionPlanOwnedPercentage:      (invMap[config.InvLiqTypeMarker.PensionPlans] / total) * 100,
-				PropOwnedPercentage:             (invMap[config.InvLiqTypeMarker.Proprietary] / total) * 100,
-				GovtOwnedPercentage:             (invMap[config.InvLiqTypeMarker.Government] / total) * 100,
-				GovtPensionPlansOwnedPercentage: (invMap[config.InvLiqTypeMarker.GovernmentPensionPlans] / total) * 100,
-				SovereignFundPercentage:         (invMap[config.InvLiqTypeMarker.SovereignFund] / total) * 100,
-				UnknownInstiOwnedPercentage:     (invMap[config.InvLiqTypeMarker.UnknownInstitution] / total) * 100,
-				OtherPlanOwnedPercentage:        (invMap[config.InvLiqTypeMarker.Other] / total) * 100,
-			}
-		default:
+		if total == 0 {
 			logging.Warn(fmt.Sprintf("TotalMVBase sum is zero for fund:%v", fundCode))
-			(*ldataHolder)[fundCode] = &LiquidityData{
-				Top5OwnedPercentage:             0,
-				UsPersonOwnedPercentage:         0,
-				NotUsPersonOwnedPercentage:      0,
-				BrokerOwnedPercentage:           0,
-				InsuranceOwnedPercentage:        0,
-				RiaOwnedPercentage:              0,
-				PvtFundPercentage:               0,
-				NonProfitOwnedPercentage:        0,
-				PensionPlanOwnedPercentage:      0,
-				PropOwnedPercentage:             0,
-				GovtOwnedPercentage:             0,
-				GovtPensionPlansOwnedPercentage: 0,
-				SovereignFundPercentage:         0,
-				UnknownInstiOwnedPercentage:     0,
-				OtherPlanOwnedPercentage:        0,
-			}
+		}
+
+		ldataHolder[fundCode] = &LiquidityData{
+			Top5OwnedPercentage:             calcRatio(top5Sum, total),
+			UsPersonOwnedPercentage:         calcRatio(invMap[config.InvLiqTypeMarker.UsPerson], total),
+			NotUsPersonOwnedPercentage:      calcRatio(invMap[config.InvLiqTypeMarker.NotUsPerson], total),
+			BrokerOwnedPercentage:           calcRatio(invMap[config.InvLiqTypeMarker.Broker], total),
+			InsuranceOwnedPercentage:        calcRatio(invMap[config.InvLiqTypeMarker.Insurance], total),
+			RiaOwnedPercentage:              calcRatio(invMap[config.InvLiqTypeMarker.RIA], total),
+			PvtFundPercentage:               calcRatio(invMap[config.InvLiqTypeMarker.PrivateFund], total),
+			NonProfitOwnedPercentage:        calcRatio(invMap[config.InvLiqTypeMarker.NonProfit], total),
+			PensionPlanOwnedPercentage:      calcRatio(invMap[config.InvLiqTypeMarker.PensionPlans], total),
+			PropOwnedPercentage:             calcRatio(invMap[config.InvLiqTypeMarker.Proprietary], total),
+			GovtOwnedPercentage:             calcRatio(invMap[config.InvLiqTypeMarker.Government], total),
+			GovtPensionPlansOwnedPercentage: calcRatio(invMap[config.InvLiqTypeMarker.GovernmentPensionPlans], total),
+			SovereignFundPercentage:         calcRatio(invMap[config.InvLiqTypeMarker.SovereignFund], total),
+			UnknownInstiOwnedPercentage:     calcRatio(invMap[config.InvLiqTypeMarker.UnknownInstitution], total),
+			OtherPlanOwnedPercentage:        calcRatio(invMap[config.InvLiqTypeMarker.Other], total),
+		}
+		if totalPercent := calcInvestorConcSum(ldataHolder[fundCode]); totalPercent < 100 {
+			ldataHolder[fundCode].calcOtherInvConc(totalPercent)
 		}
 	}
+}
+
+func calcRatio(nr, dr float64) float64 {
+	if dr == 0 {
+		return 0
+	}
+	return (nr / dr) * 100
+}
+
+func (ld *LiquidityData) calcOtherInvConc(totalPercent float64) {
+	ld.OtherPlanOwnedPercentage = 100 - totalPercent + ld.OtherPlanOwnedPercentage
+}
+
+func calcInvestorConcSum(ld *LiquidityData) float64 {
+	total := ld.UsPersonOwnedPercentage + // 16a) owned by US persons
+		ld.NotUsPersonOwnedPercentage + // 16b) owned by non-US persons
+		ld.BrokerOwnedPercentage + // 16c) owned by broker-dealers
+		ld.InsuranceOwnedPercentage + // 16d) owned by insurance companies
+		ld.RiaOwnedPercentage + // 16e) owned by investment companies/RIAs
+		ld.PvtFundPercentage + // 16f) owned by private funds
+		ld.NonProfitOwnedPercentage + // 16g) owned by non-profit organizations
+		ld.PensionPlanOwnedPercentage + // 16h) owned by pension plans
+		ld.PropOwnedPercentage + // 16i) owned by banking institutions
+		ld.GovtOwnedPercentage + // 16j) owned by government entities
+		ld.GovtPensionPlansOwnedPercentage + // 16k) owned by government pension plans
+		ld.SovereignFundPercentage + // 16l) owned by sovereign wealth funds
+		ld.UnknownInstiOwnedPercentage + // 16m) owned by non-US intermediaries
+		ld.OtherPlanOwnedPercentage
+	return total
 }
