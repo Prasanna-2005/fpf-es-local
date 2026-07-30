@@ -96,6 +96,7 @@ func prepareFilingPrivateInvestors(filingID string) (map[string][]*privateinvest
 
 	fundsMapper := make(map[string][]*privateinvestors.PrivateFund)
 	var investorLiquidityPath string
+	var pvtFunds []*privateinvestors.PrivateFund
 
 	mappings, err := db.PullFiling(filingID)
 	if err != nil {
@@ -129,9 +130,11 @@ func prepareFilingPrivateInvestors(filingID string) (map[string][]*privateinvest
 				logging.Error(fmt.Sprintf("Error in qno:%v", err.Error()))
 			}
 			fund.SetHolder(qno, mapping.FilingPath)
+			pvtFunds = append(pvtFunds, fund)
 		}
 
 	}
+	privateinvestors.GroupByFundNumber(pvtFunds)
 
 	return fundsMapper, investorLiquidityPath, nil
 }
@@ -294,7 +297,7 @@ func execute(filingID string, userID string) {
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
 			if series, ok := privateinvestors.CombineFunds[fund.GetFundID()]; ok {
-				partnerFund := privateinvestors.NewPrivateFund(fund.GetFundID()+series, series)
+				partnerFund := privateinvestors.NewPrivateFund(fund.GetFundID()+series, series, fund.GetMasterName())
 				fund.CopyHolder(partnerFund)
 				err = partnerFund.ExtractWorkPaperData()
 				if err != nil {
@@ -381,7 +384,7 @@ func executeInvServ(filingID string, userID string) {
 
 			if _, ok := existing[fund.GetFundID()]; ok {
 				logging.Info(fund.GetFundID() + " Already Populated in the Form Data. Skipping")
-				continue
+
 			}
 
 			answersMapper := make(map[[2]string]string)
@@ -396,12 +399,12 @@ func executeInvServ(filingID string, userID string) {
 			err := fund.ExtractTrialBalanceData()
 			if err != nil {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
-				continue
+
 			}
 			err = fund.ExtractQ17()
 			if err != nil {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
-				continue
+
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
 

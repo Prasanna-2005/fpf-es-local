@@ -290,73 +290,53 @@ func (F *Fund) ExtractTrialBalanceData() error {
 
 func extLevelingData(ordinate int, f *excelize.File, tbdata *WorkPaperData, F *Fund) error {
 	tbSheet := os.Getenv("TB_SHEET")
-	markerl1 := make(map[string]int)
-	markerl2 := make(map[string]int)
-	markerl3 := make(map[string]int)
-	l1, _ := LevelMapper[F.fundID]["l1"]
-	l2, _ := LevelMapper[F.fundID]["l2"]
-	l3, _ := LevelMapper[F.fundID]["l3"]
+	// fairValueLevel := FundLevels[F.fundID]
+
+	levels := []string{"l1", "l2", "l3"}
+	markers := make(map[string]map[string]int, len(levels))
+	for _, lvl := range levels {
+		markers[lvl] = make(map[string]int)
+	}
 
 	tbRows, err := f.GetRows(tbSheet)
 	if err != nil {
 		return fmt.Errorf("getting TB Rows: " + err.Error())
 	}
+
 	for i, row := range tbRows {
 		for _, cellValue := range row {
 			cellval := strings.ToLower(cellValue)
-			if slices.Contains(l1, cellval) {
-				markerl1[LevelingEntityMapper[cellval]] = i
+			for _, lvl := range levels {
+				if slices.Contains(ComponentsByLevel[lvl], cellval) {
+					markers[lvl][LevelingEntityMapper[cellval]] = i
+				}
 			}
-			if slices.Contains(l2, cellval) {
-				markerl2[LevelingEntityMapper[cellval]] = i
+		}
+	}
+
+	processLevelMarkers := func(lvl string, levelAccum *float64) {
+		for marker, abscissa := range markers[lvl] {
+			rawValue, err := f.GetCellValue(tbSheet, executors.IndexToExcel(abscissa, ordinate))
+			if err != nil {
+				logging.Error(fmt.Sprintf(EntityErr, marker, err.Error()))
 			}
-			if slices.Contains(l3, cellval) {
-				markerl3[LevelingEntityMapper[cellval]] = i
+			rawValue = executors.CleanNonNumeric(rawValue)
+			val, _ := strconv.ParseFloat(rawValue, 64)
+
+			if fp := FieldPtr(&tbdata.levelExtData, marker); fp != nil {
+				*fp = val
 			}
+
+			*levelAccum += val
+			tbdata.sumLevelExtData += val
 
 		}
 	}
 
-	for marker, abscissa := range markerl1 {
-		rawValue, err := f.GetCellValue(tbSheet, executors.IndexToExcel(abscissa, ordinate))
-		if err != nil {
-			logging.Error(fmt.Sprintf(EntityErr, marker, err.Error()))
-		}
-		rawValue = executors.CleanNonNumeric(rawValue)
-		l1, _ := strconv.ParseFloat(rawValue, 64)
-		if fp := FieldPtr(&tbdata.levelExtData, marker); fp != nil {
-			*fp = l1
-		}
-		tbdata.l1 += l1
-		tbdata.sumLevelExtData += l1
-	}
-	for marker, abscissa := range markerl2 {
-		rawValue, err := f.GetCellValue(tbSheet, executors.IndexToExcel(abscissa, ordinate))
-		if err != nil {
-			logging.Error(fmt.Sprintf(EntityErr, marker, err.Error()))
-		}
-		rawValue = executors.CleanNonNumeric(rawValue)
-		l2, _ := strconv.ParseFloat(rawValue, 64)
-		if fp := FieldPtr(&tbdata.levelExtData, marker); fp != nil {
-			*fp = l2
-		}
+	processLevelMarkers("l1", &tbdata.l1)
+	processLevelMarkers("l2", &tbdata.l2)
+	processLevelMarkers("l3", &tbdata.l3)
 
-		tbdata.l2 += l2
-		tbdata.sumLevelExtData += l2
-	}
-	for marker, abscissa := range markerl3 {
-		rawValue, err := f.GetCellValue(tbSheet, executors.IndexToExcel(abscissa, ordinate))
-		if err != nil {
-			logging.Error(fmt.Sprintf(EntityErr, marker, err.Error()))
-		}
-		rawValue = executors.CleanNonNumeric(rawValue)
-		l3, _ := strconv.ParseFloat(rawValue, 64)
-		if fp := FieldPtr(&tbdata.levelExtData, marker); fp != nil {
-			*fp = l3
-		}
-		tbdata.l3 += l3
-		tbdata.sumLevelExtData += l3
-	}
 	return nil
 }
 
