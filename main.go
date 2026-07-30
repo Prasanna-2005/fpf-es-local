@@ -381,7 +381,7 @@ func executeInvServ(filingID string, userID string) {
 
 			if _, ok := existing[fund.GetFundID()]; ok {
 				logging.Info(fund.GetFundID() + " Already Populated in the Form Data. Skipping")
-				continue
+
 			}
 
 			answersMapper := make(map[[2]string]string)
@@ -396,12 +396,12 @@ func executeInvServ(filingID string, userID string) {
 			err := fund.ExtractTrialBalanceData()
 			if err != nil {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
-				continue
+
 			}
 			err = fund.ExtractQ17()
 			if err != nil {
 				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
-				continue
+
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
 
