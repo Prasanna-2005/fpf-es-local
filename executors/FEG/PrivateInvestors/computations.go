@@ -44,11 +44,21 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 	data.CostBasedLiability = executors.CalcCBLiabilities(data.GrossAsset, data.NetAsset, 0)
 
 	// investor liquidity data
-	data.UsPercent = ld.UsPersonOwnedPercentage
-	data.OtherPercent = ld.OtherPlanOwnedPercentage
-	data.PensionPlanPercent = ld.PensionPlanOwnedPercentage
-	data.NonProfitPercent = ld.NonProfitOwnedPercentage
-	data.Top5Percent = ld.Top5OwnedPercentage
+	data.Top5Percent = ld.Top5OwnedPercentage                           // 15
+	data.UsPercent = ld.UsPersonOwnedPercentage                         // 16_a
+	data.NonUSPersonsPercent = ld.NotUsPersonOwnedPercentage            // 16_b
+	data.BrokerDealersPercent = ld.BrokerOwnedPercentage                // 16_c
+	data.InsuranceCompaniesPercent = ld.InsuranceOwnedPercentage        // 16_d
+	data.InvestmentCompaniesPercent = ld.RiaOwnedPercentage             // 16_e
+	data.PrivateFundPercent = ld.PvtFundPercentage                      // 16_f
+	data.NonProfitPercent = ld.NonProfitOwnedPercentage                 // 16_g
+	data.PensionPlanPercent = ld.PensionPlanOwnedPercentage             // 16_h
+	data.BankingInstitutionsPercent = ld.PropOwnedPercentage            // 16_i
+	data.GovernmentEntitiesPercent = ld.GovtOwnedPercentage             // 16_j
+	data.GovernmentPensionsPercent = ld.GovtPensionPlansOwnedPercentage // 16_k
+	data.SovereignPercent = ld.SovereignFundPercentage                  // 16_l
+	data.NonUSIntermediariesPercent = ld.UnknownInstiOwnedPercentage    // 16_m
+	data.OtherPercent = ld.OtherPlanOwnedPercentage                     // 16_n
 
 	F.calculateFundPerformance()
 	pd := F.workPaperData.fundPerformanceData
@@ -60,7 +70,7 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 
 func calculateQuarterPerformance(begBal, capCall, cashDistrib, netIncome, mgmtFee float64) (net, gross float64) {
 	if begBal+capCall+cashDistrib != 0 {
-		dr := begBal + capCall + cashDistrib
+		dr := math.Abs(begBal + capCall + cashDistrib)
 		gross = math.Round(((netIncome-mgmtFee)/dr)*10000) / 100
 		net = math.Round((netIncome/dr)*10000) / 100
 	}

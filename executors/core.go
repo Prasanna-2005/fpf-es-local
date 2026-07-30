@@ -47,17 +47,15 @@ type Form1bData struct {
 	BrokerDealersPercent       float64 `fieldNo:"16" formLineNo:"16_c"`
 	InsuranceCompaniesPercent  float64 `fieldNo:"16" formLineNo:"16_d"`
 	InvestmentCompaniesPercent float64 `fieldNo:"16" formLineNo:"16_e"`
-	PrivateFundsPercent        float64 `fieldNo:"16" formLineNo:"16_f"`
+	PrivateFundPercent         float64 `fieldNo:"16" formLineNo:"16_f"`
 	NonProfitPercent           float64 `fieldNo:"16" formLineNo:"16_g"`
 	PensionPlanPercent         float64 `fieldNo:"16" formLineNo:"16_h"`
 	BankingInstitutionsPercent float64 `fieldNo:"16" formLineNo:"16_i"`
 	GovernmentEntitiesPercent  float64 `fieldNo:"16" formLineNo:"16_j"`
 	GovernmentPensionsPercent  float64 `fieldNo:"16" formLineNo:"16_k"`
-	ForeignInstitutionsPercent float64 `fieldNo:"16" formLineNo:"16_l"`
+	SovereignPercent           float64 `fieldNo:"16" formLineNo:"16_l"`
 	NonUSIntermediariesPercent float64 `fieldNo:"16" formLineNo:"16_m"`
 	OtherPercent               float64 `fieldNo:"16" formLineNo:"16_n"`
-	SovereignPercent           float64 `fieldNo:"16" formLineNo:"16_l"`
-	PrivateFundPercent         float64 `fieldNo:"16" formLineNo:"16_f"`
 
 	// Months
 	JanEndDate    sql.NullString  `fieldNo:"17" formLineNo:"17_(a)_last_day_of_fiscal_period" colName:"date" term:"january"`
@@ -454,4 +452,4 @@ type LiquidityData struct {
 	OtherPlanOwnedPercentage        float64 `entity:"others_plan_percentage"`
 }
 
-type InvLiquidityData map[string]*LiquidityData
+type InvLiquidityData map[string]*LiquidityData //Fundcode:Investor concentration percentage
