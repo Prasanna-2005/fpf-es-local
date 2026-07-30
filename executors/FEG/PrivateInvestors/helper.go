@@ -3,11 +3,16 @@ package privateinvestors
 import (
 	"database/sql"
 	"fmt"
+	"quantrium-tech/form_pf_extractor_service/db"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 )
+
+var seriesRegex = regexp.MustCompile(`\s+SERIES\s+\S+$`)
+var FundNumSeries = make(map[string][]*PrivateFund)
 
 // CreateAllFundSeries is a helper function that takes up a fund and creates all of the fund-series combination and returns them
 func CreateAllFundSeries(fundCode string) []*PrivateFund {
@@ -15,6 +20,7 @@ func CreateAllFundSeries(fundCode string) []*PrivateFund {
 	var funds []*PrivateFund
 
 	seriesList := FundtoSeriesMapper[fundCode]
+	fundMetaData := db.FundStorer[fundCode]
 	for _, series := range seriesList {
 
 		fundId := fundCode
@@ -25,7 +31,7 @@ func CreateAllFundSeries(fundCode string) []*PrivateFund {
 
 		series = strings.Replace(series, "_", " - ", 1)
 
-		fund := NewPrivateFund(fundId, series)
+		fund := NewPrivateFund(fundId, series, fundMetaData.FundName)
 		funds = append(funds, fund)
 	}
 
@@ -152,5 +158,17 @@ func lastDayOfTerm(term string, year int) string {
 
 	default:
 		return "" // safeguard
+	}
+}
+
+// GroupByFundNumber groups partner names by their base entity name.
+func GroupByFundNumber(funds []*PrivateFund) {
+	for _, fund := range funds {
+		loc := seriesRegex.FindStringIndex(strings.ToUpper(fund.fundName))
+		if loc != nil {
+			entity := strings.TrimSpace(fund.fundName[:loc[0]])
+			FundNumSeries[entity] = append(FundNumSeries[entity], fund)
+			fund.masterFundName = entity
+		}
 	}
 }
