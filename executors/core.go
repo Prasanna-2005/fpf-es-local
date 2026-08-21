@@ -453,3 +453,4 @@ type LiquidityData struct {
 }
 
 type InvLiquidityData map[string]*LiquidityData //Fundcode:Investor concentration percentage
+type FieldChangeAuditor map[string]bool
