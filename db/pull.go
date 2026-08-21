@@ -17,8 +17,6 @@ func PullFiling(filingID string, submissionTime time.Time) (*[]FileMapper, error
 	if err != nil {
 		return &mappings, fmt.Errorf("retrieving mappings attached to the filingId: " + err.Error())
 	}
-	fmt.Printf("Query: %s\n", query)
-	fmt.Printf("Args: filingID=%v, submissionTime=%v\n", filingID, submissionTime.UTC().Format("2006-01-02 15:04:05"))
 	if len(mappings) == 0 {
 		return &mappings, fmt.Errorf("no mappings attached to the filingId")
 	}
