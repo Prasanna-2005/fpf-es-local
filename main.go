@@ -78,11 +78,11 @@ func main() {
 
 			switch m.Series {
 			case "Private Investors":
-				go execute(m.FilingID, m.UserID, m.Timestamp)
+				go execute(m.FilingID, m.UserID, m.Timestamp, m.Replacement)
 			case "Investment Services":
-				go executeInvServ(m.FilingID, m.UserID, m.Timestamp)
+				go executeInvServ(m.FilingID, m.UserID, m.Timestamp, m.Replacement)
 			case "Curio":
-				go executeCurio(m.FilingID, m.UserID, m.Timestamp)
+				go executeCurio(m.FilingID, m.UserID, m.Timestamp, m.Replacement)
 			}
 
 		}
@@ -130,7 +130,10 @@ func prepareFilingPrivateInvestors(filingID string, submissionTime time.Time) (m
 			if err != nil {
 				logging.Error(fmt.Sprintf("Error in qno:%v", err.Error()))
 			}
-			fund.SetHolder(qno, mapping.FilingPath)
+			// fmt.Printf("filepath:%v active:%v\n", filepath.Base(mapping.FilingPath), mapping.Active)
+			if mapping.Active {
+				fund.SetHolder(qno, mapping.FilingPath)
+			}
 			pvtFunds = append(pvtFunds, fund)
 		}
 
@@ -242,7 +245,7 @@ func section1aData(clientCode, series string) *executors.RegInvAdv {
 }
 
 // execute acts as the core execution and triggering point for both extraction and computation.
-func execute(filingID string, userID string, submissionTime time.Time) {
+func execute(filingID string, userID string, submissionTime time.Time, replacement bool) {
 	sec1a := section1aData("FEG", "Private Investors")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, investorLiquidityPath, err := prepareFilingPrivateInvestors(filingID, submissionTime)
@@ -322,6 +325,9 @@ func execute(filingID string, userID string, submissionTime time.Time) {
 
 			setStaticDataPV(formData, fund.GetFundID())
 			executors.CollectAnswers(reflect.ValueOf(*formData), answersMapper)
+			if replacement {
+				answersMapper = executors.RefineAnsMapper(fund.FormDataAudit, answersMapper)
+			}
 			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper)
 			if err != nil {
 				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
@@ -339,7 +345,7 @@ func execute(filingID string, userID string, submissionTime time.Time) {
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
-func executeInvServ(filingID string, userID string, submissionTime time.Time) {
+func executeInvServ(filingID string, userID string, submissionTime time.Time, replacement bool) {
 	sec1a := section1aData("FEG", "Investment Services")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, investorLiquidityPath, unfndCmtsPath, err := prepareFilingInvestmentServices(filingID, submissionTime)
@@ -439,7 +445,9 @@ func executeInvServ(filingID string, userID string, submissionTime time.Time) {
 			}
 
 			executors.CollectAnswers(reflect.ValueOf(*formData), answersMapper)
-
+			if replacement {
+				answersMapper = executors.RefineAnsMapper(fund.FormDataAudit, answersMapper)
+			}
 			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper)
 
 			if err != nil {
@@ -505,7 +513,7 @@ func prepareFilingInvestmentServices(filingID string, submissionTime time.Time) 
 	return fundsMapper, investorLiquidityPath, unfndCmts, nil
 }
 
-func executeCurio(filingID string, userID string, submissionTime time.Time) {
+func executeCurio(filingID string, userID string, submissionTime time.Time, replacement bool) {
 	sec1a := section1aData("FEG", "Curio")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, investorLiquidityPath, _, err := prepareFilingCurio(filingID, submissionTime)
@@ -599,7 +607,9 @@ func executeCurio(filingID string, userID string, submissionTime time.Time) {
 			}
 
 			executors.CollectAnswers(reflect.ValueOf(*formData), answersMapper)
-
+			if replacement {
+				answersMapper = executors.RefineAnsMapper(fund.FormDataAudit, answersMapper)
+			}
 			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper)
 
 			if err != nil {
