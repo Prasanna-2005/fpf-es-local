@@ -416,6 +416,22 @@ Out:
 // WorkPaperData allocated to that particular fund
 func (F *PrivateFund) ExtractWorkPaperData() error {
 
+	tracker := executors.NewWPDataTracker(F)
+
+	// log the field-level diff no matter how the function returns
+	defer func() {
+		changes := tracker.Diff(F)
+		if len(changes) == 0 {
+			return
+		}
+		F.workPaperAudit = make(executors.FieldChangeAuditor, len(changes))
+		logging.Info(fmt.Sprintf("WorkPaperData changed for fund %s", F.fundID))
+		for _, c := range changes {
+			F.workPaperAudit[c.Entity] = true
+			fmt.Printf("%v: %q -> %q\n", c.Entity, c.Old, c.New)
+		}
+	}()
+
 	f3, err := excelize.OpenFile(F.holder.q3FilePath)
 	if err != nil {
 		return fmt.Errorf("opening q3 workpaper: " + err.Error())
