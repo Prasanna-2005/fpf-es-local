@@ -1,7 +1,9 @@
 package curio
 
 import (
+	"fmt"
 	"quantrium-tech/form_pf_extractor_service/executors"
+	"quantrium-tech/form_pf_extractor_service/logging"
 )
 
 // Compute act over a private fund to calculate all the required compuations and returns a 1bData since PV only uses it in computations
@@ -12,6 +14,23 @@ func (F *Fund) Compute() *executors.Form1bData {
 	pd := F.workPaperData.irr
 
 	data := executors.NewForm1bData()
+
+	tracker := executors.NewFormStateTracker(*data)
+	// log the field-level diff no matter how the function returns
+	defer func() {
+		changes := tracker.DiffForm(data)
+		if len(changes) == 0 {
+			logging.Info("No data changed")
+			return
+		}
+		F.workPaperAudit = make(executors.FieldChangeAuditor, len(changes))
+		logging.Info(fmt.Sprintf("WorkPaperData changed for fund %s", F.fundID))
+		for _, c := range changes {
+			F.FormDataAudit[c.Entity] = c.Change
+			fmt.Printf("%v: %q -> %q\n", c.Entity, c.Old, c.New)
+		}
+
+	}()
 
 	// workpaper data
 	data.GrossAsset = executors.CalculateGrossAssets(wd.totalAssets, wd.unfundedCommitments)
