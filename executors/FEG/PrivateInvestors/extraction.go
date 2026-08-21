@@ -428,7 +428,7 @@ func (F *PrivateFund) ExtractWorkPaperData() error {
 		logging.Info(fmt.Sprintf("WorkPaperData changed for fund %s", F.fundID))
 		for _, c := range changes {
 			F.workPaperAudit[c.Entity] = true
-			fmt.Printf("%v: %q -> %q\n", c.Entity, c.Old, c.New)
+			// fmt.Printf("%v: %q -> %q\n", c.Entity, c.Old, c.New)
 		}
 	}()
 

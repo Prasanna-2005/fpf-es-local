@@ -120,8 +120,8 @@ func RefineAnsMapper(changeAudit map[string]bool, ext map[[2]string]string) (ans
 			ansMapper[k] = v
 		}
 	}
-	for k, v := range changeAudit {
-		fmt.Printf("k:%v v:%v\n", k, v)
-	}
+	// for k, v := range changeAudit {
+	// 	fmt.Printf("k:%v v:%v\n", k, v)
+	// }
 	return ansMapper
 }

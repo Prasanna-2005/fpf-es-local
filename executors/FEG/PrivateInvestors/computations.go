@@ -44,7 +44,7 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 		logging.Info(fmt.Sprintf("WorkPaperData changed for fund %s", F.fundID))
 		for _, c := range changes {
 			F.FormDataAudit[c.Entity] = c.Change
-			fmt.Printf("%v: %q -> %q\n", c.Entity, c.Old, c.New)
+			// fmt.Printf("%v: %q -> %q\n", c.Entity, c.Old, c.New)
 		}
 	}()
 

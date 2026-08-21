@@ -23,7 +23,7 @@ func PullFiling(filingID string, submissionTime time.Time) (*[]FileMapper, error
 	for i := range mappings {
 		ts, _ := time.Parse("2006-01-02 15:04:05", mappings[i].CreatedAt)
 		// Mark active if submissionTime is after or equal to CreatedAt
-		fmt.Printf("subtime:%v mappingCreatedAt:%v condn:%v\n", submissionTime, mappings[i].CreatedAt, submissionTime.Before(ts) || submissionTime.Equal(ts))
+		// fmt.Printf("subtime:%v mappingCreatedAt:%v condn:%v\n", submissionTime, mappings[i].CreatedAt, submissionTime.Before(ts) || submissionTime.Equal(ts))
 
 		if submissionTime.Before(ts) || submissionTime.Equal(ts) {
 			mappings[i].Active = true
