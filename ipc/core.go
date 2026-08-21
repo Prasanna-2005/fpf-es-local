@@ -16,10 +16,11 @@ type ipcDaemon struct {
 
 // inboundMessage represents the structure that holds the information passed from the backend
 type inboundMessage struct {
-	FilingID  string    `json:"filing_id"`
-	UserID    string    `json:"user_id"`
-	Series    string    `json:"series"`
-	Timestamp time.Time `json:"timestamp"`
+	FilingID    string    `json:"filing_id"`
+	UserID      string    `json:"user_id"`
+	Series      string    `json:"series"`
+	Timestamp   time.Time `json:"timestamp"`
+	Replacement bool      `json:"replacement"`
 }
 
 var InboundChannel = make(chan inboundMessage)
