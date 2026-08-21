@@ -11,18 +11,26 @@ import (
 func PullFiling(filingID string, submissionTime time.Time) (*[]FileMapper, error) {
 
 	var mappings []FileMapper
-	query := fmt.Sprintf("SELECT fileName,filingPath, fundShortCode, quarterNo,period from %s WHERE filingId= ? AND createdAt>=?", config.TableCfg.MappingTable)
+	query := fmt.Sprintf("SELECT fileName,filingPath, fundShortCode, quarterNo,period,createdAt from %s WHERE filingId= ?", config.TableCfg.MappingTable)
 
-	err := db.Select(&mappings, query, filingID, submissionTime.UTC().Format("2006-01-02 15:04:05"))
+	err := db.Select(&mappings, query, filingID)
 	if err != nil {
 		return &mappings, fmt.Errorf("retrieving mappings attached to the filingId: " + err.Error())
 	}
 	if len(mappings) == 0 {
 		return &mappings, fmt.Errorf("no mappings attached to the filingId")
 	}
+	for i := range mappings {
+		ts, _ := time.Parse("2006-01-02 15:04:05", mappings[i].CreatedAt)
+		// Mark active if submissionTime is after or equal to CreatedAt
+		fmt.Printf("subtime:%v mappingCreatedAt:%v condn:%v\n", submissionTime, mappings[i].CreatedAt, submissionTime.Before(ts) || submissionTime.Equal(ts))
+
+		if submissionTime.Before(ts) || submissionTime.Equal(ts) {
+			mappings[i].Active = true
+		}
+	}
 
 	return &mappings, nil
-
 }
 
 func GetExisitingFunds(filingID string) (map[string]struct{}, error) {
