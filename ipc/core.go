@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"quantrium-tech/form_pf_extractor_service/config"
+	"time"
 )
 
 // ipcDaemon represents the core daemon that listens and forwards the inbound messages
@@ -15,9 +16,10 @@ type ipcDaemon struct {
 
 // inboundMessage represents the structure that holds the information passed from the backend
 type inboundMessage struct {
-	FilingID string `json:"filing_id"`
-	UserID   string `json:"user_id"`
-	Series   string `json:"series"`
+	FilingID  string    `json:"filing_id"`
+	UserID    string    `json:"user_id"`
+	Series    string    `json:"series"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 var InboundChannel = make(chan inboundMessage)
