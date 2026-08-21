@@ -4,19 +4,21 @@ import (
 	"fmt"
 	"quantrium-tech/form_pf_extractor_service/config"
 	"strings"
+	"time"
 )
 
 // PullFiling pulls all the mappings attached to the filingID and returns the list of reduced FileMapper
-func PullFiling(filingID string) (*[]FileMapper, error) {
+func PullFiling(filingID string, submissionTime time.Time) (*[]FileMapper, error) {
 
 	var mappings []FileMapper
-	query := fmt.Sprintf("SELECT fileName,filingPath, fundShortCode, quarterNo,period from %s WHERE filingId= ?", config.TableCfg.MappingTable)
+	query := fmt.Sprintf("SELECT fileName,filingPath, fundShortCode, quarterNo,period from %s WHERE filingId= ? AND createdAt>=?", config.TableCfg.MappingTable)
 
-	err := db.Select(&mappings, query, filingID)
+	err := db.Select(&mappings, query, filingID, submissionTime.UTC().Format("2006-01-02 15:04:05"))
 	if err != nil {
 		return &mappings, fmt.Errorf("retrieving mappings attached to the filingId: " + err.Error())
 	}
-
+	fmt.Printf("Query: %s\n", query)
+	fmt.Printf("Args: filingID=%v, submissionTime=%v\n", filingID, submissionTime.UTC().Format("2006-01-02 15:04:05"))
 	if len(mappings) == 0 {
 		return &mappings, fmt.Errorf("no mappings attached to the filingId")
 	}
