@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 )
 
 func init() {
@@ -77,11 +78,11 @@ func main() {
 
 			switch m.Series {
 			case "Private Investors":
-				go execute(m.FilingID, m.UserID)
+				go execute(m.FilingID, m.UserID, m.Timestamp)
 			case "Investment Services":
-				go executeInvServ(m.FilingID, m.UserID)
+				go executeInvServ(m.FilingID, m.UserID, m.Timestamp)
 			case "Curio":
-				go executeCurio(m.FilingID, m.UserID)
+				go executeCurio(m.FilingID, m.UserID, m.Timestamp)
 			}
 
 		}
@@ -92,13 +93,13 @@ func main() {
 
 // prepareFilingPrivateInvestors takes the filingID and prepares all the funds for the execution.
 // It retrieves the mappings from the db and map them to internal fund structures
-func prepareFilingPrivateInvestors(filingID string) (map[string][]*privateinvestors.PrivateFund, string, error) {
+func prepareFilingPrivateInvestors(filingID string, submissionTime time.Time) (map[string][]*privateinvestors.PrivateFund, string, error) {
 
 	fundsMapper := make(map[string][]*privateinvestors.PrivateFund)
 	var investorLiquidityPath string
 	var pvtFunds []*privateinvestors.PrivateFund
 
-	mappings, err := db.PullFiling(filingID)
+	mappings, err := db.PullFiling(filingID, submissionTime)
 	if err != nil {
 		return fundsMapper, investorLiquidityPath, fmt.Errorf("pulling filing details from DB: " + err.Error())
 	}
@@ -241,10 +242,10 @@ func section1aData(clientCode, series string) *executors.RegInvAdv {
 }
 
 // execute acts as the core execution and triggering point for both extraction and computation.
-func execute(filingID string, userID string) {
+func execute(filingID string, userID string, submissionTime time.Time) {
 	sec1a := section1aData("FEG", "Private Investors")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
-	mapper, investorLiquidityPath, err := prepareFilingPrivateInvestors(filingID)
+	mapper, investorLiquidityPath, err := prepareFilingPrivateInvestors(filingID, submissionTime)
 	if err != nil {
 		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
 		return
@@ -278,8 +279,8 @@ func execute(filingID string, userID string) {
 		for _, fund := range list {
 
 			if _, ok := existing[fund.GetFundID()]; ok {
-				logging.Info(fund.GetFundID() + " Already Populated in the Form Data. Skipping")
-				continue
+				logging.Info(fund.GetFundID() + " Already Populated in the Form Data. Replaced files are processing")
+				// continue
 			}
 
 			answersMapper := make(map[[2]string]string)
@@ -338,10 +339,10 @@ func execute(filingID string, userID string) {
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
-func executeInvServ(filingID string, userID string) {
+func executeInvServ(filingID string, userID string, submissionTime time.Time) {
 	sec1a := section1aData("FEG", "Investment Services")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
-	mapper, investorLiquidityPath, unfndCmtsPath, err := prepareFilingInvestmentServices(filingID)
+	mapper, investorLiquidityPath, unfndCmtsPath, err := prepareFilingInvestmentServices(filingID, submissionTime)
 	if err != nil {
 		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
 		return
@@ -460,13 +461,13 @@ func executeInvServ(filingID string, userID string) {
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
-func prepareFilingInvestmentServices(filingID string) (map[string][]*invesmentservices.Fund, string, string, error) {
+func prepareFilingInvestmentServices(filingID string, submissionTime time.Time) (map[string][]*invesmentservices.Fund, string, string, error) {
 
 	fundsMapper := make(map[string][]*invesmentservices.Fund)
 	var investorLiquidityPath string
 	var unfndCmts string
 
-	mappings, err := db.PullFiling(filingID)
+	mappings, err := db.PullFiling(filingID, submissionTime)
 	if err != nil {
 		return fundsMapper, investorLiquidityPath, unfndCmts, fmt.Errorf("pulling filing details from DB: " + err.Error())
 	}
@@ -504,10 +505,10 @@ func prepareFilingInvestmentServices(filingID string) (map[string][]*invesmentse
 	return fundsMapper, investorLiquidityPath, unfndCmts, nil
 }
 
-func executeCurio(filingID string, userID string) {
+func executeCurio(filingID string, userID string, submissionTime time.Time) {
 	sec1a := section1aData("FEG", "Curio")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
-	mapper, investorLiquidityPath, _, err := prepareFilingCurio(filingID)
+	mapper, investorLiquidityPath, _, err := prepareFilingCurio(filingID, submissionTime)
 	if err != nil {
 		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
 		return
@@ -621,13 +622,13 @@ func executeCurio(filingID string, userID string) {
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
-func prepareFilingCurio(filingID string) (map[string][]*curio.Fund, string, string, error) {
+func prepareFilingCurio(filingID string, submissionTime time.Time) (map[string][]*curio.Fund, string, string, error) {
 
 	fundsMapper := make(map[string][]*curio.Fund)
 	var investorLiquidityPath string
 	var unfndCmts string
 
-	mappings, err := db.PullFiling(filingID)
+	mappings, err := db.PullFiling(filingID, submissionTime)
 	if err != nil {
 		return fundsMapper, investorLiquidityPath, unfndCmts, fmt.Errorf("pulling filing details from DB: " + err.Error())
 	}
