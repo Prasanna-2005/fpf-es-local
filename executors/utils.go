@@ -1,8 +1,10 @@
 package executors
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/binary"
+	"encoding/gob"
 	"fmt"
 	"math"
 	"reflect"
@@ -151,4 +153,70 @@ func RKType3Value(cell structure.CellData) (*string, bool) {
 		}
 	}
 	return nil, false
+}
+
+// DeepCopy clones a struct by value using gob encode/decode.
+// Safe for exported fields; unexported fields are silently skipped by gob.
+func DeepCopy(src, dst interface{}) error {
+	var buf bytes.Buffer
+	if err := gob.NewEncoder(&buf).Encode(src); err != nil {
+		return err
+	}
+	return gob.NewDecoder(&buf).Decode(dst)
+}
+
+// IterateStruct flattens a struct (any depth) into dotted paths -> reflect.Value.
+func IterateStruct(input interface{}) map[string]reflect.Value {
+	result := make(map[string]reflect.Value)
+
+	val := reflect.ValueOf(input)
+	if val.Kind() == reflect.Ptr {
+		if val.IsNil() {
+			return result
+		}
+		val = val.Elem()
+	}
+	if val.Kind() != reflect.Struct {
+		return result
+	}
+
+	typ := val.Type()
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		name := typ.Field(i).Name
+		if !field.CanInterface() {
+			continue
+		}
+
+		fv := field
+		if fv.Kind() == reflect.Ptr && !fv.IsNil() && fv.Elem().Kind() == reflect.Struct {
+			fv = fv.Elem()
+		}
+		if fv.Kind() == reflect.Struct {
+			for k, v := range IterateStruct(fv.Interface()) {
+				result[name+"."+k] = v
+			}
+			continue
+		}
+		result[name] = field
+	}
+	return result
+}
+
+// DiffStruct compares two flattened structs, returns changed field paths.
+func DiffStruct(oldStruct, newStruct interface{}) map[string]bool {
+	oldFields := IterateStruct(oldStruct)
+	newFields := IterateStruct(newStruct)
+	changed := make(map[string]bool)
+
+	for path, oldVal := range oldFields {
+		newVal, ok := newFields[path]
+		if !ok {
+			continue
+		}
+		if !oldVal.Equal(newVal) {
+			changed[path] = true
+		}
+	}
+	return changed
 }

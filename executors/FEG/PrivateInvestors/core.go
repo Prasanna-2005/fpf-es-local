@@ -14,11 +14,13 @@ type PrivateFund struct {
 	masterFundName string // master or parent fundname
 	workPaperData  WorkPaperData
 	holder         Holder
+	workPaperAudit map[string]bool
+	FormDataAudit  map[string]bool
 }
 
 // NewPrivateFund creates a new PrivateFund with the given fundId and series
 func NewPrivateFund(fundId string, series string, fundname string) *PrivateFund {
-	return &PrivateFund{fundID: fundId, series: series, fundName: fundname, workPaperData: WorkPaperData{fundPerformanceData: FundPerformanceData{}}}
+	return &PrivateFund{fundID: fundId, series: series, fundName: fundname, workPaperData: WorkPaperData{fundPerformanceData: FundPerformanceData{}}, workPaperAudit: make(map[string]bool), FormDataAudit: make(map[string]bool)}
 }
 
 func (F *PrivateFund) GetMasterName() string {

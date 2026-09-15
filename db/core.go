@@ -12,6 +12,8 @@ type FileMapper struct {
 	FundShortCode string  `db:"fundShortCode"`
 	QuarterNo     string  `db:"quarterNo"`
 	Period        *string `db:"period"`
+	CreatedAt     string  `db:"createdAt"`
+	Active        bool    `db:"-"`
 }
 
 // ExtractionEntity represents the structure of extraction table that stores the extracted Entity

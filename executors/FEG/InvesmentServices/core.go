@@ -7,11 +7,13 @@ import (
 )
 
 type Fund struct {
-	fundID        string
-	series        string
-	fundType      string
-	workPaperData WorkPaperData
-	holder        Holder
+	fundID         string
+	series         string
+	fundType       string
+	workPaperData  WorkPaperData
+	holder         Holder
+	workPaperAudit map[string]bool
+	FormDataAudit  map[string]bool
 }
 
 type Holder struct {

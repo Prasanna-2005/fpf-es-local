@@ -1,8 +1,10 @@
 package privateinvestors
 
 import (
+	"fmt"
 	"math"
 	"quantrium-tech/form_pf_extractor_service/executors"
+	"quantrium-tech/form_pf_extractor_service/logging"
 )
 
 // POF Specific Formulae
@@ -30,6 +32,21 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 	ld := F.workPaperData.liquidityData
 
 	data := executors.NewForm1bData()
+	tracker := executors.NewFormStateTracker(*data)
+	// log the field-level diff no matter how the function returns
+	defer func() {
+		changes := tracker.DiffForm(data)
+		if len(changes) == 0 {
+			logging.Info("No data changed")
+			return
+		}
+		F.workPaperAudit = make(executors.FieldChangeAuditor, len(changes))
+		logging.Info(fmt.Sprintf("WorkPaperData changed for fund %s", F.fundID))
+		for _, c := range changes {
+			F.FormDataAudit[c.Entity] = c.Change
+			// fmt.Printf("%v: %q -> %q\n", c.Entity, c.Old, c.New)
+		}
+	}()
 
 	// workpaper data
 	data.GrossAsset = executors.CalculateGrossAssets(wd.totalAssets, wd.unfundedCommitments)
@@ -65,7 +82,6 @@ func (F *PrivateFund) Compute() *executors.Form1bData {
 	// fund performance data
 	assignFundPerf(data, pd)
 	return data
-
 }
 
 func calculateQuarterPerformance(begBal, capCall, cashDistrib, netIncome, mgmtFee float64) (net, gross float64) {
