@@ -1,7 +1,6 @@
 package invesmentservices
 
 import (
-	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"reflect"
 )
@@ -20,25 +19,52 @@ type Holder struct {
 	tbFilePath          string
 	reportFilePath      string
 	capRegisterFilePath string
+	tbFileName          string
+	reportFileName      string
+	liquidityFileName   string
+	unfundedFileName    string
 }
 
 func NewFund(fundId string) *Fund {
-	return &Fund{fundID: fundId}
+	return &Fund{
+		fundID:        fundId,
+		FormDataAudit: make(map[string]bool),
+	}
 }
 
-func (F *Fund) SetHolder(FileType string, filePath string) {
+func (F *Fund) SetHolder(FileType string, filePath, fileName string) {
 
-	filePath = config.Cfg.StoragePath + filePath
+	filePath = executors.WithStoragePath(filePath)
 
 	switch FileType {
 	case "nav_tb":
 		F.holder.tbFilePath = filePath
+		F.holder.tbFileName = fileName
 	case "nav_report":
 		F.holder.reportFilePath = filePath
+		F.holder.reportFileName = fileName
 	case "capital_register":
 		F.holder.capRegisterFilePath = filePath
 	}
 
+}
+
+func (F *Fund) SetSharedSourceFiles(liquidityName, unfundedName string) {
+	F.holder.liquidityFileName = liquidityName
+	F.holder.unfundedFileName = unfundedName
+}
+
+func (F *Fund) SourceFiles(formLineNo string) []string {
+	if executors.IsLiquidityLine(formLineNo) {
+		return executors.UniqueFiles(F.holder.liquidityFileName)
+	}
+	if executors.IsBalanceLine(formLineNo, true) {
+		return executors.UniqueFiles(F.holder.tbFileName, F.holder.unfundedFileName)
+	}
+	if executors.Q17Term(formLineNo) != "" {
+		return executors.UniqueFiles(F.holder.reportFileName)
+	}
+	return nil
 }
 
 // GetFundID returns the fundID used internally

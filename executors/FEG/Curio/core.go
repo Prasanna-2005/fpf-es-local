@@ -1,7 +1,6 @@
 package curio
 
 import (
-	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"reflect"
 )
@@ -22,6 +21,9 @@ type Holder struct {
 	tbFilePath          string
 	reportFilePath      string
 	capRegisterFilePath map[string]string
+	tbFileName          string
+	liquidityFileName   string
+	capRegisterFileName map[string]string
 }
 
 // ExportWorkPaperData returns a mapped entityname to value mapper for further push
@@ -58,10 +60,12 @@ type IRR struct {
 
 func NewFund(fundId string) *Fund {
 	return &Fund{
-		fundID: fundId,
-		series: "Curio",
+		fundID:        fundId,
+		series:        "Curio",
+		FormDataAudit: make(map[string]bool),
 		holder: Holder{
-			capRegisterFilePath: make(map[string]string), // Initialize the map here
+			capRegisterFilePath: make(map[string]string),
+			capRegisterFileName: make(map[string]string),
 		},
 	}
 }
@@ -129,19 +133,45 @@ func (F *Fund) GetFundType() string {
 	return F.fundType
 }
 
-func (F *Fund) SetHolder(FileType string, filePath string, period *string) {
+func (F *Fund) SetHolder(FileType string, filePath string, period *string, fileName string) {
 
-	filePath = config.Cfg.StoragePath + filePath
+	filePath = executors.WithStoragePath(filePath)
 
 	switch FileType {
 	case "nav_tb":
 		F.holder.tbFilePath = filePath
+		F.holder.tbFileName = fileName
 	case "nav_report":
 		F.holder.reportFilePath = filePath
 	case "capital_register":
 		if period != nil {
+			if F.holder.capRegisterFileName == nil {
+				F.holder.capRegisterFileName = make(map[string]string)
+			}
 			F.holder.capRegisterFilePath[*period] = filePath
+			F.holder.capRegisterFileName[*period] = fileName
 		}
 	}
 
+}
+
+func (F *Fund) SetSharedSourceFiles(liquidityName, _ string) {
+	F.holder.liquidityFileName = liquidityName
+}
+
+func (F *Fund) SourceFiles(formLineNo string) []string {
+	if executors.IsLiquidityLine(formLineNo) {
+		return executors.UniqueFiles(F.holder.liquidityFileName)
+	}
+	if executors.IsBalanceLine(formLineNo, false) || formLineNo == "14_assets_level1" || formLineNo == "14_assets_level2" {
+		return executors.UniqueFiles(
+			F.holder.tbFileName,
+			F.holder.capRegisterFileName["september"],
+			F.holder.capRegisterFileName["third"],
+		)
+	}
+	if term := executors.Q17Term(formLineNo); term != "" {
+		return executors.UniqueFiles(F.holder.capRegisterFileName[term])
+	}
+	return nil
 }

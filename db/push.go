@@ -1,12 +1,18 @@
 package db
 
 import (
+	"encoding/json"
 	"fmt"
 	"quantrium-tech/form_pf_extractor_service/config"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 )
+
+// SourceResolver maps a form line to the files that produced its extracted value.
+type SourceResolver interface {
+	SourceFiles(formLineNo string) []string
+}
 
 // PushEntities takes the entity-value mapped data and does a batched query to push the extracted entities.
 func PushEntities(filingId string, fundCode string, userId string, data map[string]string) error {
@@ -39,8 +45,9 @@ func PushEntities(filingId string, fundCode string, userId string, data map[stri
 	return nil
 }
 
-// PushFormData takes the tagged-value mapped data and does a batched query to push the form data
-func PushFormData(filingId string, fundCode string, userId string, formdata map[[2]string]string) error {
+// PushFormData takes the tagged-value mapped data and does a batched query to push the form data.
+// resolver is optional; when set, each row stores the source file names for that form line.
+func PushFormData(filingId string, fundCode string, userId string, formdata map[[2]string]string, resolver SourceResolver) error {
 	fundId := FundCodeMapper[fundCode]
 	loc, _ := time.LoadLocation("America/New_York")
 
@@ -49,17 +56,16 @@ func PushFormData(filingId string, fundCode string, userId string, formdata map[
 	var lineNos []string
 
 	for key, value := range formdata {
-		// Populate batch for NamedExec
 		batch = append(batch, FormData{
-			FilingId:   filingId,
-			FegFundId:  fundId,
-			FieldNo:    key[0],
-			FormLineNo: key[1],
-			Value:      value,
-			CreatedAt:  time.Now().In(loc),
-			CreatedBy:  userId,
+			FilingId:    filingId,
+			FegFundId:   fundId,
+			FieldNo:     key[0],
+			FormLineNo:  key[1],
+			Value:       value,
+			CreatedAt:   time.Now().In(loc),
+			CreatedBy:   userId,
+			SourceFiles: encodeSourceFiles(resolveSourceFiles(resolver, key[1])),
 		})
-		// Collect slices for the UPDATE IN clause
 		fieldNos = append(fieldNos, key[0])
 		lineNos = append(lineNos, key[1])
 	}
@@ -89,8 +95,8 @@ func PushFormData(filingId string, fundCode string, userId string, formdata map[
 
 	//batch insert using NamedExec for the struct slice
 	insertQuery := fmt.Sprintf(`
-		INSERT INTO %s (filingId, fundSeriesId, fieldNo, formLineNo, value, createdAt, createdBy, isCurrentValue) 
-		VALUES (:filingId, :fundSeriesId, :fieldNo, :formLineNo, :value, :createdAt, :createdBy, 1)`,
+		INSERT INTO %s (filingId, fundSeriesId, fieldNo, formLineNo, value, sourceFiles, createdAt, createdBy, isCurrentValue) 
+		VALUES (:filingId, :fundSeriesId, :fieldNo, :formLineNo, :value, :sourceFiles, :createdAt, :createdBy, 1)`,
 		config.TableCfg.FormDataTable)
 
 	_, err = db.NamedExec(insertQuery, batch)
@@ -99,6 +105,24 @@ func PushFormData(filingId string, fundCode string, userId string, formdata map[
 	}
 
 	return nil
+}
+
+func resolveSourceFiles(resolver SourceResolver, formLineNo string) []string {
+	if resolver == nil {
+		return nil
+	}
+	return resolver.SourceFiles(formLineNo)
+}
+
+func encodeSourceFiles(names []string) string {
+	if names == nil {
+		names = []string{}
+	}
+	raw, err := json.Marshal(names)
+	if err != nil {
+		return "[]"
+	}
+	return string(raw)
 }
 
 // func PushFormData(filingId string, fundCode string, userId string, formdata map[[2]string]string) error {

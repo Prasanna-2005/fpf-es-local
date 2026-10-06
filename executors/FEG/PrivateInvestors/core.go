@@ -1,7 +1,6 @@
 package privateinvestors
 
 import (
-	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/executors"
 	"reflect"
 )
@@ -27,18 +26,21 @@ func (F *PrivateFund) GetMasterName() string {
 	return F.masterFundName
 }
 
-// SetHolder takes up a quarterNo and filePath and sets them in the file holder of the fund
-func (F *PrivateFund) SetHolder(quarterNo int, filePath string) {
+// SetHolder takes up a quarterNo, filePath and display fileName and sets them in the file holder of the fund
+func (F *PrivateFund) SetHolder(quarterNo int, filePath, fileName string) {
 
-	filePath = config.Cfg.StoragePath + filePath
+	filePath = executors.WithStoragePath(filePath)
 
 	switch quarterNo {
 	case 1:
 		F.holder.q1FilePath = filePath
+		F.holder.q1FileName = fileName
 	case 2:
 		F.holder.q2FilePath = filePath
+		F.holder.q2FileName = fileName
 	case 3:
 		F.holder.q3FilePath = filePath
+		F.holder.q3FileName = fileName
 	}
 
 }
@@ -47,6 +49,34 @@ func (F *PrivateFund) CopyHolder(partnerFund *PrivateFund) {
 	partnerFund.holder.q1FilePath = F.holder.q1FilePath
 	partnerFund.holder.q2FilePath = F.holder.q2FilePath
 	partnerFund.holder.q3FilePath = F.holder.q3FilePath
+	partnerFund.holder.q1FileName = F.holder.q1FileName
+	partnerFund.holder.q2FileName = F.holder.q2FileName
+	partnerFund.holder.q3FileName = F.holder.q3FileName
+	partnerFund.holder.liquidityFileName = F.holder.liquidityFileName
+}
+
+func (F *PrivateFund) SetSharedSourceFiles(liquidityName, _ string) {
+	F.holder.liquidityFileName = liquidityName
+}
+
+// SourceFiles returns the file names that produced one form line for this fund.
+func (F *PrivateFund) SourceFiles(formLineNo string) []string {
+	if executors.IsLiquidityLine(formLineNo) {
+		return executors.UniqueFiles(F.holder.liquidityFileName)
+	}
+	if executors.IsBalanceLine(formLineNo, false) {
+		return executors.UniqueFiles(F.holder.q3FileName)
+	}
+	switch executors.Q17Term(formLineNo) {
+	case "first":
+		return executors.UniqueFiles(F.holder.q1FileName)
+	case "second":
+		return executors.UniqueFiles(F.holder.q2FileName)
+	case "third":
+		return executors.UniqueFiles(F.holder.q3FileName)
+	default:
+		return nil
+	}
 }
 
 // GetFundID returns the fundID used internally
@@ -173,9 +203,13 @@ type QTDval struct {
 
 // Holder holds the path of the files needed for a extraction of a single Private Fund
 type Holder struct {
-	q1FilePath string
-	q2FilePath string
-	q3FilePath string
+	q1FilePath        string
+	q2FilePath        string
+	q3FilePath        string
+	q1FileName        string
+	q2FileName        string
+	q3FileName        string
+	liquidityFileName string
 }
 
 // liquidityDataHolder represents the map that holds the liquidityData for the reference fund

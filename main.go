@@ -93,21 +93,23 @@ func main() {
 
 // prepareFilingPrivateInvestors takes the filingID and prepares all the funds for the execution.
 // It retrieves the mappings from the db and map them to internal fund structures
-func prepareFilingPrivateInvestors(filingID string, submissionTime time.Time) (map[string][]*privateinvestors.PrivateFund, string, error) {
+func prepareFilingPrivateInvestors(filingID string, submissionTime time.Time) (map[string][]*privateinvestors.PrivateFund, string, string, error) {
 
 	fundsMapper := make(map[string][]*privateinvestors.PrivateFund)
 	var investorLiquidityPath string
+	var investorLiquidityName string
 	var pvtFunds []*privateinvestors.PrivateFund
 
 	mappings, err := db.PullFiling(filingID, submissionTime)
 	if err != nil {
-		return fundsMapper, investorLiquidityPath, fmt.Errorf("pulling filing details from DB: " + err.Error())
+		return fundsMapper, investorLiquidityPath, investorLiquidityName, fmt.Errorf("pulling filing details from DB: " + err.Error())
 	}
 
 	for _, mapping := range *mappings {
 
 		if mapping.FundShortCode == "Q15_Q16" {
 			investorLiquidityPath = os.Getenv("STORAGE_PATH") + mapping.FilingPath
+			investorLiquidityName = mapping.Filename
 			continue
 		}
 
@@ -132,7 +134,7 @@ func prepareFilingPrivateInvestors(filingID string, submissionTime time.Time) (m
 			}
 			// fmt.Printf("filepath:%v active:%v\n", filepath.Base(mapping.FilingPath), mapping.Active)
 			if mapping.Active {
-				fund.SetHolder(qno, mapping.FilingPath)
+				fund.SetHolder(qno, mapping.FilingPath, mapping.Filename)
 			}
 			pvtFunds = append(pvtFunds, fund)
 		}
@@ -140,7 +142,7 @@ func prepareFilingPrivateInvestors(filingID string, submissionTime time.Time) (m
 	}
 	privateinvestors.GroupByFundNumber(pvtFunds)
 
-	return fundsMapper, investorLiquidityPath, nil
+	return fundsMapper, investorLiquidityPath, investorLiquidityName, nil
 }
 
 // setStaticDataPV sets the static information to the form1bData
@@ -187,7 +189,7 @@ func setStaticFunds(filingID, userID string) error {
 	staticFundData, staticFundObj := invesmentservices.StaticFunds()
 	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
-	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
+	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper, nil)
 	if err != nil {
 		logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 		return err
@@ -200,13 +202,13 @@ func setStaticFunds(filingID, userID string) error {
 
 }
 
-func setStaticCurioFunds(filingID, userID string, liqudityHolder executors.InvLiquidityData) error {
+func setStaticCurioFunds(filingID, userID string, liqudityHolder executors.InvLiquidityData, liquidityName string) error {
 	answersMapper := make(map[[2]string]string)
 	//CURSLP static funds
 	staticFundData, staticFundObj := curio.StaticFunds("CURSLP")
 	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
-	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
+	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper, nil)
 	if err != nil {
 		logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 		return err
@@ -225,7 +227,8 @@ func setStaticCurioFunds(filingID, userID string, liqudityHolder executors.InvLi
 	staticFundData = staticFundObj.Compute()
 	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
-	err = db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper)
+	staticFundObj.SetSharedSourceFiles(liquidityName, "")
+	err = db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper, staticFundObj)
 	if err != nil {
 		logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 		return err
@@ -248,7 +251,7 @@ func section1aData(clientCode, series string) *executors.RegInvAdv {
 func execute(filingID string, userID string, submissionTime time.Time, replacement bool) {
 	sec1a := section1aData("FEG", "Private Investors")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
-	mapper, investorLiquidityPath, err := prepareFilingPrivateInvestors(filingID, submissionTime)
+	mapper, investorLiquidityPath, liquidityName, err := prepareFilingPrivateInvestors(filingID, submissionTime)
 	if err != nil {
 		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
 		return
@@ -293,6 +296,7 @@ func execute(filingID string, userID string, submissionTime time.Time, replaceme
 			} else {
 				logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
 			}
+			fund.SetSharedSourceFiles(liquidityName, "")
 
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractWorkPaperData()
@@ -328,7 +332,7 @@ func execute(filingID string, userID string, submissionTime time.Time, replaceme
 			if replacement {
 				answersMapper = executors.RefineAnsMapper(fund.FormDataAudit, answersMapper)
 			}
-			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper)
+			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper, fund)
 			if err != nil {
 				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
 			}
@@ -348,7 +352,7 @@ func execute(filingID string, userID string, submissionTime time.Time, replaceme
 func executeInvServ(filingID string, userID string, submissionTime time.Time, replacement bool) {
 	sec1a := section1aData("FEG", "Investment Services")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
-	mapper, investorLiquidityPath, unfndCmtsPath, err := prepareFilingInvestmentServices(filingID, submissionTime)
+	mapper, investorLiquidityPath, unfndCmtsPath, liquidityName, unfundedName, err := prepareFilingInvestmentServices(filingID, submissionTime)
 	if err != nil {
 		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
 		return
@@ -401,6 +405,7 @@ func executeInvServ(filingID string, userID string, submissionTime time.Time, re
 			} else {
 				logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
 			}
+			fund.SetSharedSourceFiles(liquidityName, unfundedName)
 
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractTrialBalanceData()
@@ -448,7 +453,7 @@ func executeInvServ(filingID string, userID string, submissionTime time.Time, re
 			if replacement {
 				answersMapper = executors.RefineAnsMapper(fund.FormDataAudit, answersMapper)
 			}
-			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper)
+			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper, fund)
 
 			if err != nil {
 				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
@@ -469,25 +474,29 @@ func executeInvServ(filingID string, userID string, submissionTime time.Time, re
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
-func prepareFilingInvestmentServices(filingID string, submissionTime time.Time) (map[string][]*invesmentservices.Fund, string, string, error) {
+func prepareFilingInvestmentServices(filingID string, submissionTime time.Time) (map[string][]*invesmentservices.Fund, string, string, string, string, error) {
 
 	fundsMapper := make(map[string][]*invesmentservices.Fund)
 	var investorLiquidityPath string
 	var unfndCmts string
+	var liquidityName string
+	var unfundedName string
 
 	mappings, err := db.PullFiling(filingID, submissionTime)
 	if err != nil {
-		return fundsMapper, investorLiquidityPath, unfndCmts, fmt.Errorf("pulling filing details from DB: " + err.Error())
+		return fundsMapper, investorLiquidityPath, unfndCmts, liquidityName, unfundedName, fmt.Errorf("pulling filing details from DB: " + err.Error())
 	}
 
 	for _, mapping := range *mappings {
 
 		if mapping.FundShortCode == "Q15_Q16" {
 			investorLiquidityPath = os.Getenv("STORAGE_PATH") + mapping.FilingPath
+			liquidityName = mapping.Filename
 			continue
 		}
 		if mapping.FundShortCode == "UNFDCMTS" {
 			unfndCmts = os.Getenv("STORAGE_PATH") + mapping.FilingPath
+			unfundedName = mapping.Filename
 		}
 
 		// converted := invesmentservices.ShortCodeConvertor[mapping.FundShortCode]
@@ -505,18 +514,18 @@ func prepareFilingInvestmentServices(filingID string, submissionTime time.Time) 
 		fundsList := fundsMapper[mapping.FundShortCode]
 
 		for _, fund := range fundsList {
-			fund.SetHolder(mapping.QuarterNo, mapping.FilingPath)
+			fund.SetHolder(mapping.QuarterNo, mapping.FilingPath, mapping.Filename)
 		}
 
 	}
 
-	return fundsMapper, investorLiquidityPath, unfndCmts, nil
+	return fundsMapper, investorLiquidityPath, unfndCmts, liquidityName, unfundedName, nil
 }
 
 func executeCurio(filingID string, userID string, submissionTime time.Time, replacement bool) {
 	sec1a := section1aData("FEG", "Curio")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
-	mapper, investorLiquidityPath, _, err := prepareFilingCurio(filingID, submissionTime)
+	mapper, investorLiquidityPath, _, liquidityName, err := prepareFilingCurio(filingID, submissionTime)
 	if err != nil {
 		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
 		return
@@ -563,6 +572,7 @@ func executeCurio(filingID string, userID string, submissionTime time.Time, repl
 			} else {
 				logging.Warn("Liquidity Data not available for the Fund: " + fund.GetFundID())
 			}
+			fund.SetSharedSourceFiles(liquidityName, "")
 
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractTrialBalanceData()
@@ -610,7 +620,7 @@ func executeCurio(filingID string, userID string, submissionTime time.Time, repl
 			if replacement {
 				answersMapper = executors.RefineAnsMapper(fund.FormDataAudit, answersMapper)
 			}
-			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper)
+			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper, fund)
 
 			if err != nil {
 				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
@@ -622,7 +632,7 @@ func executeCurio(filingID string, userID string, submissionTime time.Time, repl
 
 		}
 	}
-	err = setStaticCurioFunds(filingID, userID, liqudityHolder)
+	err = setStaticCurioFunds(filingID, userID, liqudityHolder, liquidityName)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Static funds setting error:%v", err.Error()))
 	}
@@ -632,21 +642,23 @@ func executeCurio(filingID string, userID string, submissionTime time.Time, repl
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
-func prepareFilingCurio(filingID string, submissionTime time.Time) (map[string][]*curio.Fund, string, string, error) {
+func prepareFilingCurio(filingID string, submissionTime time.Time) (map[string][]*curio.Fund, string, string, string, error) {
 
 	fundsMapper := make(map[string][]*curio.Fund)
 	var investorLiquidityPath string
 	var unfndCmts string
+	var liquidityName string
 
 	mappings, err := db.PullFiling(filingID, submissionTime)
 	if err != nil {
-		return fundsMapper, investorLiquidityPath, unfndCmts, fmt.Errorf("pulling filing details from DB: " + err.Error())
+		return fundsMapper, investorLiquidityPath, unfndCmts, liquidityName, fmt.Errorf("pulling filing details from DB: " + err.Error())
 	}
 
 	for _, mapping := range *mappings {
 
 		if mapping.FundShortCode == "Q15_Q16" {
 			investorLiquidityPath = os.Getenv("STORAGE_PATH") + mapping.FilingPath
+			liquidityName = mapping.Filename
 			continue
 		}
 		if mapping.FundShortCode == "UNFDCMTS" {
@@ -659,7 +671,7 @@ func prepareFilingCurio(filingID string, submissionTime time.Time) (map[string][
 		fundsList := fundsMapper[mapping.FundShortCode]
 
 		for _, fund := range fundsList {
-			fund.SetHolder(mapping.QuarterNo, mapping.FilingPath, mapping.Period)
+			fund.SetHolder(mapping.QuarterNo, mapping.FilingPath, mapping.Period, mapping.Filename)
 			if mapping.QuarterNo == "capital_register" && mapping.Period == nil {
 				logging.Error(fmt.Sprintf("No period present for capital register:%v", mapping.Filename))
 				logging.Error(fmt.Sprintf("Above capital register's filing path:%v", mapping.FilingPath))
@@ -668,5 +680,5 @@ func prepareFilingCurio(filingID string, submissionTime time.Time) (map[string][
 
 	}
 
-	return fundsMapper, investorLiquidityPath, unfndCmts, nil
+	return fundsMapper, investorLiquidityPath, unfndCmts, liquidityName, nil
 }

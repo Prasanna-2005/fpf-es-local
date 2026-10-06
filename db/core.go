@@ -39,16 +39,17 @@ type FundInfo struct {
 
 // FormData represents the structure of form_data table that stores the answers/form data from the computations
 type FormData struct {
-	FilingId   string       `db:"filingId"`
-	FegFundId  string       `db:"fundSeriesId"`
-	FieldNo    string       `db:"fieldNo"`
-	FormLineNo string       `db:"formLineNo"`
-	Value      string       `db:"value"`
-	Date       sql.NullTime `db:"date"`
-	CreatedAt  time.Time    `db:"createdAt"`
-	CreatedBy  string       `db:"createdBy"`
-	UpdatedAt  time.Time    `db:"updatedAt"`
-	UpdatedBy  string       `db:"updatedBy"`
+	FilingId    string       `db:"filingId"`
+	FegFundId   string       `db:"fundSeriesId"`
+	FieldNo     string       `db:"fieldNo"`
+	FormLineNo  string       `db:"formLineNo"`
+	Value       string       `db:"value"`
+	Date        sql.NullTime `db:"date"`
+	CreatedAt   time.Time    `db:"createdAt"`
+	CreatedBy   string       `db:"createdBy"`
+	UpdatedAt   time.Time    `db:"updatedAt"`
+	UpdatedBy   string       `db:"updatedBy"`
+	SourceFiles string       `db:"sourceFiles"`
 }
 
 var FundStorer = make(map[string]FundInfo)
