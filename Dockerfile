@@ -14,14 +14,15 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o bin/form-pf-extractor-service .
 
 # Runtime Stage
 
-FROM alpine:3.18 As runner
+FROM python:3.11-slim-bookworm AS runner
 
-
-RUN apk add -U tzdata 
 ENV TZ=Asia/Kolkata
 
-RUN adduser -D -g '' formpf \
- && mkdir -p $STORAGE_PATH /var/log/form-pf
+RUN apt-get update \
+ && apt-get install --no-install-recommends -y tzdata \
+ && rm -rf /var/lib/apt/lists/* \
+ && useradd -r formpf \
+ && mkdir -p /var/log/form-pf
 
 WORKDIR /app
 
