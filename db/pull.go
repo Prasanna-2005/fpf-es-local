@@ -7,11 +7,17 @@ import (
 	"time"
 )
 
-// PullFiling pulls all the mappings attached to the filingID and returns the list of reduced FileMapper
+// PullFiling returns the current file for each slot on this filing.
+// isCurrent is set by the backend: the latest upload in a short-code and
+// quarter group is current, and the file it replaced is not. Ordering by
+// createdAt means a legacy group that still has more than one current row
+// applies the newest path last.
+// Active marks rows created at or after this submit, so Private Investors
+// can attach only the files from this upload.
 func PullFiling(filingID string, submissionTime time.Time) (*[]FileMapper, error) {
 
 	var mappings []FileMapper
-	query := fmt.Sprintf("SELECT fileName,filingPath, fundShortCode, quarterNo,period,createdAt from %s WHERE filingId= ?", config.TableCfg.MappingTable)
+	query := fmt.Sprintf("SELECT fileName, filingPath, fundShortCode, quarterNo, period, createdAt FROM %s WHERE filingId = ? AND isCurrent = 1 ORDER BY createdAt ASC", config.TableCfg.MappingTable)
 
 	err := db.Select(&mappings, query, filingID)
 	if err != nil {
@@ -22,9 +28,6 @@ func PullFiling(filingID string, submissionTime time.Time) (*[]FileMapper, error
 	}
 	for i := range mappings {
 		ts, _ := time.Parse("2006-01-02 15:04:05", mappings[i].CreatedAt)
-		// Mark active if submissionTime is after or equal to CreatedAt
-		// fmt.Printf("subtime:%v mappingCreatedAt:%v condn:%v\n", submissionTime, mappings[i].CreatedAt, submissionTime.Before(ts) || submissionTime.Equal(ts))
-
 		if submissionTime.Before(ts) || submissionTime.Equal(ts) {
 			mappings[i].Active = true
 		}
