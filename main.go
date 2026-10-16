@@ -130,7 +130,7 @@ func prepareFilingPrivateInvestors(filingID string, submissionTime time.Time) (m
 		for _, fund := range fundsList {
 			qno, err := strconv.Atoi(mapping.QuarterNo)
 			if err != nil {
-				logging.Error(fmt.Sprintf("Error in qno:%v", err.Error()))
+				logging.Error(fmt.Sprintf("PullFiling quarter: filing=%s file=%s quarter=%s: %v", filingID, mapping.Filename, mapping.QuarterNo, err))
 			}
 			// fmt.Printf("filepath:%v active:%v\n", filepath.Base(mapping.FilingPath), mapping.Active)
 			if mapping.Active {
@@ -191,7 +191,7 @@ func setStaticFunds(filingID, userID string) error {
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
 	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper, nil)
 	if err != nil {
-		logging.Error("Error in Pushing to Form Data Table: " + err.Error())
+		logging.Error(fmt.Sprintf("Error in Pushing to Form Data Table: user_id=%s filing=%s: %v", userID, filingID, err))
 		return err
 	}
 
@@ -210,7 +210,7 @@ func setStaticCurioFunds(filingID, userID string, liqudityHolder executors.InvLi
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
 	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper, nil)
 	if err != nil {
-		logging.Error("Error in Pushing to Form Data Table: " + err.Error())
+		logging.Error(fmt.Sprintf("Error in Pushing to Form Data Table: user_id=%s filing=%s: %v", userID, filingID, err))
 		return err
 	}
 	logging.Info("Form Data Entries are Pushed to the DB")
@@ -230,7 +230,7 @@ func setStaticCurioFunds(filingID, userID string, liqudityHolder executors.InvLi
 	staticFundObj.SetSharedSourceFiles(liquidityName, "")
 	err = db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper, staticFundObj)
 	if err != nil {
-		logging.Error("Error in Pushing to Form Data Table: " + err.Error())
+		logging.Error(fmt.Sprintf("Error in Pushing to Form Data Table: user_id=%s filing=%s: %v", userID, filingID, err))
 		return err
 	}
 
@@ -253,18 +253,18 @@ func execute(filingID string, userID string, submissionTime time.Time, replaceme
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, investorLiquidityPath, liquidityName, err := prepareFilingPrivateInvestors(filingID, submissionTime)
 	if err != nil {
-		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
+		logging.Error(fmt.Sprintf("Error in Preparing for the Filing: user_id=%s filing=%s: %v", userID, filingID, err))
 		return
 	}
 
 	if len(mapper) == 0 {
-		logging.Error("No Funds Mapped. Execution cannot be Started")
+		logging.Error(fmt.Sprintf("No Funds Mapped. Execution cannot be Started: user_id=%s filing=%s", userID, filingID))
 		return
 	}
 
 	existing, err := db.GetExisitingFunds(filingID)
 	if err != nil {
-		logging.Error("Error in Getting the Existing Funds in Form Data: " + err.Error())
+		logging.Error(fmt.Sprintf("Error in Getting the Existing Funds in Form Data: user_id=%s filing=%s: %v", userID, filingID, err))
 		return
 	}
 
@@ -273,7 +273,7 @@ func execute(filingID string, userID string, submissionTime time.Time, replaceme
 	if investorLiquidityPath != "" {
 		liqudityHolder, err = executors.ExtractInvestorLiquidity(investorLiquidityPath)
 		if err != nil {
-			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+			logging.Error(fmt.Sprintf("Error in Extracting Investor Liquidity: user_id=%s filing=%s: %v", userID, filingID, err))
 			return
 		}
 	}
@@ -301,7 +301,7 @@ func execute(filingID string, userID string, submissionTime time.Time, replaceme
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractWorkPaperData()
 			if err != nil {
-				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
+				logging.Error(fmt.Sprintf("Error in extracting for the Fund: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
 			if series, ok := privateinvestors.CombineFunds[fund.GetFundID()]; ok {
@@ -309,7 +309,7 @@ func execute(filingID string, userID string, submissionTime time.Time, replaceme
 				fund.CopyHolder(partnerFund)
 				err = partnerFund.ExtractWorkPaperData()
 				if err != nil {
-					logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
+					logging.Error(fmt.Sprintf("Error in extracting for the Fund: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 				}
 				fund.CombineData(partnerFund)
 
@@ -318,7 +318,7 @@ func execute(filingID string, userID string, submissionTime time.Time, replaceme
 			extractionData := fund.ExportWorkPaperData()
 			err = db.PushEntities(filingID, fund.GetFundID(), userID, extractionData)
 			if err != nil {
-				logging.Error("Error in Pushing to Extraction Table: " + err.Error())
+				logging.Error(fmt.Sprintf("Error in Pushing to Extraction Table: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 				continue
 			}
 			logging.Info("Entraction Entities are Pushed to the DB")
@@ -334,7 +334,7 @@ func execute(filingID string, userID string, submissionTime time.Time, replaceme
 			}
 			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper, fund)
 			if err != nil {
-				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
+				logging.Error(fmt.Sprintf("Error in Pushing to Form Data Table: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 			}
 			// sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
 			logging.Info("Form Data Entries are Pushed to the DB")
@@ -354,18 +354,18 @@ func executeInvServ(filingID string, userID string, submissionTime time.Time, re
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, investorLiquidityPath, unfndCmtsPath, liquidityName, unfundedName, err := prepareFilingInvestmentServices(filingID, submissionTime)
 	if err != nil {
-		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
+		logging.Error(fmt.Sprintf("Error in Preparing for the Filing: user_id=%s filing=%s: %v", userID, filingID, err))
 		return
 	}
 
 	if len(mapper) == 0 {
-		logging.Error("No Funds Mapped. Execution cannot be Started")
+		logging.Error(fmt.Sprintf("No Funds Mapped. Execution cannot be Started: user_id=%s filing=%s", userID, filingID))
 		return
 	}
 
 	existing, err := db.GetExisitingFunds(filingID)
 	if err != nil {
-		logging.Error("Error in Getting the Existing Funds in Form Data: " + err.Error())
+		logging.Error(fmt.Sprintf("Error in Getting the Existing Funds in Form Data: user_id=%s filing=%s: %v", userID, filingID, err))
 		return
 	}
 
@@ -375,14 +375,14 @@ func executeInvServ(filingID string, userID string, submissionTime time.Time, re
 	if investorLiquidityPath != "" {
 		liqudityHolder, err = executors.ExtractInvestorLiquidity(investorLiquidityPath)
 		if err != nil {
-			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+			logging.Error(fmt.Sprintf("Error in Extracting Investor Liquidity: user_id=%s filing=%s: %v", userID, filingID, err))
 			return
 		}
 	}
 	if unfndCmtsPath != "" {
 		unfndCmtHolder, err = invesmentservices.ExtractUnfundedCmts(unfndCmtsPath)
 		if err != nil {
-			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+			logging.Error(fmt.Sprintf("Error in Extracting Investor Liquidity: user_id=%s filing=%s: %v", userID, filingID, err))
 			return
 		}
 	}
@@ -410,12 +410,12 @@ func executeInvServ(filingID string, userID string, submissionTime time.Time, re
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractTrialBalanceData()
 			if err != nil {
-				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
+				logging.Error(fmt.Sprintf("Error in extracting for the Fund: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 
 			}
 			err = fund.ExtractQ17()
 			if err != nil {
-				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
+				logging.Error(fmt.Sprintf("Error in extracting for the Fund: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
@@ -429,7 +429,7 @@ func executeInvServ(filingID string, userID string, submissionTime time.Time, re
 			extractionData := fund.ExportWorkPaperData()
 			err = db.PushEntities(filingID, fund.GetFundID(), userID, extractionData)
 			if err != nil {
-				logging.Error("Error in Pushing to Extraction Table: " + err.Error())
+				logging.Error(fmt.Sprintf("Error in Pushing to Extraction Table: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 				continue
 			}
 			logging.Info("Entraction Entities are Pushed to the DB")
@@ -456,7 +456,7 @@ func executeInvServ(filingID string, userID string, submissionTime time.Time, re
 			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper, fund)
 
 			if err != nil {
-				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
+				logging.Error(fmt.Sprintf("Error in Pushing to Form Data Table: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 			}
 			// sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
 			logging.Info("Form Data Entries are Pushed to the DB")
@@ -466,7 +466,7 @@ func executeInvServ(filingID string, userID string, submissionTime time.Time, re
 	}
 	err = setStaticFunds(filingID, userID)
 	if err != nil {
-		logging.Error(fmt.Sprintf("Static funds setting error:%v", err.Error()))
+		logging.Error(fmt.Sprintf("Static funds setting error: user_id=%s filing=%s: %v", userID, filingID, err))
 	}
 	logging.Info("Succefully set static Funds")
 	sec1a.CalcAUM(filingID)
@@ -527,18 +527,18 @@ func executeCurio(filingID string, userID string, submissionTime time.Time, repl
 	logging.Info("Execution Started for the filing with ID: " + filingID)
 	mapper, investorLiquidityPath, _, liquidityName, err := prepareFilingCurio(filingID, submissionTime)
 	if err != nil {
-		logging.Error("Error in Preparing for the Filing with Id: " + filingID + ": " + err.Error())
+		logging.Error(fmt.Sprintf("Error in Preparing for the Filing: user_id=%s filing=%s: %v", userID, filingID, err))
 		return
 	}
 
 	if len(mapper) == 0 {
-		logging.Error("No Funds Mapped. Execution cannot be Started")
+		logging.Error(fmt.Sprintf("No Funds Mapped. Execution cannot be Started: user_id=%s filing=%s", userID, filingID))
 		return
 	}
 
 	existing, err := db.GetExisitingFunds(filingID)
 	if err != nil {
-		logging.Error("Error in Getting the Existing Funds in Form Data: " + err.Error())
+		logging.Error(fmt.Sprintf("Error in Getting the Existing Funds in Form Data: user_id=%s filing=%s: %v", userID, filingID, err))
 		return
 	}
 
@@ -548,7 +548,7 @@ func executeCurio(filingID string, userID string, submissionTime time.Time, repl
 	if investorLiquidityPath != "" {
 		liqudityHolder, err = executors.ExtractInvestorLiquidity(investorLiquidityPath)
 		if err != nil {
-			logging.Error("Error in Extracting Investor Liquidity: " + err.Error())
+			logging.Error(fmt.Sprintf("Error in Extracting Investor Liquidity: user_id=%s filing=%s: %v", userID, filingID, err))
 			return
 		}
 	}
@@ -577,23 +577,23 @@ func executeCurio(filingID string, userID string, submissionTime time.Time, repl
 			logging.Info("Extraction Started for the Fund: " + fund.GetFundID())
 			err := fund.ExtractTrialBalanceData()
 			if err != nil {
-				logging.Error("Error in extracting Trial Balance sheet for " + fund.GetFundID() + ": " + err.Error())
+				logging.Error(fmt.Sprintf("Error in extracting Trial Balance sheet: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 			}
 			err = fund.ExtractCapReg()
 			if err != nil {
-				logging.Error("Error in extracting capital register sheet for " + fund.GetFundID() + ": " + err.Error())
+				logging.Error(fmt.Sprintf("Error in extracting capital register sheet: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 			}
 
 			err = fund.ExtractFundPerformance()
 			if err != nil {
-				logging.Error("Error in extracting for the Fund: " + fund.GetFundID() + ": " + err.Error())
+				logging.Error(fmt.Sprintf("Error in extracting for the Fund: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 				continue
 			}
 			logging.Info("Extraction Completed for the Fund: " + fund.GetFundID())
 			extractionData := fund.ExportWorkPaperData()
 			err = db.PushEntities(filingID, fund.GetFundID(), userID, extractionData)
 			if err != nil {
-				logging.Error("Error in Pushing to Extraction Table: " + err.Error())
+				logging.Error(fmt.Sprintf("Error in Pushing to Extraction Table: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 				continue
 			}
 			logging.Info("Entraction Entities are Pushed to the DB")
@@ -623,7 +623,7 @@ func executeCurio(filingID string, userID string, submissionTime time.Time, repl
 			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper, fund)
 
 			if err != nil {
-				logging.Error("Error in Pushing to Form Data Table: " + err.Error())
+				logging.Error(fmt.Sprintf("Error in Pushing to Form Data Table: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 			}
 			// sec1a.CalcAUM(db.FundStorer[fund.GetFundID()].FundType, formData.NetAsset, formData.GrossAsset)
 			logging.Info("Form Data Entries are Pushed to the DB")
@@ -634,7 +634,7 @@ func executeCurio(filingID string, userID string, submissionTime time.Time, repl
 	}
 	err = setStaticCurioFunds(filingID, userID, liqudityHolder, liquidityName)
 	if err != nil {
-		logging.Error(fmt.Sprintf("Static funds setting error:%v", err.Error()))
+		logging.Error(fmt.Sprintf("Static funds setting error: user_id=%s filing=%s: %v", userID, filingID, err))
 	}
 	logging.Info("Succefully set static Funds")
 	sec1a.CalcAUM(filingID)
@@ -673,8 +673,7 @@ func prepareFilingCurio(filingID string, submissionTime time.Time) (map[string][
 		for _, fund := range fundsList {
 			fund.SetHolder(mapping.QuarterNo, mapping.FilingPath, mapping.Period, mapping.Filename)
 			if mapping.QuarterNo == "capital_register" && mapping.Period == nil {
-				logging.Error(fmt.Sprintf("No period present for capital register:%v", mapping.Filename))
-				logging.Error(fmt.Sprintf("Above capital register's filing path:%v", mapping.FilingPath))
+				logging.Error(fmt.Sprintf("No period present for capital register: filing=%s file=%s path=%s", filingID, mapping.Filename, mapping.FilingPath))
 			}
 		}
 

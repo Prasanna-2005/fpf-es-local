@@ -268,7 +268,7 @@ func (sec1a *RegInvAdv) HandleSection1A(filingID string, userID string, existing
 
 	// Push to database
 	if err := db.PushFormData(filingID, "SECTION-1A", userID, mapped1a, nil); err != nil {
-		logging.Error("Error in Pushing to Form 1a Data Table: " + err.Error())
+		logging.Error(fmt.Sprintf("Error in Pushing to Form 1a Data Table: user_id=%s filing=%s: %v", userID, filingID, err))
 		return err
 	}
 

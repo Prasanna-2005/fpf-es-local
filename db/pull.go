@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"quantrium-tech/form_pf_extractor_service/config"
+	"quantrium-tech/form_pf_extractor_service/logging"
 	"strings"
 	"time"
 )
@@ -27,7 +28,11 @@ func PullFiling(filingID string, submissionTime time.Time) (*[]FileMapper, error
 		return &mappings, fmt.Errorf("no mappings attached to the filingId")
 	}
 	for i := range mappings {
-		ts, _ := time.Parse("2006-01-02 15:04:05", mappings[i].CreatedAt)
+		ts, err := time.Parse("2006-01-02 15:04:05", mappings[i].CreatedAt)
+		if err != nil {
+			logging.Error(fmt.Sprintf("PullFiling: filing=%s file=%s invalid createdAt %q: %v", filingID, mappings[i].Filename, mappings[i].CreatedAt, err))
+			continue
+		}
 		if submissionTime.Before(ts) || submissionTime.Equal(ts) {
 			mappings[i].Active = true
 		}

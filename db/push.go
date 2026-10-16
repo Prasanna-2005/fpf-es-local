@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"quantrium-tech/form_pf_extractor_service/config"
+	"quantrium-tech/form_pf_extractor_service/logging"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -56,6 +57,11 @@ func PushFormData(filingId string, fundCode string, userId string, formdata map[
 	var lineNos []string
 
 	for key, value := range formdata {
+		sourceFiles, err := encodeSourceFiles(resolveSourceFiles(resolver, key[1]))
+		if err != nil {
+			logging.Error(fmt.Sprintf("PushFormData: user_id=%s filing=%s fund=%s line=%s: %v", userId, filingId, fundCode, key[1], err))
+			sourceFiles = "[]"
+		}
 		batch = append(batch, FormData{
 			FilingId:    filingId,
 			FegFundId:   fundId,
@@ -64,7 +70,7 @@ func PushFormData(filingId string, fundCode string, userId string, formdata map[
 			Value:       value,
 			CreatedAt:   time.Now().In(loc),
 			CreatedBy:   userId,
-			SourceFiles: encodeSourceFiles(resolveSourceFiles(resolver, key[1])),
+			SourceFiles: sourceFiles,
 		})
 		fieldNos = append(fieldNos, key[0])
 		lineNos = append(lineNos, key[1])
@@ -114,15 +120,15 @@ func resolveSourceFiles(resolver SourceResolver, formLineNo string) []string {
 	return resolver.SourceFiles(formLineNo)
 }
 
-func encodeSourceFiles(names []string) string {
+func encodeSourceFiles(names []string) (string, error) {
 	if names == nil {
 		names = []string{}
 	}
 	raw, err := json.Marshal(names)
 	if err != nil {
-		return "[]"
+		return "[]", err
 	}
-	return string(raw)
+	return string(raw), nil
 }
 
 // func PushFormData(filingId string, fundCode string, userId string, formdata map[[2]string]string) error {
