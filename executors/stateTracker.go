@@ -1,7 +1,6 @@
 package executors
 
 import (
-	"fmt"
 	"reflect"
 	"sync"
 )
@@ -104,24 +103,5 @@ func (f Form1bData) ExportFormData() (ansMapper map[string]string) {
 	for k, v := range entityValueMapper {
 		ansMapper[k[0]+"_quantrium_"+k[1]] = v
 	}
-	return ansMapper
-}
-
-func RefineAnsMapper(changeAudit map[string]bool, ext map[[2]string]string) (ansMapper map[[2]string]string) {
-	ansMapper = make(map[[2]string]string)
-	for k, v := range ext {
-		/***
-			Add to ansMapper if:
-			  key is NOT present in changeAudit (missing key), OR
-			  key IS present and its value is true
-			Skip only if key is present and its value is false
-		***/
-		if val, exists := changeAudit[k[0]+"_quantrium_"+k[1]]; !exists || val { // ideally the boolean is kept add to static data sec-1a
-			ansMapper[k] = v
-		}
-	}
-	// for k, v := range changeAudit {
-	// 	fmt.Printf("k:%v v:%v\n", k, v)
-	// }
 	return ansMapper
 }
