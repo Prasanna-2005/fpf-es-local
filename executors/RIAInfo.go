@@ -77,10 +77,10 @@ func (firm *RegInvAdv) NewfirmSign() RIAInfo {
 
 }
 
-func (firm *RegInvAdv) CalcAUM(filingID string) {
+func (firm *RegInvAdv) CalcAUM(filingID string, version int) {
 	// assets is map[string]map[string]map[string]float64
 	// Structure: [fundType][formLineNo][fieldNo]
-	assets, err := db.PullAssets(filingID)
+	assets, err := db.PullAssets(filingID, version)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Pulling assets error calc aum failed: %v", err))
 		return
@@ -240,12 +240,18 @@ func (firm *RegInvAdv) UpdateAUM() *Form1aData {
 	return form1a
 }
 
-func (sec1a *RegInvAdv) HandleSection1A(filingID string, userID string, existing map[string]struct{}) error {
+func (sec1a *RegInvAdv) HandleSection1A(filingID string, userID string, existing map[string]struct{}, targetVersion int) error {
 	var form1aData *Form1aData
-	//Determine which data computation to run
-	if _, ok := existing["SECTION-1A"]; ok {
-		logging.Info("Updating only AUM for q3 section-1a")
-		form1aData = sec1a.UpdateAUM()
+	// A new filing version needs the whole section. The question-3-only path
+	// is only for a same-version refresh of an already stored Section 1A.
+	fullSnapshot := targetVersion > 1
+	if !fullSnapshot {
+		if _, ok := existing["SECTION-1A"]; ok {
+			logging.Info("Updating only AUM for q3 section-1a")
+			form1aData = sec1a.UpdateAUM()
+		} else {
+			form1aData = sec1a.Compute()
+		}
 	} else {
 		form1aData = sec1a.Compute()
 	}
@@ -258,16 +264,18 @@ func (sec1a *RegInvAdv) HandleSection1A(filingID string, userID string, existing
 	// Map the data structure to the database-ready format
 	mapped1a := make(map[[2]string]string)
 	CollectAnswers(reflect.ValueOf(*form1aData), mapped1a)
-	if _, ok := existing["SECTION-1A"]; ok {
-		for key, _ := range mapped1a {
-			if len(key) > 0 && key[0] != "3" {
-				delete(mapped1a, key)
+	if !fullSnapshot {
+		if _, ok := existing["SECTION-1A"]; ok {
+			for key := range mapped1a {
+				if len(key) > 0 && key[0] != "3" {
+					delete(mapped1a, key)
+				}
 			}
 		}
 	}
 
 	// Push to database
-	if err := db.PushFormData(filingID, "SECTION-1A", userID, mapped1a, nil); err != nil {
+	if err := db.PushFormData(filingID, "SECTION-1A", userID, mapped1a, nil, targetVersion); err != nil {
 		logging.Error(fmt.Sprintf("Error in Pushing to Form 1a Data Table: user_id=%s filing=%s: %v", userID, filingID, err))
 		return err
 	}

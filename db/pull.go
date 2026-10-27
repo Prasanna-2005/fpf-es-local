@@ -3,9 +3,7 @@ package db
 import (
 	"fmt"
 	"quantrium-tech/form_pf_extractor_service/config"
-	"quantrium-tech/form_pf_extractor_service/logging"
 	"strings"
-	"time"
 )
 
 // PullFiling returns the current file for each slot on this filing.
@@ -13,12 +11,10 @@ import (
 // quarter group is current, and the file it replaced is not. Ordering by
 // createdAt means a legacy group that still has more than one current row
 // applies the newest path last.
-// Active marks rows created at or after this submit, so Private Investors
-// can attach only the files from this upload.
-func PullFiling(filingID string, submissionTime time.Time) (*[]FileMapper, error) {
+func PullFiling(filingID string) (*[]FileMapper, error) {
 
 	var mappings []FileMapper
-	query := fmt.Sprintf("SELECT fileName, filingPath, fundShortCode, quarterNo, period, createdAt FROM %s WHERE filingId = ? AND isCurrent = 1 ORDER BY createdAt ASC", config.TableCfg.MappingTable)
+	query := fmt.Sprintf("SELECT fileName, filingPath, fundShortCode, quarterNo, period FROM %s WHERE filingId = ? AND isCurrent = 1 ORDER BY createdAt ASC", config.TableCfg.MappingTable)
 
 	err := db.Select(&mappings, query, filingID)
 	if err != nil {
@@ -26,16 +22,6 @@ func PullFiling(filingID string, submissionTime time.Time) (*[]FileMapper, error
 	}
 	if len(mappings) == 0 {
 		return &mappings, fmt.Errorf("no mappings attached to the filingId")
-	}
-	for i := range mappings {
-		ts, err := time.Parse("2006-01-02 15:04:05", mappings[i].CreatedAt)
-		if err != nil {
-			logging.Error(fmt.Sprintf("PullFiling: filing=%s file=%s invalid createdAt %q: %v", filingID, mappings[i].Filename, mappings[i].CreatedAt, err))
-			continue
-		}
-		if submissionTime.Before(ts) || submissionTime.Equal(ts) {
-			mappings[i].Active = true
-		}
 	}
 
 	return &mappings, nil
@@ -102,7 +88,7 @@ type AUM struct {
 	Asset      float64 `db:"assets"` // Matches the 'AS total_value' in SQL
 }
 
-func PullAssets(filingID string) (map[string]map[string]map[string]float64, error) {
+func PullAssets(filingID string, version int) (map[string]map[string]map[string]float64, error) {
 	var rows []AUM
 	// Map structure: [FundType][LineNo][FieldNo]AssetValue
 	finalData := make(map[string]map[string]map[string]float64)
@@ -123,12 +109,13 @@ func PullAssets(filingID string) (map[string]map[string]map[string]float64, erro
             AND legacy.fieldNo IN ('8', '9') 
             AND legacy.formLineNo IN ('8', '9')
 			AND isCurrentValue=1
+			AND legacy.version = ?
         GROUP BY 
             funds.fundType, 
             legacy.formLineNo,
             legacy.fieldNo`
 
-	err := db.Select(&rows, query, filingID)
+	err := db.Select(&rows, query, filingID, version)
 	if err != nil {
 		return nil, fmt.Errorf("error retrieving detailed fund assets: %w", err)
 	}

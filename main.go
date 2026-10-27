@@ -16,7 +16,6 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
-	"time"
 )
 
 func init() {
@@ -78,11 +77,11 @@ func main() {
 
 			switch m.Series {
 			case "Private Investors":
-				go execute(m.FilingID, m.UserID, m.Timestamp)
+				go execute(m.FilingID, m.UserID)
 			case "Investment Services":
-				go executeInvServ(m.FilingID, m.UserID, m.Timestamp)
+				go executeInvServ(m.FilingID, m.UserID)
 			case "Curio":
-				go executeCurio(m.FilingID, m.UserID, m.Timestamp)
+				go executeCurio(m.FilingID, m.UserID)
 			}
 
 		}
@@ -93,14 +92,14 @@ func main() {
 
 // prepareFilingPrivateInvestors takes the filingID and prepares all the funds for the execution.
 // It retrieves the mappings from the db and map them to internal fund structures
-func prepareFilingPrivateInvestors(filingID string, submissionTime time.Time) (map[string][]*privateinvestors.PrivateFund, string, string, error) {
+func prepareFilingPrivateInvestors(filingID string) (map[string][]*privateinvestors.PrivateFund, string, string, error) {
 
 	fundsMapper := make(map[string][]*privateinvestors.PrivateFund)
 	var investorLiquidityPath string
 	var investorLiquidityName string
 	var pvtFunds []*privateinvestors.PrivateFund
 
-	mappings, err := db.PullFiling(filingID, submissionTime)
+	mappings, err := db.PullFiling(filingID)
 	if err != nil {
 		return fundsMapper, investorLiquidityPath, investorLiquidityName, fmt.Errorf("pulling filing details from DB: " + err.Error())
 	}
@@ -132,10 +131,7 @@ func prepareFilingPrivateInvestors(filingID string, submissionTime time.Time) (m
 			if err != nil {
 				logging.Error(fmt.Sprintf("PullFiling quarter: filing=%s file=%s quarter=%s: %v", filingID, mapping.Filename, mapping.QuarterNo, err))
 			}
-			// fmt.Printf("filepath:%v active:%v\n", filepath.Base(mapping.FilingPath), mapping.Active)
-			if mapping.Active {
-				fund.SetHolder(qno, mapping.FilingPath, mapping.Filename)
-			}
+			fund.SetHolder(qno, mapping.FilingPath, mapping.Filename)
 			pvtFunds = append(pvtFunds, fund)
 		}
 
@@ -184,12 +180,12 @@ func setQ24val(form1cdata *executors.Form1cData, fundId string) {
 
 }
 
-func setStaticFunds(filingID, userID string) error {
+func setStaticFunds(filingID, userID string, targetVersion int) error {
 	answersMapper := make(map[[2]string]string)
 	staticFundData, staticFundObj := invesmentservices.StaticFunds()
 	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
-	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper, nil)
+	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper, nil, targetVersion)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Error in Pushing to Form Data Table: user_id=%s filing=%s: %v", userID, filingID, err))
 		return err
@@ -202,13 +198,13 @@ func setStaticFunds(filingID, userID string) error {
 
 }
 
-func setStaticCurioFunds(filingID, userID string, liqudityHolder executors.InvLiquidityData, liquidityName string) error {
+func setStaticCurioFunds(filingID, userID string, liqudityHolder executors.InvLiquidityData, liquidityName string, targetVersion int) error {
 	answersMapper := make(map[[2]string]string)
 	//CURSLP static funds
 	staticFundData, staticFundObj := curio.StaticFunds("CURSLP")
 	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
-	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper, nil)
+	err := db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper, nil, targetVersion)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Error in Pushing to Form Data Table: user_id=%s filing=%s: %v", userID, filingID, err))
 		return err
@@ -228,7 +224,7 @@ func setStaticCurioFunds(filingID, userID string, liqudityHolder executors.InvLi
 	setStaticDataPV(staticFundData, staticFundObj.GetFundID())
 	executors.CollectAnswers(reflect.ValueOf(*staticFundData), answersMapper)
 	staticFundObj.SetSharedSourceFiles(liquidityName, "")
-	err = db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper, staticFundObj)
+	err = db.PushFormData(filingID, staticFundObj.GetFundID(), userID, answersMapper, staticFundObj, targetVersion)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Error in Pushing to Form Data Table: user_id=%s filing=%s: %v", userID, filingID, err))
 		return err
@@ -248,10 +244,10 @@ func section1aData(clientCode, series string) *executors.RegInvAdv {
 }
 
 // execute acts as the core execution and triggering point for both extraction and computation.
-func execute(filingID string, userID string, submissionTime time.Time) {
+func execute(filingID string, userID string) {
 	sec1a := section1aData("FEG", "Private Investors")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
-	mapper, investorLiquidityPath, liquidityName, err := prepareFilingPrivateInvestors(filingID, submissionTime)
+	mapper, investorLiquidityPath, liquidityName, err := prepareFilingPrivateInvestors(filingID)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Error in Preparing for the Filing: user_id=%s filing=%s: %v", userID, filingID, err))
 		return
@@ -267,6 +263,12 @@ func execute(filingID string, userID string, submissionTime time.Time) {
 		logging.Error(fmt.Sprintf("Error in Getting the Existing Funds in Form Data: user_id=%s filing=%s: %v", userID, filingID, err))
 		return
 	}
+	targetVersion, err := db.ResolveTargetVersion(filingID)
+	if err != nil {
+		logging.Error(fmt.Sprintf("Error resolving filing version: user_id=%s filing=%s: %v", userID, filingID, err))
+		return
+	}
+	logging.Info(fmt.Sprintf("Filing %s will be written as version %d", filingID, targetVersion))
 
 	liqudityHolder := make(executors.InvLiquidityData)
 
@@ -329,7 +331,7 @@ func execute(filingID string, userID string, submissionTime time.Time) {
 
 			setStaticDataPV(formData, fund.GetFundID())
 			executors.CollectAnswers(reflect.ValueOf(*formData), answersMapper)
-			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper, fund)
+			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper, fund, targetVersion)
 			if err != nil {
 				logging.Error(fmt.Sprintf("Error in Pushing to Form Data Table: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
 			}
@@ -341,15 +343,22 @@ func execute(filingID string, userID string, submissionTime time.Time) {
 		}
 
 	}
-	sec1a.CalcAUM(filingID)
-	sec1a.HandleSection1A(filingID, userID, existing)
+	sec1a.CalcAUM(filingID, targetVersion)
+	if err := sec1a.HandleSection1A(filingID, userID, existing, targetVersion); err != nil {
+		logging.Error(fmt.Sprintf("Section 1A push failed: user_id=%s filing=%s: %v", userID, filingID, err))
+		return
+	}
+	if err := db.CommitFilingVersion(filingID, targetVersion); err != nil {
+		logging.Error(fmt.Sprintf("Error committing filing version: user_id=%s filing=%s: %v", userID, filingID, err))
+		return
+	}
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
-func executeInvServ(filingID string, userID string, submissionTime time.Time) {
+func executeInvServ(filingID string, userID string) {
 	sec1a := section1aData("FEG", "Investment Services")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
-	mapper, investorLiquidityPath, unfndCmtsPath, liquidityName, unfundedName, err := prepareFilingInvestmentServices(filingID, submissionTime)
+	mapper, investorLiquidityPath, unfndCmtsPath, liquidityName, unfundedName, err := prepareFilingInvestmentServices(filingID)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Error in Preparing for the Filing: user_id=%s filing=%s: %v", userID, filingID, err))
 		return
@@ -365,6 +374,12 @@ func executeInvServ(filingID string, userID string, submissionTime time.Time) {
 		logging.Error(fmt.Sprintf("Error in Getting the Existing Funds in Form Data: user_id=%s filing=%s: %v", userID, filingID, err))
 		return
 	}
+	targetVersion, err := db.ResolveTargetVersion(filingID)
+	if err != nil {
+		logging.Error(fmt.Sprintf("Error resolving filing version: user_id=%s filing=%s: %v", userID, filingID, err))
+		return
+	}
+	logging.Info(fmt.Sprintf("Filing %s will be written as version %d", filingID, targetVersion))
 
 	liqudityHolder := make(executors.InvLiquidityData)
 	unfndCmtHolder := make(invesmentservices.UnfundedCommitmentsHolder)
@@ -447,7 +462,7 @@ func executeInvServ(filingID string, userID string, submissionTime time.Time) {
 			}
 
 			executors.CollectAnswers(reflect.ValueOf(*formData), answersMapper)
-			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper, fund)
+			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper, fund, targetVersion)
 
 			if err != nil {
 				logging.Error(fmt.Sprintf("Error in Pushing to Form Data Table: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
@@ -458,17 +473,24 @@ func executeInvServ(filingID string, userID string, submissionTime time.Time) {
 
 		}
 	}
-	err = setStaticFunds(filingID, userID)
+	err = setStaticFunds(filingID, userID, targetVersion)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Static funds setting error: user_id=%s filing=%s: %v", userID, filingID, err))
 	}
 	logging.Info("Succefully set static Funds")
-	sec1a.CalcAUM(filingID)
-	sec1a.HandleSection1A(filingID, userID, existing)
+	sec1a.CalcAUM(filingID, targetVersion)
+	if err := sec1a.HandleSection1A(filingID, userID, existing, targetVersion); err != nil {
+		logging.Error(fmt.Sprintf("Section 1A push failed: user_id=%s filing=%s: %v", userID, filingID, err))
+		return
+	}
+	if err := db.CommitFilingVersion(filingID, targetVersion); err != nil {
+		logging.Error(fmt.Sprintf("Error committing filing version: user_id=%s filing=%s: %v", userID, filingID, err))
+		return
+	}
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
-func prepareFilingInvestmentServices(filingID string, submissionTime time.Time) (map[string][]*invesmentservices.Fund, string, string, string, string, error) {
+func prepareFilingInvestmentServices(filingID string) (map[string][]*invesmentservices.Fund, string, string, string, string, error) {
 
 	fundsMapper := make(map[string][]*invesmentservices.Fund)
 	var investorLiquidityPath string
@@ -476,7 +498,7 @@ func prepareFilingInvestmentServices(filingID string, submissionTime time.Time) 
 	var liquidityName string
 	var unfundedName string
 
-	mappings, err := db.PullFiling(filingID, submissionTime)
+	mappings, err := db.PullFiling(filingID)
 	if err != nil {
 		return fundsMapper, investorLiquidityPath, unfndCmts, liquidityName, unfundedName, fmt.Errorf("pulling filing details from DB: " + err.Error())
 	}
@@ -516,10 +538,10 @@ func prepareFilingInvestmentServices(filingID string, submissionTime time.Time) 
 	return fundsMapper, investorLiquidityPath, unfndCmts, liquidityName, unfundedName, nil
 }
 
-func executeCurio(filingID string, userID string, submissionTime time.Time) {
+func executeCurio(filingID string, userID string) {
 	sec1a := section1aData("FEG", "Curio")
 	logging.Info("Execution Started for the filing with ID: " + filingID)
-	mapper, investorLiquidityPath, _, liquidityName, err := prepareFilingCurio(filingID, submissionTime)
+	mapper, investorLiquidityPath, _, liquidityName, err := prepareFilingCurio(filingID)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Error in Preparing for the Filing: user_id=%s filing=%s: %v", userID, filingID, err))
 		return
@@ -535,6 +557,12 @@ func executeCurio(filingID string, userID string, submissionTime time.Time) {
 		logging.Error(fmt.Sprintf("Error in Getting the Existing Funds in Form Data: user_id=%s filing=%s: %v", userID, filingID, err))
 		return
 	}
+	targetVersion, err := db.ResolveTargetVersion(filingID)
+	if err != nil {
+		logging.Error(fmt.Sprintf("Error resolving filing version: user_id=%s filing=%s: %v", userID, filingID, err))
+		return
+	}
+	logging.Info(fmt.Sprintf("Filing %s will be written as version %d", filingID, targetVersion))
 
 	liqudityHolder := make(executors.InvLiquidityData)
 	// unfndCmtHolder := make(curio.UnfundedCommitmentsHolder)
@@ -553,9 +581,11 @@ func executeCurio(filingID string, userID string, submissionTime time.Time) {
 	for _, list := range mapper {
 		for _, fund := range list {
 
-			if _, ok := existing[fund.GetFundID()]; ok {
-				logging.Info(fund.GetFundID() + " Already Populated in the Form Data. Skipping")
-				continue
+			if targetVersion == 1 {
+				if _, ok := existing[fund.GetFundID()]; ok {
+					logging.Info(fund.GetFundID() + " Already Populated in the Form Data. Skipping")
+					continue
+				}
 			}
 
 			answersMapper := make(map[[2]string]string)
@@ -611,7 +641,7 @@ func executeCurio(filingID string, userID string, submissionTime time.Time) {
 			}
 
 			executors.CollectAnswers(reflect.ValueOf(*formData), answersMapper)
-			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper, fund)
+			err = db.PushFormData(filingID, fund.GetFundID(), userID, answersMapper, fund, targetVersion)
 
 			if err != nil {
 				logging.Error(fmt.Sprintf("Error in Pushing to Form Data Table: user_id=%s filing=%s fund=%s: %v", userID, filingID, fund.GetFundID(), err))
@@ -623,24 +653,31 @@ func executeCurio(filingID string, userID string, submissionTime time.Time) {
 
 		}
 	}
-	err = setStaticCurioFunds(filingID, userID, liqudityHolder, liquidityName)
+	err = setStaticCurioFunds(filingID, userID, liqudityHolder, liquidityName, targetVersion)
 	if err != nil {
 		logging.Error(fmt.Sprintf("Static funds setting error: user_id=%s filing=%s: %v", userID, filingID, err))
 	}
 	logging.Info("Succefully set static Funds")
-	sec1a.CalcAUM(filingID)
-	sec1a.HandleSection1A(filingID, userID, existing)
+	sec1a.CalcAUM(filingID, targetVersion)
+	if err := sec1a.HandleSection1A(filingID, userID, existing, targetVersion); err != nil {
+		logging.Error(fmt.Sprintf("Section 1A push failed: user_id=%s filing=%s: %v", userID, filingID, err))
+		return
+	}
+	if err := db.CommitFilingVersion(filingID, targetVersion); err != nil {
+		logging.Error(fmt.Sprintf("Error committing filing version: user_id=%s filing=%s: %v", userID, filingID, err))
+		return
+	}
 	logging.Info("Execution Completed for the filing with ID: " + filingID)
 }
 
-func prepareFilingCurio(filingID string, submissionTime time.Time) (map[string][]*curio.Fund, string, string, string, error) {
+func prepareFilingCurio(filingID string) (map[string][]*curio.Fund, string, string, string, error) {
 
 	fundsMapper := make(map[string][]*curio.Fund)
 	var investorLiquidityPath string
 	var unfndCmts string
 	var liquidityName string
 
-	mappings, err := db.PullFiling(filingID, submissionTime)
+	mappings, err := db.PullFiling(filingID)
 	if err != nil {
 		return fundsMapper, investorLiquidityPath, unfndCmts, liquidityName, fmt.Errorf("pulling filing details from DB: " + err.Error())
 	}

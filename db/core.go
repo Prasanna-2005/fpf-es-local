@@ -12,8 +12,6 @@ type FileMapper struct {
 	FundShortCode string  `db:"fundShortCode"`
 	QuarterNo     string  `db:"quarterNo"`
 	Period        *string `db:"period"`
-	CreatedAt     string  `db:"createdAt"`
-	Active        bool    `db:"-"`
 }
 
 // ExtractionEntity represents the structure of extraction table that stores the extracted Entity
@@ -50,6 +48,8 @@ type FormData struct {
 	UpdatedAt   time.Time    `db:"updatedAt"`
 	UpdatedBy   string       `db:"updatedBy"`
 	SourceFiles string       `db:"sourceFiles"`
+	Version     int          `db:"version"`
+	IsEdit      bool         `db:"isEdit"`
 }
 
 var FundStorer = make(map[string]FundInfo)

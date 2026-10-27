@@ -6,8 +6,6 @@ import (
 	"quantrium-tech/form_pf_extractor_service/config"
 	"quantrium-tech/form_pf_extractor_service/logging"
 	"time"
-
-	"github.com/jmoiron/sqlx"
 )
 
 // SourceResolver maps a form line to the files that produced its extracted value.
@@ -46,70 +44,101 @@ func PushEntities(filingId string, fundCode string, userId string, data map[stri
 	return nil
 }
 
-// PushFormData takes the tagged-value mapped data and does a batched query to push the form data.
-// resolver is optional; when set, each row stores the source file names for that form line.
-func PushFormData(filingId string, fundCode string, userId string, formdata map[[2]string]string, resolver SourceResolver) error {
+// currentSnapshot is the version-x row the smart check compares against.
+// DecideVersionValue chooses the single row written for one line.
+// A nil prior, or a prior that was itself extracted, stores val_extracted.
+// An edited prior is kept only when the new extraction matches the latest extracted string.
+func DecideVersionValue(extracted string, prior *currentSnapshot, latestExtracted *string) (value string, isEdit bool, preserved bool) {
+	if prior == nil || !prior.IsEdit {
+		return extracted, false, false
+	}
+	if latestExtracted != nil && *latestExtracted == extracted {
+		return prior.Value, true, true
+	}
+	return extracted, false, false
+}
+
+// PushFormData writes one versioned row per emitted line.
+// Older versions are left untouched. targetVersion is chosen once per extraction run.
+func PushFormData(filingId string, fundCode string, userId string, formdata map[[2]string]string, resolver SourceResolver, targetVersion int) error {
+	if len(formdata) == 0 {
+		return nil
+	}
+	if targetVersion < 1 {
+		targetVersion = 1
+	}
 	fundId := FundCodeMapper[fundCode]
 	loc, _ := time.LoadLocation("America/New_York")
+	now := time.Now().In(loc)
 
-	var batch []FormData
-	var fieldNos []string
-	var lineNos []string
-
-	for key, value := range formdata {
-		sourceFiles, err := encodeSourceFiles(resolveSourceFiles(resolver, key[1]))
+	var priors map[lineKey]currentSnapshot
+	var extracted map[lineKey]string
+	if targetVersion > 1 {
+		var err error
+		priors, err = loadVersionCurrents(filingId, fundId, targetVersion-1)
 		if err != nil {
-			logging.Error(fmt.Sprintf("PushFormData: user_id=%s filing=%s fund=%s line=%s: %v", userId, filingId, fundCode, key[1], err))
-			sourceFiles = "[]"
+			return err
+		}
+		for _, row := range priors {
+			if row.IsEdit {
+				extracted, err = loadLatestExtracted(filingId, fundId, targetVersion-1)
+				if err != nil {
+					return err
+				}
+				break
+			}
+		}
+	}
+
+	batch := make([]FormData, 0, len(formdata))
+	for key, value := range formdata {
+		k := lineKey{FieldNo: key[0], FormLineNo: key[1]}
+		var prior *currentSnapshot
+		if row, ok := priors[k]; ok {
+			copied := row
+			prior = &copied
+		}
+		var latest *string
+		if raw, ok := extracted[k]; ok {
+			copied := raw
+			latest = &copied
+		}
+		chosen, isEdit, preserved := DecideVersionValue(value, prior, latest)
+		sourceFiles := "[]"
+		createdBy := userId
+		if preserved && prior != nil && prior.CreatedBy != "" {
+			createdBy = prior.CreatedBy
+		}
+		if !preserved {
+			encoded, encErr := encodeSourceFiles(resolveSourceFiles(resolver, key[1]))
+			if encErr != nil {
+				logging.Error(fmt.Sprintf("PushFormData: user_id=%s filing=%s fund=%s line=%s: %v", userId, filingId, fundCode, key[1], encErr))
+				encoded = "[]"
+			}
+			sourceFiles = encoded
 		}
 		batch = append(batch, FormData{
 			FilingId:    filingId,
 			FegFundId:   fundId,
 			FieldNo:     key[0],
 			FormLineNo:  key[1],
-			Value:       value,
-			CreatedAt:   time.Now().In(loc),
-			CreatedBy:   userId,
+			Value:       chosen,
+			CreatedAt:   now,
+			CreatedBy:   createdBy,
 			SourceFiles: sourceFiles,
+			Version:     targetVersion,
+			IsEdit:      isEdit,
 		})
-		fieldNos = append(fieldNos, key[0])
-		lineNos = append(lineNos, key[1])
 	}
 
-	// safe batch update using sqlx.In to safely expand slices in go
-	// This generates: UPDATE table SET isCurrentValue=0 WHERE ... AND fieldNo IN (?,?) ...
-	updateQuery, args, err := sqlx.In(fmt.Sprintf(`
-		UPDATE %s 
-		SET isCurrentValue = 0 
-		WHERE filingId = ? 
-		  AND fundSeriesId = ? 
-		  AND fieldNo IN (?) 
-		  AND formLineNo IN (?)`, config.TableCfg.FormDataTable),
-		filingId, fundId, fieldNos, lineNos)
-
-	if err != nil {
-		return fmt.Errorf("preparing update query: %w", err)
-	}
-
-	// sqlx.In returns '?' placeholders, but MySQL requires '?'
-	// db.Rebind ensures the query is compatible with your driver
-	updateQuery = db.Rebind(updateQuery)
-	_, err = db.Exec(updateQuery, args...)
-	if err != nil {
-		return fmt.Errorf("executing batch update: %w", err)
-	}
-
-	//batch insert using NamedExec for the struct slice
 	insertQuery := fmt.Sprintf(`
-		INSERT INTO %s (filingId, fundSeriesId, fieldNo, formLineNo, value, sourceFiles, createdAt, createdBy, isCurrentValue) 
-		VALUES (:filingId, :fundSeriesId, :fieldNo, :formLineNo, :value, :sourceFiles, :createdAt, :createdBy, 1)`,
+		INSERT INTO %s (filingId, fundSeriesId, fieldNo, formLineNo, value, sourceFiles, createdAt, createdBy, isCurrentValue, version, isEdit)
+		VALUES (:filingId, :fundSeriesId, :fieldNo, :formLineNo, :value, :sourceFiles, :createdAt, :createdBy, 1, :version, :isEdit)`,
 		config.TableCfg.FormDataTable)
 
-	_, err = db.NamedExec(insertQuery, batch)
-	if err != nil {
+	if _, err := db.NamedExec(insertQuery, batch); err != nil {
 		return fmt.Errorf("executing batch insert: %w", err)
 	}
-
 	return nil
 }
 
